@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | VELORA Premium</title>
+    <link rel="stylesheet" href="/src/styles/main.css">
+    <link rel="stylesheet" href="/src/styles/auth.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card glass-card">
+            <div class="secure-badge">SECURE ENCRYPTION ACTIVE</div>
+            <h1 class="brand-logo">VELORA</h1>
+            <p class="auth-subtitle">Welcome back to excellence.</p>
+            
+            <form id="loginForm" class="auth-form">
+                <div class="input-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="phone" placeholder="08012345678" required>
+                </div>
+
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+
+                <div class="auth-options">
+                    <label class="remember-me">
+                        <input type="checkbox" checked> <span>Keep me signed in</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="gold-button w-full" id="loginBtn">Sign In</button>
+            </form>
+
+            <p class="auth-footer">
+                New to the elite? <a href="/register.html">Join VELORA</a>
+            </p>
+        </div>
+    </div>
+    <script type="module" src="/src/pages/login.js"></script>
+</body>
+</html>
