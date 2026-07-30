@@ -1,0 +1,37 @@
+:root {
+  --primary-gold: #D4AF37;
+  --gold-gradient: linear-gradient(135deg, #D4AF37 0%, #F1D592 50%, #B49448 100%);
+  --bg-black: #050505;
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(212, 175, 55, 0.2);
+  --text-main: #ffffff;
+  --text-muted: #a0a0a0;
+  --font-main: 'Montserrat', sans-serif;
+}
+
+body {
+  background-color: var(--bg-black);
+  color: var(--text-main);
+  font-family: var(--font-main);
+  margin: 0;
+  overflow-x: hidden;
+}
+
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+}
+
+.gold-button {
+  background: var(--gold-gradient);
+  color: #000;
+  font-weight: 700;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
