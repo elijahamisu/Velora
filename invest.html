@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invest | VELORA - Elite Investments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F4E3AD;
+            --luxury-white: #FBFAFA;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--luxury-white);
+            color: #1a1a1a;
+        }
+        .heading-font { font-family: 'Playfair Display', serif; }
+        .gold-gradient {
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+        }
+        .gold-text {
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+        .sidebar-item:hover {
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.1) 0%, transparent 100%);
+            color: var(--gold);
+            border-left: 3px solid var(--gold);
+        }
+        .sidebar-active {
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.1) 0%, transparent 100%);
+            color: var(--gold);
+            border-left: 3px solid var(--gold);
+        }
+        #sidebar { transition: transform 0.3s ease-in-out; }
+        @media (max-width: 1024px) {
+            #sidebar.closed { transform: translateX(-100%); }
+        }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+            -webkit-appearance: none; margin: 0;
+        }
+    </style>
+</head>
+<body class="bg-[#F8F9FA]">
+
+    <!-- Auth Guard Loader -->
+    <div id="authGuard" class="fixed inset-0 z-[100] bg-white flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-gold-light border-t-[#D4AF37] rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="heading-font gold-text text-xl">VELORA</p>
+        </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="fixed top-0 right-0 left-0 h-20 bg-white/80 backdrop-blur-md border-b border-gray-100 z-40 lg:left-64">
+        <div class="h-full flex items-center justify-between px-6">
+            <div class="flex items-center gap-4">
+                <button id="menuToggle" class="lg:hidden text-gray-500"><i data-lucide="menu"></i></button>
+                <h2 class="text-xl font-bold heading-font hidden md:block">Investment <span class="gold-text">Center</span></h2>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <div class="hidden sm:flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-100">
+                    <i data-lucide="wallet" class="w-4 h-4 text-gold"></i>
+                    <span id="topBarBalance" class="text-xs font-bold">₦0.00</span>
+                </div>
+                <div class="relative cursor-pointer"><i data-lucide="bell" class="text-gray-400"></i></div>
+                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white font-bold">
+                    <span id="userInitials">V</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Menu -->
+    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-64 bg-white border-r border-gray-100 z-50 lg:translate-x-0 closed">
+        <div class="p-8">
+            <div class="flex items-center gap-3 mb-10">
+                <div class="w-8 h-8 gold-gradient rounded-full flex items-center justify-center text-white font-bold">V</div>
+                <h1 class="text-2xl font-bold heading-font gold-text tracking-tighter">VELORA</h1>
+            </div>
+            <nav class="space-y-1">
+                <a href="dashboard.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                </a>
+                <a href="invest.html" class="sidebar-item sidebar-active flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium">
+                    <i data-lucide="gem" class="w-5 h-5"></i> Invest
+                </a>
+                <a href="deposit.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                    <i data-lucide="arrow-down-circle" class="w-5 h-5"></i> Deposit
+                </a>
+                <a href="withdraw.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                    <i data-lucide="arrow-up-circle" class="w-5 h-5"></i> Withdraw
+                </a>
+                <a href="wallet.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                    <i data-lucide="wallet" class="w-5 h-5"></i> Wallet
+                </a>
+                <a href="transactions.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                    <i data-lucide="history" class="w-5 h-5"></i> Transactions
+                </a>
+                <a href="referral.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                    <i data-lucide="users" class="w-5 h-5"></i> Referral
+                </a>
+                <a href="gift.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                    <i data-lucide="gift" class="w-5 h-5"></i> Gift Code
+                </a>
+                <div class="pt-10 mt-10 border-t border-gray-50">
+                    <a href="profile.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                        <i data-lucide="user" class="w-5 h-5"></i> Profile
+                    </a>
+                    <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-red-400 hover:bg-red-50">
+                        <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 pt-28 px-6 pb-12">
+        <div class="max-w-5xl mx-auto">
+            
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div class="glass-card p-6 rounded-[32px]">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Available Balance</p>
+                    <h3 id="walletBalance" class="text-2xl font-bold">₦0.00</h3>
+                </div>
+                <div class="glass-card p-6 rounded-[32px]">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Active Assets</p>
+                    <h3 id="activeInvestment" class="text-2xl font-bold gold-text">₦0.00</h3>
+                </div>
+                <div class="glass-card p-6 rounded-[32px]">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Daily Accrual</p>
+                    <h3 id="dailyEarnings" class="text-2xl font-bold text-green-600">₦0.00</h3>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-5 gap-8">
+                <!-- Investment Form -->
+                <div class="lg:col-span-3">
+                    <div class="glass-card p-8 rounded-[40px] relative overflow-hidden">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 bg-gold/10 rounded-full flex items-center justify-center text-gold">
+                                <i data-lucide="trending-up" class="w-5 h-5"></i>
+                            </div>
+                            <h4 class="text-xl font-bold heading-font">Create New Investment</h4>
+                        </div>
+
+                        <form id="investForm" class="space-y-6">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">Investment Amount (₦)</label>
+                                <div class="relative">
+                                    <input type="number" id="investAmount" placeholder="3000" required
+                                        class="w-full bg-gray-50 border border-gray-100 px-6 py-5 rounded-3xl text-xl font-bold focus:outline-none focus:border-gold transition">
+                                    <button type="button" id="setMax" class="absolute right-4 top-1/2 -translate-y-1/2 px-4 py-2 bg-white border border-gray-100 rounded-2xl text-[10px] font-bold text-gold uppercase hover:bg-gold-light transition">Max</button>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-3 ml-1">Min. investment: ₦3,000</p>
+                            </div>
+
+                            <div class="bg-gray-50/50 rounded-3xl p-6 border border-gray-100 space-y-4">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-500">Expected Daily ROI</span>
+                                    <span class="font-bold text-green-600" id="previewRoi">₦0.00</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-500">New Wallet Balance</span>
+                                    <span class="font-bold" id="previewBalance">₦0.00</span>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="investBtn"
+                                class="w-full py-5 gold-gradient text-white font-bold rounded-[24px] shadow-lg shadow-gold/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-3">
+                                <span>Commit Investment</span>
+                                <div id="btnLoader" class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin hidden"></div>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Guidance / Info -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white p-8 rounded-[40px] border border-gray-50">
+                        <h5 class="font-bold mb-4 flex items-center gap-2">
+                            <i data-lucide="info" class="w-4 h-4 text-gold"></i> Investment Rules
+                        </h5>
+                        <ul class="space-y-4 text-sm text-gray-500">
+                            <li class="flex items-start gap-3">
+                                <span class="w-1.5 h-1.5 rounded-full bg-gold mt-1.5 shrink-0"></span>
+                                Daily earnings are processed automatically every midnight.
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-1.5 h-1.5 rounded-full bg-gold mt-1.5 shrink-0"></span>
+                                Capital is locked within the active assets to generate yield.
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-1.5 h-1.5 rounded-full bg-gold mt-1.5 shrink-0"></span>
+                                You can have multiple active investments simultaneously.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Section -->
+            <div class="mt-12">
+                <h4 class="text-lg font-bold heading-font mb-6 flex items-center gap-2">
+                    <i data-lucide="history" class="w-5 h-5 text-gray-400"></i> Investment History
+                </h4>
+                <div class="bg-white rounded-[40px] border border-gray-50 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-gray-50/50 border-b border-gray-100">
+                                    <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Amount</th>
+                                    <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Started</th>
+                                    <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
+                                    <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Daily Yield</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTable" class="divide-y divide-gray-50">
+                                <tr>
+                                    <td colspan="4" class="px-8 py-10 text-center text-gray-400 text-sm">Loading history...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+        lucide.createIcons();
+
+        const supabase = createClient(
+            import.meta.env.VITE_SUPABASE_URL,
+            import.meta.env.VITE_SUPABASE_ANON_KEY
+        );
+
+        let user = null;
+        let currentBalance = 0;
+        const MIN_INVESTMENT = 3000;
+
+        // --- 1. Auth Guard ---
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+            user = session.user;
+            document.getElementById('authGuard').classList.add('hidden');
+            loadData();
+        }
+
+        // --- 2. Load Data ---
+        async function loadData() {
+            try {
+                const [walletRes, profileRes, investRes, summaryRes] = await Promise.all([
+                    supabase.from('wallets').select('*').eq('user_id', user.id).single(),
+                    supabase.from('profiles').select('*').eq('id', user.id).single(),
+                    supabase.from('investments').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+                    supabase.from('earnings').select('*').eq('user_id', user.id).single()
+                ]);
+
+                if (walletRes.data) {
+                    currentBalance = walletRes.data.balance;
+                    document.getElementById('walletBalance').textContent = `₦${currentBalance.toLocaleString()}`;
+                    document.getElementById('topBarBalance').textContent = `₦${currentBalance.toLocaleString()}`;
+                    document.getElementById('previewBalance').textContent = `₦${currentBalance.toLocaleString()}`;
+                }
+
+                if (profileRes.data) {
+                    document.getElementById('userInitials').textContent = profileRes.data.full_name.charAt(0);
+                }
+
+                if (summaryRes.data) {
+                    document.getElementById('activeInvestment').textContent = `₦${summaryRes.data.active_investment.toLocaleString()}`;
+                    document.getElementById('dailyEarnings').textContent = `₦${summaryRes.data.today_earnings.toLocaleString()}`;
+                }
+
+                updateHistoryTable(investRes.data || []);
+            } catch (err) {
+                console.error("Fetch Error:", err);
+            }
+        }
+
+        // --- 3. UI Logic ---
+        const investInput = document.getElementById('investAmount');
+        const previewRoi = document.getElementById('previewRoi');
+        const previewBalance = document.getElementById('previewBalance');
+
+        investInput.addEventListener('input', () => {
+            const amt = parseFloat(investInput.value) || 0;
+            // Assuming business logic: 10% daily ROI (placeholder for UI preview)
+            previewRoi.textContent = `₦${(amt * 0.1).toLocaleString()}`;
+            previewBalance.textContent = `₦${(currentBalance - amt).toLocaleString()}`;
+        });
+
+        document.getElementById('setMax').onclick = () => {
+            investInput.value = Math.floor(currentBalance);
+            investInput.dispatchEvent(new Event('input'));
+        };
+
+        // --- 4. Investment Logic ---
+        document.getElementById('investForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const amount = parseFloat(investInput.value);
+
+            if (amount < MIN_INVESTMENT) {
+                alert(`Minimum investment is ₦${MIN_INVESTMENT}`);
+                return;
+            }
+
+            if (amount > currentBalance) {
+                alert('Insufficient wallet balance.');
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                // In production, use a Database RPC to ensure Atomicity (Transaction)
+                // 1. Deduct Balance
+                const { error: walletErr } = await supabase
+                    .from('wallets')
+                    .update({ balance: currentBalance - amount })
+                    .eq('user_id', user.id);
+
+                if (walletErr) throw walletErr;
+
+                // 2. Create Investment Record
+                const { error: investErr } = await supabase
+                    .from('investments')
+                    .insert([{
+                        user_id: user.id,
+                        amount: amount,
+                        daily_roi_pct: 10, // Logic defined in backend triggers
+                        status: 'active'
+                    }]);
+                
+                if (investErr) throw investErr;
+
+                // 3. Create Transaction Record
+                await supabase.from('transactions').insert([{
+                    user_id: user.id,
+                    amount: amount,
+                    type: 'investment',
+                    status: 'completed',
+                    description: `Committed ₦${amount} to luxury investment plan`
+                }]);
+
+                alert('Investment Successful!');
+                window.location.href = 'dashboard.html';
+
+            } catch (err) {
+                alert(err.message);
+                setLoading(false);
+            }
+        };
+
+        function updateHistoryTable(data) {
+            const tbody = document.getElementById('historyTable');
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-8 py-10 text-center text-gray-400 text-xs uppercase tracking-widest font-bold">No investments found</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map(row => `
+                <tr class="hover:bg-gray-50/50 transition cursor-default">
+                    <td class="px-8 py-6 font-bold text-gray-800">₦${row.amount.toLocaleString()}</td>
+                    <td class="px-8 py-6 text-xs text-gray-400 font-medium">${new Date(row.created_at).toLocaleDateString()}</td>
+                    <td class="px-8 py-6">
+                        <span class="text-[9px] uppercase font-bold px-3 py-1 rounded-full ${row.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">
+                            ${row.status}
+                        </span>
+                    </td>
+                    <td class="px-8 py-6 text-right font-bold text-green-600">₦${(row.amount * (row.daily_roi_pct/100)).toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        function setLoading(state) {
+            const btn = document.getElementById('investBtn');
+            const loader = document.getElementById('btnLoader');
+            btn.disabled = state;
+            loader.classList.toggle('hidden', !state);
+            btn.querySelector('span').textContent = state ? 'Processing...' : 'Commit Investment';
+        }
+
+        document.getElementById('menuToggle').onclick = () => sidebar.classList.toggle('closed');
+        document.getElementById('logoutBtn').onclick = async () => {
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+        };
+
+        checkAuth();
+    </script>
+</body>
+</html>
