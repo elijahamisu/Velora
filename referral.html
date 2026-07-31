@@ -3,218 +3,495 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Affiliates | VELORA — Private Circle</title>
+    <title>Referral | VELORA — Private Circle</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- QR Code Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root {
-            --gold: #D4AF37;
-            --gold-dark: #B8860B;
-            --luxury-white: #FBFAFA;
+            --ink: #0C0E13;
+            --ink-soft: #171A22;
+            --paper: #F6F4EF;
+            --paper-card: #FFFFFF;
+            --gold: #B7935B;
+            --gold-deep: #8F6E3E;
+            --gold-light: #E7D9BC;
+            --line: rgba(183, 147, 91, 0.16);
+            --ink-text: #14161C;
+            --muted: #7A7E88;
         }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--luxury-white);
-            color: #1a1a1a;
+            background-color: var(--paper);
+            color: var(--ink-text);
+            overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
         }
-        .heading-font { font-family: 'Playfair Display', serif; }
-        .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%); }
+        .heading-font { font-family: 'Fraunces', serif; font-feature-settings: "ss01"; }
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+
+        .gold-gradient { background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%); }
         .gold-text {
-            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(212, 175, 55, 0.1);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
-        }
+        .ink-gradient { background: linear-gradient(160deg, var(--ink) 0%, var(--ink-soft) 100%); }
 
-        /* Mobile Island Nav (Same as other pages) */
-        .island-nav {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            width: 92%; max-width: 400px; background: rgba(10, 10, 10, 0.9);
-            backdrop-filter: blur(20px); border-radius: 35px; padding: 12px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); z-index: 100;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .card {
+            background: var(--paper-card);
+            border: 1px solid rgba(20, 22, 28, 0.06);
+            box-shadow: 0 1px 2px rgba(12,14,19,0.03), 0 12px 24px -18px rgba(12,14,19,0.18);
         }
-        .island-item { color: rgba(255,255,255,0.5); transition: 0.3s; }
-        .island-item.active { color: var(--gold); transform: translateY(-3px); }
-
-        /* Sidebar Overlay */
-        #sidebarOverlay { background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); transition: 0.3s; }
-        #sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .card-gold-edge { border-top: 2px solid var(--gold); }
 
         /* Referral Link Box */
         .link-box {
-            background: #ffffff;
+            background: #FAF9F6;
             border: 1px dashed var(--gold);
             padding: 12px 16px;
             border-radius: 16px;
-            font-family: monospace;
-            font-size: 0.85rem;
-            color: #666;
+            font-size: 0.82rem;
+            color: var(--muted);
             word-break: break-all;
         }
-        
-        #qrcode img { margin: 0 auto; padding: 10px; background: white; border-radius: 12px; }
+
+        #qrcode img { margin: 0 auto; padding: 10px; background: white; border-radius: 12px; border: 1px solid rgba(20,22,28,0.06); }
 
         .stat-card { transition: transform 0.3s ease; }
         .stat-card:active { transform: scale(0.98); }
+
+        /* ---------- Sidebar (desktop) ---------- */
+        #sidebar { background: var(--ink); }
+        #sidebar .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+        .sidebar-item {
+            color: rgba(246, 244, 239, 0.55);
+            border-left: 2px solid transparent;
+            transition: color .18s ease, background .18s ease, border-color .18s ease;
+        }
+        .sidebar-item:hover {
+            background: linear-gradient(90deg, rgba(183,147,91,0.12) 0%, transparent 85%);
+            color: var(--gold-light);
+        }
+        .sidebar-active {
+            background: linear-gradient(90deg, rgba(183,147,91,0.16) 0%, transparent 85%);
+            color: var(--gold-light) !important;
+            border-left: 2px solid var(--gold);
+        }
+        .sidebar-item i { width: 17px; height: 17px; }
+
+        /* ---------- Mobile Island Navigation ---------- */
+        #islandNav {
+            background: rgba(12, 14, 19, 0.97);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(183, 147, 91, 0.22);
+            box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(183,147,91,0.05) inset;
+        }
+        .island-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            padding: 7px 4px;
+            border-radius: 13px;
+            color: rgba(246, 244, 239, 0.4);
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+        .island-item i { width: 16px; height: 16px; }
+        .island-item span {
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+        .island-item.active {
+            color: var(--gold-light);
+            background: linear-gradient(135deg, rgba(183,147,91,0.22) 0%, rgba(143,110,62,0.10) 100%);
+        }
+        .island-item.active i { filter: drop-shadow(0 2px 6px rgba(183,147,91,0.45)); }
+
+        ::selection { background: var(--gold-light); color: var(--ink); }
+        :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+        /* ---------- Mobile Drawer Sidebar ---------- */
+        #drawerOverlay {
+            background: rgba(8, 9, 13, 0.55);
+            backdrop-filter: blur(2px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .28s ease;
+        }
+        #drawerOverlay.open { opacity: 1; pointer-events: auto; }
+
+        #mobileDrawer {
+            background: var(--ink);
+            width: min(86vw, 320px);
+            transform: translateX(-100%);
+            transition: transform .32s cubic-bezier(.32,.72,0,1);
+            box-shadow: 24px 0 60px -20px rgba(0,0,0,0.5);
+        }
+        #mobileDrawer.open { transform: translateX(0); }
+        #mobileDrawer .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+
+        .drawer-item {
+            color: rgba(246, 244, 239, 0.6);
+            border-left: 2px solid transparent;
+            transition: color .18s ease, background .18s ease, border-color .18s ease;
+        }
+        .drawer-item:active,
+        .drawer-item:hover {
+            background: linear-gradient(90deg, rgba(183,147,91,0.14) 0%, transparent 85%);
+            color: var(--gold-light);
+        }
+        .drawer-active {
+            background: linear-gradient(90deg, rgba(183,147,91,0.18) 0%, transparent 85%);
+            color: var(--gold-light) !important;
+            border-left: 2px solid var(--gold);
+        }
+        .drawer-item i { width: 18px; height: 18px; }
+
+        #menuToggle {
+            width: 38px; height: 38px;
+            border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(20,22,28,0.08);
+            color: var(--ink-text);
+            transition: background .18s ease, border-color .18s ease;
+        }
+        #menuToggle:hover { background: rgba(183,147,91,0.08); border-color: rgba(183,147,91,0.3); }
+        #menuToggle i { width: 18px; height: 18px; }
     </style>
 </head>
-<body class="bg-[#F8F9FA]">
+<body class="bg-[var(--paper)]">
 
     <!-- Auth Guard Loader -->
-    <div id="authGuard" class="fixed inset-0 z-[200] bg-white flex items-center justify-center">
+    <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
         <div class="text-center">
-            <div class="w-12 h-12 border-4 border-gray-100 border-t-[#D4AF37] rounded-full animate-spin mx-auto mb-4"></div>
-            <p class="heading-font gold-text text-lg tracking-widest uppercase">Velora</p>
+            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(183,147,91,0.25); border-top-color: var(--gold);"></div>
+            <p class="heading-font gold-text text-2xl tracking-wide">VELORA</p>
+            <p class="text-[10px] uppercase tracking-[0.3em] text-white/30 mt-2">Verifying Access</p>
         </div>
     </div>
 
-    <!-- Mobile Slide-out Sidebar -->
-    <div id="sidebarOverlay" class="fixed inset-0 z-[140] hidden opacity-0"></div>
-    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-72 bg-white border-r border-gray-100 z-[150] lg:translate-x-0 -translate-x-full">
-        <div class="p-8 h-full flex flex-col">
-            <div class="flex items-center justify-between mb-10">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 gold-gradient rounded-full flex items-center justify-center text-white font-bold">V</div>
-                    <span class="text-2xl font-bold heading-font gold-text">VELORA</span>
+    <!-- Navigation Header -->
+    <header class="fixed top-0 right-0 left-0 h-20 bg-[var(--paper)]/85 backdrop-blur-md border-b border-black/[0.06] z-40 lg:left-64">
+        <div class="h-full flex items-center justify-between px-6">
+            <div class="flex items-center gap-3">
+                <button id="menuToggle" class="lg:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="w-7 h-7 gold-gradient rounded-full flex items-center justify-center text-white heading-font text-xs lg:hidden">V</div>
+                <div>
+                    <h2 class="text-lg font-semibold heading-font hidden md:block tracking-tight">Private <span class="gold-text italic">Circle</span></h2>
+                    <h2 class="text-base font-semibold heading-font md:hidden">Referral</h2>
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] hidden md:block">Grow With Your Network</p>
                 </div>
-                <button id="closeSidebar" class="lg:hidden text-gray-300"><i data-lucide="x"></i></button>
             </div>
-            <nav class="space-y-1 flex-1" id="mainNav">
-                <!-- Nav Links injected for consistency -->
-            </nav>
-        </div>
-    </aside>
 
-    <!-- Top Navbar (Desktop) -->
-    <header class="fixed top-0 right-0 left-0 h-20 bg-white/80 backdrop-blur-md border-b border-gray-50 z-40 lg:left-72 hidden lg:block">
-        <div class="h-full flex items-center justify-between px-10">
-            <h2 class="text-xl font-bold heading-font">Private <span class="gold-text">Circle</span></h2>
             <div class="flex items-center gap-6">
-                <div class="bg-gray-50 px-5 py-2 rounded-full border border-gray-100 flex items-center gap-3">
-                    <i data-lucide="wallet" class="w-4 h-4 text-gold"></i>
-                    <span id="topBalance" class="text-xs font-bold">₦0.00</span>
+                <div class="hidden sm:flex items-center gap-2 bg-black/[0.03] px-4 py-2 rounded-full border border-black/[0.06]">
+                    <i data-lucide="wallet" class="w-4 h-4 text-[var(--gold-deep)]"></i>
+                    <span id="topBalance" class="text-xs font-bold mono">₦0.00</span>
                 </div>
-                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white font-bold" id="userInitials">V</div>
+                <div class="relative cursor-pointer group">
+                    <i data-lucide="bell" class="text-[var(--muted)] group-hover:text-[var(--gold)] transition w-5 h-5"></i>
+                </div>
+                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold">
+                    <span id="userInitials">V</span>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- Mobile Island Nav -->
-    <div class="island-nav lg:hidden">
-        <a href="dashboard.html" class="island-item"><i data-lucide="layout-dashboard"></i></a>
-        <a href="invest.html" class="island-item"><i data-lucide="gem"></i></a>
-        <a href="wallet.html" class="island-item"><i data-lucide="wallet"></i></a>
-        <a href="referral.html" class="island-item active"><i data-lucide="users"></i></a>
-        <button id="mobileMenuBtn" class="island-item"><i data-lucide="menu"></i></button>
-    </div>
+    <!-- Sidebar Menu (Desktop only) -->
+    <aside id="sidebar" class="hidden lg:block fixed top-0 left-0 bottom-0 w-64 z-50">
+        <div class="p-8 h-full flex flex-col">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-9 h-9 rounded-full border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
+                <h1 class="text-2xl heading-font gold-text tracking-tight font-semibold">VELORA</h1>
+            </div>
+            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-8 ml-12 -mt-1">Private Wealth</p>
+            <div class="h-px w-full brand-hair mb-8"></div>
+
+            <nav class="space-y-1 flex-1" id="sidebarNav">
+                <a href="dashboard.html" data-page="dashboard" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="invest.html" data-page="invest" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gem"></i> Invest
+                </a>
+                <a href="deposit.html" data-page="deposit" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-down-circle"></i> Deposit
+                </a>
+                <a href="withdraw.html" data-page="withdraw" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-up-circle"></i> Withdraw
+                </a>
+                <a href="wallet.html" data-page="wallet" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="wallet"></i> Wallet
+                </a>
+                <a href="transactions.html" data-page="transactions" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="history"></i> Transactions
+                </a>
+                <a href="referral.html" data-page="referral" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="users"></i> Referral
+                </a>
+                <a href="gift.html" data-page="gift" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gift"></i> Gift Code
+                </a>
+
+                <div class="pt-8 mt-8 border-t border-white/[0.06] space-y-1">
+                    <a href="profile.html" data-page="profile" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                        <i data-lucide="user"></i> Profile
+                    </a>
+                    <a href="support.html" data-page="support" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                        <i data-lucide="help-circle"></i> Support
+                    </a>
+                    <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
+                        <i data-lucide="log-out" class="w-[17px] h-[17px]"></i> Logout
+                    </button>
+                </div>
+            </nav>
+
+            <div class="pt-6 border-t border-white/[0.06]">
+                <div class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/25">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Secured Session
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ============ Mobile Drawer Sidebar ============ -->
+    <div id="drawerOverlay" class="lg:hidden fixed inset-0 z-[60]"></div>
+    <aside id="mobileDrawer" class="lg:hidden fixed top-0 left-0 bottom-0 z-[70] overflow-y-auto">
+        <div class="p-7 min-h-full flex flex-col">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
+                    <h1 class="text-xl heading-font gold-text tracking-tight font-semibold">VELORA</h1>
+                </div>
+                <button id="drawerClose" aria-label="Close menu" class="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-[var(--gold-light)] hover:bg-white/5 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-6 ml-12 -mt-1">Private Wealth</p>
+            <div class="h-px w-full brand-hair mb-6"></div>
+
+            <!-- Account chip -->
+            <div class="flex items-center gap-3 p-3 mb-6 rounded-2xl bg-white/[0.04] border border-white/10">
+                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold shrink-0">
+                    <span id="drawerInitials">V</span>
+                </div>
+                <div class="min-w-0">
+                    <p id="drawerBalance" class="text-sm font-semibold text-white truncate">₦0.00</p>
+                    <p class="text-[10px] text-[var(--gold-light)] font-bold tracking-widest uppercase mono truncate">Wallet Balance</p>
+                </div>
+            </div>
+
+            <nav class="space-y-1 flex-1" id="drawerNav">
+                <a href="dashboard.html" data-page="dashboard" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="invest.html" data-page="invest" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gem"></i> Invest
+                </a>
+                <a href="deposit.html" data-page="deposit" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-down-circle"></i> Deposit
+                </a>
+                <a href="withdraw.html" data-page="withdraw" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-up-circle"></i> Withdraw
+                </a>
+                <a href="wallet.html" data-page="wallet" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="wallet"></i> Wallet
+                </a>
+                <a href="transactions.html" data-page="transactions" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="history"></i> Transactions
+                </a>
+                <a href="referral.html" data-page="referral" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="users"></i> Referral
+                </a>
+                <a href="gift.html" data-page="gift" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gift"></i> Gift Code
+                </a>
+
+                <div class="pt-6 mt-6 border-t border-white/[0.06] space-y-1">
+                    <a href="profile.html" data-page="profile" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                        <i data-lucide="user"></i> Profile
+                    </a>
+                    <a href="support.html" data-page="support" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                        <i data-lucide="help-circle"></i> Support
+                    </a>
+                    <button id="drawerLogoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
+                        <i data-lucide="log-out" class="w-[18px] h-[18px]"></i> Logout
+                    </button>
+                </div>
+            </nav>
+
+            <div class="pt-6 mt-6 border-t border-white/[0.06]">
+                <div class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/25">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Secured Session
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ============ Mobile Island Navigation ============ -->
+    <nav id="islandNav" class="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-[22px] flex items-center gap-1 px-2 py-1.5 w-[92%] max-w-sm">
+        <a href="dashboard.html" data-page="dashboard" class="island-item flex-1">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Home</span>
+        </a>
+        <a href="invest.html" data-page="invest" class="island-item flex-1">
+            <i data-lucide="gem"></i>
+            <span>Plans</span>
+        </a>
+        <a href="wallet.html" data-page="wallet" class="island-item flex-1">
+            <i data-lucide="wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a href="referral.html" data-page="referral" class="island-item flex-1">
+            <i data-lucide="users"></i>
+            <span>Referrals</span>
+        </a>
+        <a href="profile.html" data-page="profile" class="island-item flex-1">
+            <i data-lucide="user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
 
     <!-- Main Content -->
-    <main class="lg:ml-72 pt-6 lg:pt-28 px-6 pb-36">
+    <main class="lg:ml-64 pt-28 px-6 pb-24 lg:pb-12">
         <div class="max-w-6xl mx-auto">
-            
-            <!-- Mobile Header -->
-            <div class="lg:hidden mb-8 mt-2">
-                <h2 class="text-3xl font-bold heading-font">Referral</h2>
-                <p class="text-xs text-gray-400 font-medium">Grow your wealth with your network.</p>
-            </div>
 
-            <!-- Stats Grid (Mobile-First) -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div class="glass-card p-6 rounded-[32px] stat-card">
-                    <p class="text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1">Total Bonus Earned</p>
-                    <h3 id="totalBonus" class="text-3xl font-bold gold-text">₦0.00</h3>
-                    <div class="mt-4 flex items-center gap-2 text-[10px] font-bold text-green-500 uppercase">
-                        <i data-lucide="trending-up" class="w-3 h-3"></i> Today: <span id="todayBonus">₦0.00</span>
+            <!-- ===== Hero: Referral Earnings + Invite Code ===== -->
+            <div class="ink-gradient rounded-[32px] p-8 md:p-10 relative overflow-hidden mb-8" style="box-shadow: 0 30px 60px -30px rgba(12,14,19,0.55);">
+                <div class="absolute -top-16 -right-16 w-72 h-72 rounded-full" style="background: radial-gradient(circle, rgba(183,147,91,0.16), transparent 70%);"></div>
+                <div class="relative flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+                    <div>
+                        <p class="text-[11px] uppercase tracking-[0.2em] text-white/40 font-semibold mb-3 flex items-center gap-2">
+                            <i data-lucide="users" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Total Bonus Earned
+                        </p>
+                        <h2 id="totalBonus" class="text-4xl md:text-5xl heading-font font-semibold text-white tracking-tight">₦0.00</h2>
+                        <div class="flex items-center gap-2 mt-4">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-emerald-400/10 text-emerald-400">
+                                <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
+                                <span id="todayBonus">₦0.00</span> today
+                            </span>
+                            <span class="text-white/30 text-xs">From your entire network</span>
+                        </div>
                     </div>
-                </div>
-                <div class="glass-card p-6 rounded-[32px] stat-card">
-                    <p class="text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1">Active Referrals</p>
-                    <h3 id="activeRefCount" class="text-3xl font-bold">0</h3>
-                    <p class="text-[10px] text-gray-400 mt-4 uppercase font-bold">Total Network: <span id="totalRefCount">0</span></p>
-                </div>
-                <div class="glass-card p-6 rounded-[32px] bg-white border-gold/20 stat-card">
-                    <p class="text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1">Personal Invite Code</p>
-                    <div class="flex items-center justify-between mt-2">
-                        <h3 id="refCode" class="text-2xl font-mono font-bold tracking-tighter">---</h3>
-                        <button onclick="copyRefCode()" class="text-gold p-2 bg-gold/5 rounded-xl"><i data-lucide="copy" class="w-4 h-4"></i></button>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Share & Link Section -->
-            <div class="grid lg:grid-cols-2 gap-8 mb-12">
-                <!-- QR & Link -->
-                <div class="glass-card p-8 rounded-[40px] text-center">
-                    <h4 class="font-bold heading-font text-lg mb-6">Your Personal QR Code</h4>
-                    <div id="qrcode" class="mb-8 flex justify-center"></div>
-                    
-                    <p class="text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-3">Unique Invitation Link</p>
-                    <div class="link-box mb-6" id="refLinkText">https://velora.com/register?ref=...</div>
-                    
-                    <button onclick="copyRefLink()" class="w-full py-4 gold-gradient text-white font-bold rounded-2xl shadow-lg shadow-gold/20 flex items-center justify-center gap-3 active:scale-95 transition">
-                        <i data-lucide="link" class="w-5 h-5"></i> Copy Referral Link
-                    </button>
-                </div>
-
-                <!-- Social Share -->
-                <div class="glass-card p-8 rounded-[40px]">
-                    <h4 class="font-bold heading-font text-lg mb-6">Share to Socials</h4>
-                    <div class="grid grid-cols-2 gap-4">
-                        <button onclick="share('whatsapp')" class="p-5 bg-green-50 rounded-3xl flex flex-col items-center gap-2 hover:bg-green-100 transition">
-                            <i data-lucide="message-circle" class="text-green-600"></i>
-                            <span class="text-[10px] font-bold uppercase">WhatsApp</span>
-                        </button>
-                        <button onclick="share('telegram')" class="p-5 bg-blue-50 rounded-3xl flex flex-col items-center gap-2 hover:bg-blue-100 transition">
-                            <i data-lucide="send" class="text-blue-500"></i>
-                            <span class="text-[10px] font-bold uppercase">Telegram</span>
-                        </button>
-                        <button onclick="share('facebook')" class="p-5 bg-indigo-50 rounded-3xl flex flex-col items-center gap-2 hover:bg-indigo-100 transition">
-                            <i data-lucide="facebook" class="text-indigo-600"></i>
-                            <span class="text-[10px] font-bold uppercase">Facebook</span>
-                        </button>
-                        <button onclick="share('x')" class="p-5 bg-gray-50 rounded-3xl flex flex-col items-center gap-2 hover:bg-gray-100 transition">
-                            <i data-lucide="twitter" class="text-black"></i>
-                            <span class="text-[10px] font-bold uppercase">X (Twitter)</span>
-                        </button>
+                    <!-- Personal Invite Code -->
+                    <div class="w-full lg:w-72 shrink-0">
+                        <p class="text-[10px] uppercase tracking-[0.15em] text-white/35 font-semibold mb-2">Personal Invite Code</p>
+                        <div class="flex items-center justify-between bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-4">
+                            <h3 id="refCode" class="text-xl mono font-semibold text-[var(--gold-light)] tracking-tight">---</h3>
+                            <button onclick="copyRefCode()" class="text-[var(--gold)] hover:text-[var(--gold-light)] transition p-2 rounded-xl bg-white/[0.04]"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                        </div>
                     </div>
-                    <button onclick="nativeShare()" class="w-full mt-6 py-4 border border-gray-100 rounded-2xl text-xs font-bold text-gray-500 flex items-center justify-center gap-2 hover:bg-gray-50">
-                        <i data-lucide="share" class="w-4 h-4"></i> More Share Options
-                    </button>
                 </div>
             </div>
 
-            <!-- Referral Ledger -->
-            <div class="mb-10">
-                <div class="flex items-center justify-between mb-6">
-                    <h4 class="text-xl font-bold heading-font">Recent Referrals</h4>
-                    <span class="text-[10px] font-bold px-3 py-1 bg-gold/10 text-gold rounded-full uppercase">Real-time</span>
+            <!-- ===== Compact Metrics Row ===== -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+                <div class="card p-5 rounded-2xl stat-card">
+                    <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
+                        <i data-lucide="user-check" class="w-3 h-3"></i> Active Referrals
+                    </p>
+                    <h4 id="activeRefCount" class="text-lg heading-font font-semibold text-[var(--ink-text)]">0</h4>
                 </div>
-                <div class="glass-card rounded-[40px] overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead class="bg-gray-50/50 border-b border-gray-50">
-                                <tr>
-                                    <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Referral Name</th>
-                                    <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Joined Date</th>
-                                    <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
-                                    <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Bonus Earned</th>
-                                </tr>
-                            </thead>
-                            <tbody id="refTable" class="divide-y divide-gray-50">
-                                <tr><td colspan="4" class="px-8 py-20 text-center text-gray-400 text-xs font-bold uppercase tracking-widest">Fetching your network...</td></tr>
-                            </tbody>
-                        </table>
+                <div class="card p-5 rounded-2xl stat-card">
+                    <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
+                        <i data-lucide="users" class="w-3 h-3"></i> Total Network
+                    </p>
+                    <h4 id="totalRefCount" class="text-lg heading-font font-semibold text-[var(--ink-text)]">0</h4>
+                </div>
+                <div class="card card-gold-edge p-5 rounded-2xl stat-card">
+                    <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
+                        <i data-lucide="trending-up" class="w-3 h-3"></i> Today's Bonus
+                    </p>
+                    <h4 class="text-lg heading-font font-semibold text-[var(--gold-deep)] mono"><span id="todayBonusMetric">₦0.00</span></h4>
+                </div>
+                <div class="card p-5 rounded-2xl stat-card">
+                    <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
+                        <i data-lucide="bar-chart" class="w-3 h-3"></i> Lifetime Bonus
+                    </p>
+                    <h4 class="text-lg heading-font font-semibold text-[var(--ink-text)] mono"><span id="totalBonusMetric">₦0.00</span></h4>
+                </div>
+            </div>
+
+            <!-- ===== Main Grid: Ledger | QR + Share ===== -->
+            <div class="grid lg:grid-cols-3 gap-8">
+
+                <!-- Left column: Referral Ledger -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center justify-between mb-6">
+                        <h4 class="text-xl font-semibold heading-font italic">Recent Referrals</h4>
+                        <span class="text-[10px] font-bold px-3 py-1 bg-[rgba(183,147,91,0.1)] text-[var(--gold-deep)] rounded-full uppercase tracking-wide">Real-time</span>
+                    </div>
+                    <div class="card rounded-[32px] overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-black/[0.02] border-b border-black/[0.05]">
+                                    <tr>
+                                        <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Referral Name</th>
+                                        <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Joined Date</th>
+                                        <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Status</th>
+                                        <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest text-right">Bonus Earned</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="refTable" class="divide-y divide-black/[0.05]">
+                                    <tr><td colspan="4" class="px-8 py-20 text-center text-[var(--muted)] text-xs font-bold uppercase tracking-widest">Fetching your network...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right column: QR + Share -->
+                <div class="space-y-8">
+                    <!-- QR & Link -->
+                    <div class="card p-8 rounded-[32px] text-center">
+                        <h4 class="font-semibold heading-font text-base mb-6">Your Personal QR Code</h4>
+                        <div id="qrcode" class="mb-8 flex justify-center"></div>
+
+                        <p class="text-[10px] uppercase font-bold text-[var(--muted)] tracking-widest mb-3">Unique Invitation Link</p>
+                        <div class="link-box mb-6 mono" id="refLinkText">https://velora.com/register?ref=...</div>
+
+                        <button onclick="copyRefLink()" class="w-full py-4 gold-gradient text-white font-bold rounded-2xl flex items-center justify-center gap-3 active:scale-95 transition" style="box-shadow: 0 20px 40px -20px rgba(143,110,62,0.5);">
+                            <i data-lucide="link" class="w-5 h-5"></i> Copy Referral Link
+                        </button>
+                    </div>
+
+                    <!-- Social Share -->
+                    <div class="card p-8 rounded-[32px]">
+                        <h4 class="font-semibold heading-font text-base mb-6">Share to Socials</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="share('whatsapp')" class="p-5 bg-emerald-50 rounded-2xl flex flex-col items-center gap-2 hover:bg-emerald-100 transition">
+                                <i data-lucide="message-circle" class="text-emerald-700"></i>
+                                <span class="text-[10px] font-bold uppercase">WhatsApp</span>
+                            </button>
+                            <button onclick="share('telegram')" class="p-5 bg-blue-50 rounded-2xl flex flex-col items-center gap-2 hover:bg-blue-100 transition">
+                                <i data-lucide="send" class="text-blue-600"></i>
+                                <span class="text-[10px] font-bold uppercase">Telegram</span>
+                            </button>
+                            <button onclick="share('facebook')" class="p-5 bg-indigo-50 rounded-2xl flex flex-col items-center gap-2 hover:bg-indigo-100 transition">
+                                <i data-lucide="facebook" class="text-indigo-700"></i>
+                                <span class="text-[10px] font-bold uppercase">Facebook</span>
+                            </button>
+                            <button onclick="share('x')" class="p-5 bg-black/[0.03] rounded-2xl flex flex-col items-center gap-2 hover:bg-black/[0.06] transition">
+                                <i data-lucide="twitter" class="text-[var(--ink)]"></i>
+                                <span class="text-[10px] font-bold uppercase">X (Twitter)</span>
+                            </button>
+                        </div>
+                        <button onclick="nativeShare()" class="w-full mt-6 py-4 border border-black/[0.08] rounded-2xl text-xs font-bold text-[var(--muted)] flex items-center justify-center gap-2 hover:bg-black/[0.02] transition">
+                            <i data-lucide="share" class="w-4 h-4"></i> More Share Options
+                        </button>
                     </div>
                 </div>
             </div>
@@ -231,6 +508,44 @@
             import.meta.env.VITE_SUPABASE_URL,
             import.meta.env.VITE_SUPABASE_ANON_KEY
         );
+
+        // --- 0. Active nav state (sidebar + mobile island + drawer) ---
+        function setActiveNav() {
+            const current = (window.location.pathname.split('/').pop() || 'dashboard.html').replace('.html', '') || 'dashboard';
+            document.querySelectorAll('#sidebarNav a[data-page]').forEach(a => {
+                a.classList.toggle('sidebar-active', a.dataset.page === current);
+            });
+            document.querySelectorAll('#islandNav a[data-page]').forEach(a => {
+                a.classList.toggle('active', a.dataset.page === current);
+            });
+            document.querySelectorAll('#drawerNav a[data-page]').forEach(a => {
+                a.classList.toggle('drawer-active', a.dataset.page === current);
+            });
+        }
+
+        // --- 0b. Mobile drawer open/close ---
+        const drawer = document.getElementById('mobileDrawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+        const drawerClose = document.getElementById('drawerClose');
+
+        function openDrawer() {
+            drawer.classList.add('open');
+            drawerOverlay.classList.add('open');
+            menuToggle.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeDrawer() {
+            drawer.classList.remove('open');
+            drawerOverlay.classList.remove('open');
+            menuToggle.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+        menuToggle.addEventListener('click', openDrawer);
+        drawerClose.addEventListener('click', closeDrawer);
+        drawerOverlay.addEventListener('click', closeDrawer);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+        document.querySelectorAll('#drawerNav a[data-page]').forEach(a => a.addEventListener('click', closeDrawer));
 
         let user = null;
         let profile = null;
@@ -258,12 +573,13 @@
                 const link = `${window.location.origin}/register.html?ref=${code}`;
                 document.getElementById('refLinkText').textContent = link;
                 document.getElementById('userInitials').textContent = data.full_name.charAt(0);
-                
+                document.getElementById('drawerInitials').textContent = data.full_name.charAt(0);
+
                 new QRCode(document.getElementById("qrcode"), {
                     text: link,
                     width: 160,
                     height: 160,
-                    colorDark : "#1a1a1a",
+                    colorDark : "#14161C",
                     colorLight : "#ffffff",
                     correctLevel : QRCode.CorrectLevel.H
                 });
@@ -296,7 +612,10 @@
 
         async function loadWallet() {
             const { data } = await supabase.from('wallets').select('balance').eq('user_id', user.id).single();
-            if (data) document.getElementById('topBalance').textContent = `₦${data.balance.toLocaleString()}`;
+            if (data) {
+                document.getElementById('topBalance').textContent = `₦${data.balance.toLocaleString()}`;
+                document.getElementById('drawerBalance').textContent = `₦${data.balance.toLocaleString()}`;
+            }
         }
 
         // --- Update UI ---
@@ -308,30 +627,32 @@
 
             document.getElementById('totalBonus').textContent = `₦${totalEarned.toLocaleString()}`;
             document.getElementById('todayBonus').textContent = `₦${todayEarned.toLocaleString()}`;
+            document.getElementById('totalBonusMetric').textContent = `₦${totalEarned.toLocaleString()}`;
+            document.getElementById('todayBonusMetric').textContent = `₦${todayEarned.toLocaleString()}`;
             document.getElementById('totalRefCount').textContent = refs.length;
-            
+
             const activeRefs = refs.filter(r => r.is_active); // Custom logic for active status
             document.getElementById('activeRefCount').textContent = activeRefs.length;
 
             const tbody = document.getElementById('refTable');
             if (refs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="px-8 py-20 text-center text-gray-400 text-xs font-bold uppercase tracking-widest">Network is empty</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="px-8 py-20 text-center text-[var(--muted)] text-xs font-bold uppercase tracking-widest">Network is empty</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = refs.map(r => `
-                <tr class="hover:bg-gray-50/50 transition">
+                <tr class="hover:bg-black/[0.015] transition">
                     <td class="px-8 py-6">
-                        <p class="text-sm font-bold text-gray-800">${r.full_name}</p>
-                        <p class="text-[10px] text-gray-400 uppercase font-medium">Verified User</p>
+                        <p class="text-sm font-semibold text-[var(--ink-text)]">${r.full_name}</p>
+                        <p class="text-[10px] text-[var(--muted)] uppercase font-medium">Verified User</p>
                     </td>
-                    <td class="px-8 py-6 text-xs text-gray-400 font-medium">${new Date(r.created_at).toLocaleDateString()}</td>
+                    <td class="px-8 py-6 text-xs text-[var(--muted)] font-medium mono">${new Date(r.created_at).toLocaleDateString()}</td>
                     <td class="px-8 py-6">
-                        <span class="text-[9px] uppercase font-bold px-2 py-1 rounded-full ${r.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}">
+                        <span class="text-[9px] uppercase font-bold px-2 py-1 rounded-full ${r.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-black/5 text-[var(--ink-text)]'}">
                             ${r.is_active ? 'Active' : 'Joined'}
                         </span>
                     </td>
-                    <td class="px-8 py-6 text-right font-bold text-gray-800">
+                    <td class="px-8 py-6 text-right font-semibold text-[var(--ink-text)] mono">
                         ₦${(bonuses.filter(b => b.ref_id === r.id).reduce((acc, c) => acc + c.amount, 0)).toLocaleString()}
                     </td>
                 </tr>
@@ -384,37 +705,16 @@
                 .subscribe();
         }
 
-        // --- Navigation Logic ---
-        const navItems = [
-            { label: 'Dashboard', icon: 'layout-dashboard', href: 'dashboard.html' },
-            { label: 'Invest', icon: 'gem', href: 'invest.html' },
-            { label: 'Deposit', icon: 'arrow-down-circle', href: 'deposit.html' },
-            { label: 'Withdraw', icon: 'arrow-up-circle', href: 'withdraw.html' },
-            { label: 'Wallet', icon: 'wallet', href: 'wallet.html' },
-            { label: 'Transactions', icon: 'history', href: 'transactions.html' },
-            { label: 'Referral', icon: 'users', href: 'referral.html', active: true }
-        ];
+        document.getElementById('logoutBtn').onclick = async () => {
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+        };
+        document.getElementById('drawerLogoutBtn').onclick = async () => {
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+        };
 
-        document.getElementById('mainNav').innerHTML = navItems.map(item => `
-            <a href="${item.href}" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold ${item.active ? 'sidebar-active text-gold' : 'text-gray-500'}">
-                <i data-lucide="${item.icon}" class="w-5 h-5"></i> ${item.label}
-            </a>
-        `).join('') + `
-            <div class="pt-8 mt-8 border-t border-gray-50">
-                <a href="profile.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500"><i data-lucide="user" class="w-5 h-5"></i> Profile</a>
-                <button id="logoutBtn" class="w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-red-400 hover:bg-red-50"><i data-lucide="log-out" class="w-5 h-5"></i> Logout</button>
-            </div>
-        `;
-        lucide.createIcons();
-
-        // Sidebar Control
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        document.getElementById('mobileMenuBtn').onclick = () => { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.add('opacity-100'), 10); };
-        document.getElementById('closeSidebar').onclick = overlay.onclick = () => { sidebar.classList.add('-translate-x-full'); overlay.classList.remove('opacity-100'); setTimeout(() => overlay.classList.add('hidden'), 400); };
-        
-        document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
-
+        setActiveNav();
         checkAuth();
     </script>
 </body>
