@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | VELORA - Elite Investments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F4E3AD;
+            --luxury-white: #FBFAFA;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--luxury-white);
+            color: #1a1a1a;
+            overflow-x: hidden;
+        }
+        .heading-font { font-family: 'Playfair Display', serif; }
+        .gold-gradient {
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+        }
+        .gold-text {
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+        .sidebar-item:hover {
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.1) 0%, transparent 100%);
+            color: var(--gold);
+            border-left: 3px solid var(--gold);
+        }
+        .sidebar-active {
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.1) 0%, transparent 100%);
+            color: var(--gold);
+            border-left: 3px solid var(--gold);
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        /* Mobile Sidebar Toggle */
+        #sidebar { transition: transform 0.3s ease-in-out; }
+        @media (max-width: 1024px) {
+            #sidebar.closed { transform: translateX(-100%); }
+        }
+    </style>
+</head>
+<body class="bg-[#F8F9FA]">
+
+    <!-- Auth Guard Loader -->
+    <div id="authGuard" class="fixed inset-0 z-[100] bg-white flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-16 h-16 border-4 border-gold-light border-t-[#D4AF37] rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="heading-font gold-text text-xl animate-pulse">VELORA</p>
+        </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="fixed top-0 right-0 left-0 h-20 bg-white/80 backdrop-blur-md border-b border-gray-100 z-40 lg:left-64">
+        <div class="h-full flex items-center justify-between px-6">
+            <div class="flex items-center gap-4">
+                <button id="menuToggle" class="lg:hidden text-gray-500"><i data-lucide="menu"></i></button>
+                <h2 class="text-xl font-bold heading-font hidden md:block">Client <span class="gold-text">Dashboard</span></h2>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <!-- Notifications -->
+                <div class="relative cursor-pointer group">
+                    <i data-lucide="bell" class="text-gray-400 group-hover:text-gold transition"></i>
+                    <span id="notifBadge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full hidden">0</span>
+                </div>
+                <!-- Profile Summary -->
+                <div class="flex items-center gap-3 pl-6 border-l border-gray-100">
+                    <div class="text-right hidden sm:block">
+                        <p id="userName" class="text-sm font-bold text-gray-800">...</p>
+                        <p id="userRef" class="text-[10px] text-gold font-bold tracking-widest uppercase">...</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white font-bold">
+                        <span id="userInitials">V</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Menu -->
+    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-64 bg-white border-r border-gray-100 z-50 lg:translate-x-0 closed">
+        <div class="p-8">
+            <div class="flex items-center gap-3 mb-10">
+                <div class="w-8 h-8 gold-gradient rounded-full flex items-center justify-center text-white font-bold">V</div>
+                <h1 class="text-2xl font-bold heading-font gold-text tracking-tighter">VELORA</h1>
+            </div>
+
+            <nav class="space-y-1">
+                <a href="dashboard.html" class="sidebar-item sidebar-active flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                </a>
+                <a href="invest.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                    <i data-lucide="gem" class="w-5 h-5"></i> Invest
+                </a>
+                <a href="deposit.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                    <i data-lucide="arrow-down-circle" class="w-5 h-5"></i> Deposit
+                </a>
+                <a href="withdraw.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                    <i data-lucide="arrow-up-circle" class="w-5 h-5"></i> Withdraw
+                </a>
+                <a href="wallet.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                    <i data-lucide="wallet" class="w-5 h-5"></i> Wallet
+                </a>
+                <a href="transactions.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                    <i data-lucide="history" class="w-5 h-5"></i> Transactions
+                </a>
+                <a href="referral.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                    <i data-lucide="users" class="w-5 h-5"></i> Referral
+                </a>
+                <a href="gift.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                    <i data-lucide="gift" class="w-5 h-5"></i> Gift Code
+                </a>
+                <div class="pt-10 mt-10 border-t border-gray-50">
+                    <a href="profile.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                        <i data-lucide="user" class="w-5 h-5"></i> Profile
+                    </a>
+                    <a href="support.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-gray-500">
+                        <i data-lucide="help-circle" class="w-5 h-5"></i> Support
+                    </a>
+                    <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium text-red-400 hover:bg-red-50">
+                        <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 pt-28 px-6 pb-12">
+        <div class="max-w-7xl mx-auto">
+            
+            <!-- Welcome Section -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                <div>
+                    <h3 class="text-2xl heading-font font-bold">Good Day, <span id="welcomeName" class="gold-text">Investor</span></h3>
+                    <p class="text-gray-400 text-sm">Here is what's happening with your luxury portfolio today.</p>
+                </div>
+                <div class="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-gray-50">
+                    <div class="px-4 py-2 text-center border-r border-gray-100">
+                        <p class="text-[10px] uppercase tracking-tighter text-gray-400 font-bold">Next Earning</p>
+                        <p id="countdown" class="text-sm font-mono font-bold text-gold">23:59:59</p>
+                    </div>
+                    <div class="px-4 py-2 text-center">
+                        <p class="text-[10px] uppercase tracking-tighter text-gray-400 font-bold">Server Time</p>
+                        <p id="serverTime" class="text-sm font-bold">00:00</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <!-- Wallet -->
+                <div class="glass-card p-6 rounded-[32px] relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition">
+                        <i data-lucide="wallet" class="w-12 h-12"></i>
+                    </div>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Wallet Balance</p>
+                    <h4 id="walletBalance" class="text-2xl font-bold text-gray-800">₦0.00</h4>
+                    <div class="mt-4 flex items-center gap-2 text-[10px] text-green-500 font-bold">
+                        <i data-lucide="trending-up" class="w-3 h-3"></i> AVAILABLE FOR WITHDRAWAL
+                    </div>
+                </div>
+                <!-- Active Investment -->
+                <div class="glass-card p-6 rounded-[32px] relative overflow-hidden">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Active Investment</p>
+                    <h4 id="activeInvestment" class="text-2xl font-bold text-gray-800">₦0.00</h4>
+                    <div class="mt-4 flex items-center gap-2 text-[10px] text-gold font-bold">
+                        <i data-lucide="shield-check" class="w-3 h-3"></i> SECURED ASSETS
+                    </div>
+                </div>
+                <!-- Today's Earnings -->
+                <div class="gold-gradient p-6 rounded-[32px] relative shadow-lg shadow-gold/20">
+                    <p class="text-xs font-bold text-white/70 uppercase tracking-widest mb-1">Today's Earnings</p>
+                    <h4 id="todayEarnings" class="text-2xl font-bold text-white">₦0.00</h4>
+                    <div class="mt-4 flex items-center gap-2 text-[10px] text-white/90 font-bold uppercase">
+                        <i data-lucide="zap" class="w-3 h-3"></i> Daily Growth
+                    </div>
+                </div>
+                <!-- Total Earnings -->
+                <div class="glass-card p-6 rounded-[32px] relative overflow-hidden">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Total Earnings</p>
+                    <h4 id="totalEarnings" class="text-2xl font-bold text-gray-800">₦0.00</h4>
+                    <div class="mt-4 flex items-center gap-2 text-[10px] text-blue-500 font-bold uppercase">
+                        <i data-lucide="bar-chart" class="w-3 h-3"></i> Lifetime Profit
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Action Grid -->
+            <div class="mb-10">
+                <h4 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 flex items-center gap-2">
+                    <span class="w-8 h-[1px] bg-gold/30"></span> Quick Actions
+                </h4>
+                <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+                    <a href="invest.html" class="flex flex-col items-center gap-3 p-4 bg-white rounded-3xl border border-gray-50 hover:border-gold transition group">
+                        <div class="w-12 h-12 rounded-2xl bg-gold/5 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-white transition">
+                            <i data-lucide="gem" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-tighter">Invest</span>
+                    </a>
+                    <a href="deposit.html" class="flex flex-col items-center gap-3 p-4 bg-white rounded-3xl border border-gray-50 hover:border-gold transition group">
+                        <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-green-600 group-hover:text-white transition">
+                            <i data-lucide="plus-circle" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-tighter">Deposit</span>
+                    </a>
+                    <a href="withdraw.html" class="flex flex-col items-center gap-3 p-4 bg-white rounded-3xl border border-gray-50 hover:border-gold transition group">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition">
+                            <i data-lucide="external-link" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-tighter">Withdraw</span>
+                    </a>
+                    <a href="referral.html" class="flex flex-col items-center gap-3 p-4 bg-white rounded-3xl border border-gray-50 hover:border-gold transition group">
+                        <div class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition">
+                            <i data-lucide="share-2" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-tighter">Referral</span>
+                    </a>
+                    <a href="gift.html" class="flex flex-col items-center gap-3 p-4 bg-white rounded-3xl border border-gray-50 hover:border-gold transition group">
+                        <div class="w-12 h-12 rounded-2xl bg-pink-50 flex items-center justify-center text-pink-600 group-hover:bg-pink-600 group-hover:text-white transition">
+                            <i data-lucide="gift" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-tighter">Gift Code</span>
+                    </a>
+                    <a href="support.html" class="flex flex-col items-center gap-3 p-4 bg-white rounded-3xl border border-gray-50 hover:border-gold transition group">
+                        <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-600 group-hover:bg-gold group-hover:text-white transition">
+                            <i data-lucide="message-circle" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-tighter">Support</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Secondary Stats & Activity -->
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Activity Feed -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center justify-between mb-6">
+                        <h4 class="text-lg font-bold heading-font italic">Recent Activity</h4>
+                        <a href="transactions.html" class="text-xs font-bold text-gold hover:underline uppercase">View All</a>
+                    </div>
+                    <div class="bg-white rounded-[32px] border border-gray-50 overflow-hidden shadow-sm">
+                        <div id="activityList" class="divide-y divide-gray-50">
+                            <!-- Skeleton Item -->
+                            <div class="p-6 flex items-center justify-between animate-pulse">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-gray-100 rounded-2xl"></div>
+                                    <div>
+                                        <div class="h-4 w-32 bg-gray-100 rounded mb-2"></div>
+                                        <div class="h-3 w-20 bg-gray-50 rounded"></div>
+                                    </div>
+                                </div>
+                                <div class="h-6 w-16 bg-gray-100 rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Summary & Referrals -->
+                <div class="space-y-8">
+                    <!-- Referral Card -->
+                    <div class="bg-white p-8 rounded-[32px] border border-gray-50 shadow-sm relative overflow-hidden">
+                        <div class="absolute -top-10 -right-10 w-32 h-32 bg-gold/5 rounded-full"></div>
+                        <h4 class="font-bold mb-4">Refer & Earn</h4>
+                        <p class="text-gray-400 text-xs mb-6 leading-relaxed">Earn commissions from every successful deposit your referrals make.</p>
+                        <div class="bg-gray-50 p-4 rounded-2xl flex items-center justify-between mb-4 border border-dashed border-gray-200">
+                            <span id="refCodeDisplay" class="font-mono text-sm font-bold text-gray-600 italic">...</span>
+                            <button id="copyRef" class="text-gold"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="flex justify-between items-center text-xs font-bold">
+                            <span class="text-gray-400 uppercase tracking-tighter">Referral Earnings</span>
+                            <span id="refEarnings" class="text-green-500 font-bold">₦0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Additional Summary Cards -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white p-5 rounded-3xl border border-gray-50 text-center">
+                            <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Total Deposits</p>
+                            <p id="totalDeposits" class="text-sm font-bold">₦0.00</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-3xl border border-gray-50 text-center">
+                            <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Total Withdrawals</p>
+                            <p id="totalWithdrawals" class="text-sm font-bold">₦0.00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+        lucide.createIcons();
+
+        const supabase = createClient(
+            import.meta.env.VITE_SUPABASE_URL,
+            import.meta.env.VITE_SUPABASE_ANON_KEY
+        );
+
+        // Sidebar Controls
+        const sidebar = document.getElementById('sidebar');
+        document.getElementById('menuToggle').onclick = () => sidebar.classList.toggle('closed');
+
+        // Global Data Store
+        let user = null;
+
+        // --- 1. Security Check ---
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+            user = session.user;
+            document.getElementById('authGuard').classList.add('hidden');
+            loadDashboardData();
+        }
+
+        // --- 2. Load Dashboard Data ---
+        async function loadDashboardData() {
+            try {
+                // Fetch Profile & Wallet
+                const [profileRes, walletRes, earningsRes, transRes, notifRes, statsRes] = await Promise.all([
+                    supabase.from('profiles').select('*').eq('id', user.id).single(),
+                    supabase.from('wallets').select('*').eq('user_id', user.id).single(),
+                    supabase.from('earnings').select('*').eq('user_id', user.id).single(),
+                    supabase.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
+                    supabase.from('notifications').select('*').eq('user_id', user.id).eq('is_read', false),
+                    supabase.rpc('get_user_summary', { user_id_param: user.id }) // Optional RPC for efficiency
+                ]);
+
+                if (profileRes.data) updateUIProfile(profileRes.data);
+                if (walletRes.data) updateUIWallet(walletRes.data);
+                if (earningsRes.data) updateUIEarnings(earningsRes.data);
+                if (transRes.data) updateUIActivity(transRes.data);
+                if (notifRes.data) updateUINotifs(notifRes.data);
+
+            } catch (error) {
+                console.error("Data Load Error:", error);
+            }
+        }
+
+        // --- 3. UI Update Functions ---
+        function updateUIProfile(data) {
+            document.getElementById('userName').textContent = data.full_name;
+            document.getElementById('welcomeName').textContent = data.full_name.split(' ')[0];
+            document.getElementById('userRef').textContent = data.referral_code || 'REF-VEL';
+            document.getElementById('refCodeDisplay').textContent = data.referral_code || 'REF-VEL';
+            document.getElementById('userInitials').textContent = data.full_name.charAt(0);
+        }
+
+        function updateUIWallet(data) {
+            document.getElementById('walletBalance').textContent = `₦${data.balance.toLocaleString()}`;
+            document.getElementById('refEarnings').textContent = `₦${(data.referral_balance || 0).toLocaleString()}`;
+        }
+
+        function updateUIEarnings(data) {
+            document.getElementById('todayEarnings').textContent = `₦${(data.today_earnings || 0).toLocaleString()}`;
+            document.getElementById('totalEarnings').textContent = `₦${(data.total_earnings || 0).toLocaleString()}`;
+            document.getElementById('activeInvestment').textContent = `₦${(data.active_investment || 0).toLocaleString()}`;
+        }
+
+        function updateUIActivity(items) {
+            const list = document.getElementById('activityList');
+            if (items.length === 0) {
+                list.innerHTML = `<div class="p-10 text-center text-gray-400 text-xs uppercase tracking-widest font-bold">No Transactions Yet</div>`;
+                return;
+            }
+
+            list.innerHTML = items.map(item => {
+                const isPositive = ['deposit', 'earning', 'referral', 'welcome_bonus', 'gift_code'].includes(item.type);
+                const iconMap = {
+                    deposit: 'arrow-down-circle',
+                    withdrawal: 'arrow-up-circle',
+                    investment: 'gem',
+                    earning: 'zap',
+                    referral: 'users',
+                    welcome_bonus: 'award',
+                    gift_code: 'gift'
+                };
+                
+                return `
+                    <div class="p-6 flex items-center justify-between hover:bg-gray-50 transition cursor-default">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl ${isPositive ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-600'} flex items-center justify-center">
+                                <i data-lucide="${iconMap[item.type] || 'circle'}" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-gray-800 capitalize">${item.type.replace('_', ' ')}</p>
+                                <p class="text-[10px] text-gray-400 font-medium">${new Date(item.created_at).toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold ${isPositive ? 'text-green-600' : 'text-gray-800'}">
+                                ${isPositive ? '+' : '-'}₦${item.amount.toLocaleString()}
+                            </p>
+                            <span class="text-[9px] uppercase font-bold px-2 py-1 rounded-md ${item.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
+                                ${item.status}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function updateUINotifs(notifs) {
+            const badge = document.getElementById('notifBadge');
+            if (notifs.length > 0) {
+                badge.textContent = notifs.length;
+                badge.classList.remove('hidden');
+            }
+        }
+
+        // --- 4. Utilities (Countdown & Time) ---
+        function startClocks() {
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('serverTime').textContent = now.toTimeString().split(' ')[0].substring(0, 5);
+                
+                // Countdown to midnight
+                const next = new Date();
+                next.setHours(24, 0, 0, 0);
+                const diff = next - now;
+                const h = Math.floor(diff / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                document.getElementById('countdown').textContent = 
+                    `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        // --- 5. Interaction Handlers ---
+        document.getElementById('copyRef').onclick = () => {
+            const code = document.getElementById('refCodeDisplay').textContent;
+            const link = `${window.location.origin}/register.html?ref=${code}`;
+            navigator.clipboard.writeText(link);
+            alert('Referral link copied to clipboard!');
+        };
+
+        document.getElementById('logoutBtn').onclick = async () => {
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+        };
+
+        // Initialize
+        checkAuth();
+        startClocks();
+    </script>
+</body>
+</html>
