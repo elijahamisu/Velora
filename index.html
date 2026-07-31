@@ -3,98 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VELORA | Private Wealth, Reimagined</title>
+    <title>VELORA | Luxury Investment Excellence</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --ink: #0C0E13;
-            --ink-soft: #171A22;
-            --paper: #F6F4EF;
-            --paper-card: #FFFFFF;
-            --gold: #B7935B;
-            --gold-deep: #8F6E3E;
-            --gold-light: #E7D9BC;
-            --ink-text: #14161C;
-            --muted: #7A7E88;
+            --gold: #D4AF37;
+            --gold-light: #F4E3AD;
+            --luxury-white: #FFFFFF;
+            --soft-gray: #F9F9F9;
         }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--paper);
-            color: var(--ink-text);
+            background-color: var(--luxury-white);
+            color: #1a1a1a;
             scroll-behavior: smooth;
         }
-        .heading-font { font-family: 'Fraunces', serif; font-feature-settings: "ss01"; }
-        .mono { font-family: 'IBM Plex Mono', monospace; }
-
-        .gold-gradient { background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%); }
+        .heading-font { font-family: 'Playfair Display', serif; }
+        .gold-gradient {
+            background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%);
+        }
         .gold-text {
-            background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%);
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .ink-gradient { background: linear-gradient(160deg, var(--ink) 0%, var(--ink-soft) 100%); }
-
-        .luxury-shadow { box-shadow: 0 20px 45px -20px rgba(183, 147, 91, 0.25); }
-        .border-gold { border: 1px solid var(--gold); }
-        .card {
-            background: var(--paper-card);
-            border: 1px solid rgba(20, 22, 28, 0.06);
-            box-shadow: 0 1px 2px rgba(12,14,19,0.03), 0 12px 24px -18px rgba(12,14,19,0.18);
+        .luxury-shadow {
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.1);
         }
+        .border-gold { border: 1px solid #D4AF37; }
         .btn-gold {
-            background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%);
+            background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%);
             color: white;
-            transition: all 0.25s ease;
+            transition: all 0.3s ease;
         }
         .btn-gold:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 28px -8px rgba(143, 110, 62, 0.45);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
         }
-        ::selection { background: var(--gold-light); color: var(--ink); }
     </style>
 </head>
 <body>
 
     <!-- Navigation -->
-    <nav class="fixed w-full z-50 bg-[var(--paper)]/85 backdrop-blur-md border-b border-black/[0.06]">
+    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <div class="w-9 h-9 rounded-full border border-[var(--gold)]/40 flex items-center justify-center">
-                    <span class="heading-font gold-text font-semibold text-lg">V</span>
+                <div class="w-8 h-8 gold-gradient rounded-full flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">V</span>
                 </div>
-                <span class="text-2xl font-semibold tracking-tight heading-font gold-text">VELORA</span>
+                <span class="text-2xl font-bold tracking-tighter heading-font gold-text">VELORA</span>
             </div>
             <div class="hidden md:flex gap-8 items-center font-medium text-sm tracking-wide">
-                <a href="#how-it-works" class="hover:text-[var(--gold-deep)] transition">HOW IT WORKS</a>
-                <a href="#why-choose-us" class="hover:text-[var(--gold-deep)] transition">BENEFITS</a>
-                <a href="login.html" class="px-6 py-2 border border-[var(--gold)] text-[var(--gold-deep)] rounded-full hover:bg-[rgba(183,147,91,0.08)] transition">LOGIN</a>
+                <a href="#how-it-works" class="hover:text-[#D4AF37] transition">HOW IT WORKS</a>
+                <a href="#why-choose-us" class="hover:text-[#D4AF37] transition">BENEFITS</a>
+                <a href="login.html" class="px-6 py-2 border border-gold text-[#D4AF37] rounded-full hover:bg-gold-light transition">LOGIN</a>
                 <a href="register.html" class="px-6 py-2 btn-gold rounded-full">GET STARTED</a>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="pt-36 pb-20 px-6 relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-[32rem] h-[32rem] rounded-full opacity-[0.06] pointer-events-none" style="background: radial-gradient(circle, var(--gold), transparent 70%);"></div>
-        <div class="max-w-7xl mx-auto text-center relative">
-            <p class="text-[11px] uppercase tracking-[0.25em] text-[var(--gold-deep)] font-bold mb-5 flex items-center justify-center gap-2">
-                <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Private Wealth Platform
-            </p>
-            <h1 class="text-5xl md:text-7xl heading-font mb-6 leading-tight font-medium">
+    <section class="pt-32 pb-20 px-6">
+        <div class="max-w-7xl mx-auto text-center">
+            <h1 class="text-5xl md:text-7xl heading-font mb-6 leading-tight">
                 Invest in <span class="gold-text italic">Elegance</span>,<br>Grow in Prosperity
             </h1>
-            <p class="text-[var(--muted)] max-w-2xl mx-auto text-lg mb-10">
-                Nigeria's premier boutique investment platform. Designed for the discerning investor, built for consistency. Start your journey with a premium welcome.
+            <p class="text-gray-500 max-w-2xl mx-auto text-lg mb-10">
+                Experience Nigeria's premier boutique investment platform. Designed for the elite, built for consistency. Start your journey with a premium welcome.
             </p>
             <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
                 <a href="register.html" class="w-full md:w-auto px-10 py-4 btn-gold rounded-full text-lg font-semibold flex items-center justify-center gap-2">
                     Start Earning Now <i data-lucide="arrow-right" class="w-5 h-5"></i>
                 </a>
-                <a href="login.html" class="w-full md:w-auto px-10 py-4 border border-[var(--gold)] rounded-full text-lg font-semibold text-[var(--gold-deep)] hover:bg-black/[0.02] transition">
+                <a href="login.html" class="w-full md:w-auto px-10 py-4 border border-gold rounded-full text-lg font-semibold text-[#D4AF37] hover:bg-gray-50">
                     Client Login
                 </a>
             </div>
@@ -102,56 +86,55 @@
     </section>
 
     <!-- Essential Stats Card -->
-    <section class="px-6 -mt-6 mb-20 relative">
-        <div class="max-w-5xl mx-auto ink-gradient rounded-[32px] p-8 md:p-12 grid grid-cols-2 md:grid-cols-4 gap-8" style="box-shadow: 0 30px 60px -30px rgba(12,14,19,0.5);">
+    <section class="px-6 -mt-10 mb-20">
+        <div class="max-w-5xl mx-auto bg-white rounded-3xl p-8 md:p-12 luxury-shadow grid grid-cols-2 md:grid-cols-4 gap-8 border border-gray-50">
             <div class="text-center">
-                <p class="text-white/40 text-[11px] uppercase tracking-[0.15em] font-semibold mb-2">Welcome Bonus</p>
-                <p class="text-2xl heading-font font-semibold gold-text">₦600</p>
+                <p class="text-gray-400 text-xs uppercase tracking-widest mb-2">Welcome Bonus</p>
+                <p class="text-2xl font-bold gold-text">₦600</p>
             </div>
-            <div class="text-center border-l border-white/10">
-                <p class="text-white/40 text-[11px] uppercase tracking-[0.15em] font-semibold mb-2">Min Deposit</p>
-                <p class="text-2xl heading-font font-semibold text-white mono">₦3,000</p>
+            <div class="text-center border-l border-gray-100">
+                <p class="text-gray-400 text-xs uppercase tracking-widest mb-2">Min Deposit</p>
+                <p class="text-2xl font-bold text-gray-800">₦3,000</p>
             </div>
-            <div class="text-center border-l border-white/10">
-                <p class="text-white/40 text-[11px] uppercase tracking-[0.15em] font-semibold mb-2">Min Payout</p>
-                <p class="text-2xl heading-font font-semibold text-white mono">₦600</p>
+            <div class="text-center border-l border-gray-100">
+                <p class="text-gray-400 text-xs uppercase tracking-widest mb-2">Min Payout</p>
+                <p class="text-2xl font-bold text-gray-800">₦600</p>
             </div>
-            <div class="text-center border-l border-white/10">
-                <p class="text-white/40 text-[11px] uppercase tracking-[0.15em] font-semibold mb-2">Charge</p>
-                <p class="text-2xl heading-font font-semibold text-red-400 mono">15%</p>
+            <div class="text-center border-l border-gray-100">
+                <p class="text-gray-400 text-xs uppercase tracking-widest mb-2">Charge</p>
+                <p class="text-2xl font-bold text-red-400">15%</p>
             </div>
         </div>
     </section>
 
     <!-- How It Works -->
-    <section id="how-it-works" class="py-20 px-6" style="background: #F0EDE4;">
+    <section id="how-it-works" class="py-20 bg-gray-50 px-6">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
-                <p class="text-[11px] uppercase tracking-[0.2em] text-[var(--gold-deep)] font-bold mb-3">The Process</p>
-                <h2 class="text-4xl heading-font font-medium mb-4">Three Steps to Wealth</h2>
-                <div class="w-16 h-[2px] gold-gradient mx-auto"></div>
+                <h2 class="text-4xl heading-font mb-4">Three Steps to Wealth</h2>
+                <div class="w-20 h-1 gold-gradient mx-auto"></div>
             </div>
             <div class="grid md:grid-cols-3 gap-12">
                 <div class="text-center">
                     <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 luxury-shadow border-gold">
-                        <i data-lucide="user-plus" class="text-[var(--gold-deep)]"></i>
+                        <i data-lucide="user-plus" class="text-[#D4AF37]"></i>
                     </div>
-                    <h3 class="text-xl font-semibold heading-font mb-3">1. Create Account</h3>
-                    <p class="text-[var(--muted)]">Sign up in seconds and instantly receive your ₦600 welcome bonus to start your journey.</p>
+                    <h3 class="text-xl font-bold mb-3">1. Create Account</h3>
+                    <p class="text-gray-500">Sign up in seconds and instantly receive your ₦600 welcome bonus to start your journey.</p>
                 </div>
                 <div class="text-center">
                     <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 luxury-shadow border-gold">
-                        <i data-lucide="gem" class="text-[var(--gold-deep)]"></i>
+                        <i data-lucide="gem" class="text-[#D4AF37]"></i>
                     </div>
-                    <h3 class="text-xl font-semibold heading-font mb-3">2. Choose a Plan</h3>
-                    <p class="text-[var(--muted)]">Select an investment tier that suits your goals. Minimum entry starts at just ₦3,000.</p>
+                    <h3 class="text-xl font-bold mb-3">2. Choose a Plan</h3>
+                    <p class="text-gray-500">Select an investment tier that suits your goals. Minimum entry starts at just ₦3,000.</p>
                 </div>
                 <div class="text-center">
                     <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 luxury-shadow border-gold">
-                        <i data-lucide="wallet" class="text-[var(--gold-deep)]"></i>
+                        <i data-lucide="wallet" class="text-[#D4AF37]"></i>
                     </div>
-                    <h3 class="text-xl font-semibold heading-font mb-3">3. Withdraw Daily</h3>
-                    <p class="text-[var(--muted)]">Request your earnings once you hit ₦600. Fast processing directly to your bank.</p>
+                    <h3 class="text-xl font-bold mb-3">3. Withdraw Daily</h3>
+                    <p class="text-gray-400">Request your earnings once you hit ₦600. Fast processing directly to your bank.</p>
                 </div>
             </div>
         </div>
@@ -161,99 +144,98 @@
     <section id="why-choose-us" class="py-20 px-6">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
             <div class="md:w-1/2">
-                <p class="text-[11px] uppercase tracking-[0.2em] text-[var(--gold-deep)] font-bold mb-3">Why Velora</p>
-                <h2 class="text-4xl heading-font font-medium mb-6 leading-tight">Why the Discerning Choose <span class="gold-text italic">Velora</span></h2>
+                <h2 class="text-4xl heading-font mb-6 leading-tight">Why the Elite Choose <span class="gold-text">Velora</span></h2>
                 <div class="space-y-6">
                     <div class="flex gap-4">
-                        <div class="mt-1"><i data-lucide="shield-check" class="text-[var(--gold-deep)]"></i></div>
+                        <div class="mt-1"><i data-lucide="shield-check" class="text-[#D4AF37]"></i></div>
                         <div>
-                            <h4 class="font-semibold">Uncompromising Security</h4>
-                            <p class="text-[var(--muted)]">Your funds and data are protected by bank-grade encryption and Supabase security protocols.</p>
+                            <h4 class="font-bold">Uncompromising Security</h4>
+                            <p class="text-gray-500">Your funds and data are protected by bank-grade encryption and Supabase security protocols.</p>
                         </div>
                     </div>
                     <div class="flex gap-4">
-                        <div class="mt-1"><i data-lucide="zap" class="text-[var(--gold-deep)]"></i></div>
+                        <div class="mt-1"><i data-lucide="zap" class="text-[#D4AF37]"></i></div>
                         <div>
-                            <h4 class="font-semibold">Instant Activation</h4>
-                            <p class="text-[var(--muted)]">No waiting periods. Your investment starts generating returns the moment you confirm.</p>
+                            <h4 class="font-bold">Instant Activation</h4>
+                            <p class="text-gray-500">No waiting periods. Your investment starts generating returns the moment you confirm.</p>
                         </div>
                     </div>
                     <div class="flex gap-4">
-                        <div class="mt-1"><i data-lucide="headphones" class="text-[var(--gold-deep)]"></i></div>
+                        <div class="mt-1"><i data-lucide="headphones" class="text-[#D4AF37]"></i></div>
                         <div>
-                            <h4 class="font-semibold">24/7 Concierge Support</h4>
-                            <p class="text-[var(--muted)]">Dedicated support team available to assist with any inquiries or transactions.</p>
+                            <h4 class="font-bold">24/7 Concierge Support</h4>
+                            <p class="text-gray-500">Dedicated support team available to assist with any inquiries or transactions.</p>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="md:w-1/2 ink-gradient h-80 w-full rounded-[32px] flex items-center justify-center relative overflow-hidden" style="box-shadow: 0 30px 60px -30px rgba(12,14,19,0.5);">
-                <div class="absolute -top-10 -right-10 w-48 h-48 rounded-full" style="background: rgba(183,147,91,0.15);"></div>
-                <i data-lucide="trending-up" class="w-28 h-28 text-[var(--gold-light)] relative"></i>
+            <div class="md:w-1/2 bg-gray-100 h-80 w-full rounded-3xl gold-gradient opacity-10 flex items-center justify-center">
+                 <!-- Placeholder for luxury abstract image/graphic -->
+                 <i data-lucide="trending-up" class="w-32 h-32 text-white"></i>
             </div>
         </div>
     </section>
 
     <!-- FAQ -->
-    <section class="py-20 px-6" style="background: #F0EDE4;">
+    <section class="py-20 bg-gray-50 px-6">
         <div class="max-w-3xl mx-auto">
-            <h2 class="text-3xl heading-font font-medium text-center mb-12">Frequently Asked Questions</h2>
+            <h2 class="text-3xl heading-font text-center mb-12">Frequently Asked Questions</h2>
             <div class="space-y-4">
-                <details class="group card p-6 rounded-2xl">
-                    <summary class="list-none font-semibold flex justify-between items-center cursor-pointer">
+                <details class="group bg-white p-6 rounded-2xl luxury-shadow border border-gray-100">
+                    <summary class="list-none font-bold flex justify-between items-center cursor-pointer">
                         How do I start?
-                        <i data-lucide="plus" class="w-5 h-5 transition group-open:rotate-45 text-[var(--gold-deep)]"></i>
+                        <i data-lucide="plus" class="w-5 h-5 transition group-open:rotate-45"></i>
                     </summary>
-                    <p class="mt-4 text-[var(--muted)]">Register with your phone number, claim your ₦600 bonus, and choose an investment plan starting from ₦3,000.</p>
+                    <p class="mt-4 text-gray-500">Register with your phone number, claim your ₦600 bonus, and choose an investment plan starting from ₦3,000.</p>
                 </details>
-                <details class="group card p-6 rounded-2xl">
-                    <summary class="list-none font-semibold flex justify-between items-center cursor-pointer">
+                <details class="group bg-white p-6 rounded-2xl luxury-shadow border border-gray-100">
+                    <summary class="list-none font-bold flex justify-between items-center cursor-pointer">
                         What is the withdrawal charge?
-                        <i data-lucide="plus" class="w-5 h-5 transition group-open:rotate-45 text-[var(--gold-deep)]"></i>
+                        <i data-lucide="plus" class="w-5 h-5 transition group-open:rotate-45"></i>
                     </summary>
-                    <p class="mt-4 text-[var(--muted)]">To maintain the sustainability of our platform, a 15% maintenance fee is applied to all withdrawals.</p>
+                    <p class="mt-4 text-gray-500">To maintain the sustainability of our platform, a 15% maintenance fee is applied to all withdrawals.</p>
                 </details>
-                <details class="group card p-6 rounded-2xl">
-                    <summary class="list-none font-semibold flex justify-between items-center cursor-pointer">
+                <details class="group bg-white p-6 rounded-2xl luxury-shadow border border-gray-100">
+                    <summary class="list-none font-bold flex justify-between items-center cursor-pointer">
                         Is my money safe?
-                        <i data-lucide="plus" class="w-5 h-5 transition group-open:rotate-45 text-[var(--gold-deep)]"></i>
+                        <i data-lucide="plus" class="w-5 h-5 transition group-open:rotate-45"></i>
                     </summary>
-                    <p class="mt-4 text-[var(--muted)]">Velora uses automated smart-rebalancing to ensure all payouts are fulfilled promptly and securely.</p>
+                    <p class="mt-4 text-gray-500">Velora uses automated smart-rebalancing to ensure all payouts are fulfilled promptly and securely.</p>
                 </details>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-[var(--paper)] border-t border-black/[0.06] pt-16 pb-8 px-6">
+    <footer class="bg-white border-t border-gray-100 pt-16 pb-8 px-6">
         <div class="max-w-7xl mx-auto">
             <div class="flex flex-col md:flex-row justify-between mb-12 gap-8">
                 <div class="max-w-xs">
                     <div class="flex items-center gap-2 mb-4">
-                        <div class="w-7 h-7 gold-gradient rounded-full"></div>
-                        <span class="text-xl font-semibold heading-font gold-text">VELORA</span>
+                        <div class="w-6 h-6 gold-gradient rounded-full"></div>
+                        <span class="text-xl font-bold heading-font gold-text">VELORA</span>
                     </div>
-                    <p class="text-[var(--muted)] text-sm italic">"The intersection of luxury and financial growth."</p>
+                    <p class="text-gray-400 text-sm italic">"The intersection of luxury and financial growth."</p>
                 </div>
                 <div class="grid grid-cols-2 gap-12">
                     <div>
-                        <h5 class="font-semibold mb-4 text-sm uppercase tracking-wide">Links</h5>
-                        <ul class="text-[var(--muted)] text-sm space-y-2">
-                            <li><a href="register.html" class="hover:text-[var(--gold-deep)]">Join Us</a></li>
-                            <li><a href="login.html" class="hover:text-[var(--gold-deep)]">Member Access</a></li>
+                        <h5 class="font-bold mb-4">Links</h5>
+                        <ul class="text-gray-500 text-sm space-y-2">
+                            <li><a href="register.html" class="hover:text-[#D4AF37]">Join Us</a></li>
+                            <li><a href="login.html" class="hover:text-[#D4AF37]">Member Access</a></li>
                         </ul>
                     </div>
                     <div>
-                        <h5 class="font-semibold mb-4 text-sm uppercase tracking-wide">Legal</h5>
-                        <ul class="text-[var(--muted)] text-sm space-y-2">
-                            <li><a href="#" class="hover:text-[var(--gold-deep)]">Terms of Service</a></li>
-                            <li><a href="#" class="hover:text-[var(--gold-deep)]">Privacy Policy</a></li>
+                        <h5 class="font-bold mb-4">Legal</h5>
+                        <ul class="text-gray-500 text-sm space-y-2">
+                            <li><a href="#" class="hover:text-[#D4AF37]">Terms of Service</a></li>
+                            <li><a href="#" class="hover:text-[#D4AF37]">Privacy Policy</a></li>
                         </ul>
                     </div>
                 </div>
             </div>
-            <div class="text-center pt-8 border-t border-black/[0.05] text-[var(--muted)] text-xs tracking-wide">
-                © 2024 VELORA PRIVATE WEALTH. ALL RIGHTS RESERVED.
+            <div class="text-center pt-8 border-t border-gray-50 text-gray-400 text-xs">
+                © 2024 VELORA LUXURY INVESTMENTS. ALL RIGHTS RESERVED.
             </div>
         </div>
     </footer>
@@ -275,7 +257,7 @@
                 console.log("Active session found");
             }
         }
-
+        
         // Uncomment when Supabase is configured
         // checkSession();
     </script>
