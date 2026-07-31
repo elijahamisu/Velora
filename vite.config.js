@@ -22,6 +22,7 @@ export default defineConfig({
          transactions: resolve(__dirname, 'transactions.html'),
          referral: resolve(__dirname, 'referral.html'),
          gift: resolve(__dirname, 'gift.html'),
+         notifications: resolve(__dirname, 'notifications.html'),
       },
     },
   },
