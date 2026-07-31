@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | VELORA — Elite Identity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-dark: #B8860B;
+            --luxury-white: #FBFAFA;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--luxury-white);
+            color: #1a1a1a;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .heading-font { font-family: 'Playfair Display', serif; }
+        .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%); }
+        .gold-text {
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 175, 55, 0.12);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Sidebar & Nav (Identical to Dashboard) */
+        .sidebar-item:hover, .sidebar-active {
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.08) 0%, transparent 100%);
+            color: var(--gold);
+            border-left: 3px solid var(--gold);
+        }
+        .island-nav {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            width: 92%; max-width: 420px; background: rgba(15, 15, 15, 0.88);
+            backdrop-filter: blur(24px); border-radius: 40px; padding: 10px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4); z-index: 100;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .island-item { color: rgba(255,255,255,0.5); transition: 0.3s; }
+        .island-item.active { color: var(--gold); }
+        
+        #sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        #sidebarOverlay { backdrop-filter: blur(6px); transition: 0.3s; }
+
+        /* Profile Specific */
+        .avatar-container { position: relative; width: 100px; height: 100px; }
+        .avatar-container img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .avatar-edit { position: absolute; bottom: 0; right: 0; background: var(--gold); color: white; padding: 6px; border-radius: 50%; cursor: pointer; border: 2px solid white; }
+        
+        input:disabled { background: #f9f9f9; color: #aaa; cursor: not-allowed; }
+        .section-label { font-size: 10px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 1.5px; }
+    </style>
+</head>
+<body class="bg-[#F8F9FA]">
+
+    <!-- Auth Guard Loader -->
+    <div id="authGuard" class="fixed inset-0 z-[200] bg-white flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-12 h-12 border-4 border-gray-100 border-t-[#D4AF37] rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="heading-font gold-text text-lg tracking-widest uppercase">Velora</p>
+        </div>
+    </div>
+
+    <!-- Navigation Components -->
+    <div id="sidebarOverlay" class="fixed inset-0 z-[140] bg-black/40 hidden opacity-0"></div>
+    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-72 bg-white border-r border-gray-100 z-[150] lg:translate-x-0 -translate-x-full">
+        <div class="p-8 h-full flex flex-col">
+            <div class="flex items-center justify-between mb-10">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 gold-gradient rounded-full flex items-center justify-center text-white font-bold">V</div>
+                    <span class="text-2xl font-bold heading-font gold-text">VELORA</span>
+                </div>
+                <button id="closeSidebar" class="lg:hidden text-gray-400"><i data-lucide="x"></i></button>
+            </div>
+            <nav class="space-y-1 flex-1">
+                <a href="dashboard.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard</a>
+                <a href="invest.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500"><i data-lucide="gem" class="w-5 h-5"></i> Invest</a>
+                <a href="deposit.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500"><i data-lucide="arrow-down-circle" class="w-5 h-5"></i> Deposit</a>
+                <a href="withdraw.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500"><i data-lucide="arrow-up-circle" class="w-5 h-5"></i> Withdraw</a>
+                <a href="wallet.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500"><i data-lucide="wallet" class="w-5 h-5"></i> Wallet</a>
+                <a href="profile.html" class="sidebar-item sidebar-active flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold"><i data-lucide="user" class="w-5 h-5"></i> Profile</a>
+                <div class="pt-8 mt-8 border-t border-gray-50">
+                    <button id="logoutBtn" class="w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-red-400 hover:bg-red-50"><i data-lucide="log-out" class="w-5 h-5"></i> Logout</button>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <header class="fixed top-0 right-0 left-0 h-20 bg-white/80 backdrop-blur-md border-b border-gray-50 z-40 lg:left-72 hidden lg:block">
+        <div class="h-full flex items-center justify-between px-10">
+            <h2 class="text-xl font-bold heading-font">Elite <span class="gold-text">Identity</span></h2>
+            <div class="flex items-center gap-4">
+                <div id="topWallet" class="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-100">
+                    <i data-lucide="wallet" class="w-3 h-3 text-gold"></i>
+                    <span id="topBalance" class="text-[10px] font-bold">₦0.00</span>
+                </div>
+                <div class="w-10 h-10 rounded-full gold-gradient overflow-hidden border-2 border-white shadow-sm">
+                    <img id="navAvatar" src="" alt="" class="w-full h-full object-cover hidden">
+                    <div id="navInitials" class="w-full h-full flex items-center justify-center text-white font-bold">V</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="island-nav lg:hidden">
+        <a href="dashboard.html" class="island-item"><i data-lucide="layout-dashboard"></i></a>
+        <a href="invest.html" class="island-item"><i data-lucide="gem"></i></a>
+        <a href="wallet.html" class="island-item"><i data-lucide="wallet"></i></a>
+        <a href="profile.html" class="island-item active"><i data-lucide="user"></i></a>
+        <button id="mobileMenuBtn" class="island-item"><i data-lucide="menu"></i></button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="lg:ml-72 pt-6 lg:pt-28 px-6 pb-36 min-h-screen">
+        <div class="max-w-5xl mx-auto">
+            
+            <!-- Mobile Profile Header -->
+            <div class="lg:hidden flex flex-col items-center mb-10 mt-2">
+                <div class="avatar-container mb-4">
+                    <img id="profileAvatar" src="https://ui-avatars.com/api/?name=User&background=D4AF37&color=fff" alt="Avatar">
+                    <label for="avatarUpload" class="avatar-edit">
+                        <i data-lucide="camera" class="w-4 h-4"></i>
+                        <input type="file" id="avatarUpload" class="hidden" accept="image/*">
+                    </label>
+                </div>
+                <h2 id="profileNameDisplay" class="text-2xl font-bold heading-font">...</h2>
+                <p id="profileEmailDisplay" class="text-xs text-gray-400">...</p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                
+                <!-- Left: Edit Form -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- Personal Details -->
+                    <div class="glass-card rounded-[40px] p-8">
+                        <h4 class="text-lg font-bold heading-font mb-8">Personal Information</h4>
+                        <form id="profileForm" class="space-y-6">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="section-label mb-2 block">Full Name</label>
+                                    <input type="text" id="fullName" class="w-full px-5 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:border-gold outline-none transition">
+                                </div>
+                                <div>
+                                    <label class="section-label mb-2 block">Phone Number</label>
+                                    <input type="tel" id="phoneNumber" class="w-full px-5 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:border-gold outline-none transition">
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="section-label mb-2 block">Email Address</label>
+                                    <input type="email" id="email" disabled class="w-full px-5 py-3 border border-gray-100 rounded-2xl text-sm">
+                                </div>
+                                <div>
+                                    <label class="section-label mb-2 block">Account Status</label>
+                                    <div class="px-5 py-3 bg-green-50 text-green-600 rounded-2xl text-xs font-bold uppercase tracking-widest border border-green-100">Verified Client</div>
+                                </div>
+                            </div>
+                            <button type="submit" id="saveProfileBtn" class="w-full py-4 gold-gradient text-white font-bold rounded-2xl shadow-lg shadow-gold/20 active:scale-95 transition">
+                                Update Personal Details
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Security Section -->
+                    <div class="glass-card rounded-[40px] p-8">
+                        <h4 class="text-lg font-bold heading-font mb-8">Security & Access</h4>
+                        <form id="passwordForm" class="space-y-6">
+                            <div>
+                                <label class="section-label mb-2 block">New Password</label>
+                                <input type="password" id="newPassword" placeholder="Minimum 6 characters" class="w-full px-5 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:border-gold outline-none transition">
+                            </div>
+                            <div>
+                                <label class="section-label mb-2 block">Confirm New Password</label>
+                                <input type="password" id="confirmPassword" class="w-full px-5 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:border-gold outline-none transition">
+                            </div>
+                            <button type="submit" id="savePassBtn" class="w-full py-4 bg-gray-900 text-white font-bold rounded-2xl active:scale-95 transition">
+                                Change Password
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Right: Account Summary & Metadata -->
+                <div class="space-y-8">
+                    <!-- Identity Metadata -->
+                    <div class="bg-white rounded-[40px] border border-gray-100 p-8">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Identity Records</h4>
+                        <div class="space-y-6">
+                            <div>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase">Member Since</p>
+                                <p id="memberSince" class="text-sm font-bold">...</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase">Referral Code</p>
+                                <p id="referralCode" class="text-sm font-mono font-bold gold-text tracking-tighter">...</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase">User ID</p>
+                                <p id="userId" class="text-[10px] text-gray-400 break-all font-mono">...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financial Summary (Read Only) -->
+                    <div class="bg-gray-900 rounded-[40px] p-8 text-white">
+                        <h4 class="text-xs font-bold text-white/40 uppercase tracking-widest mb-6">Wealth Summary</h4>
+                        <div class="grid grid-cols-2 gap-y-6">
+                            <div>
+                                <p class="text-[9px] text-white/40 font-bold uppercase">Wallet</p>
+                                <p id="sumWallet" class="text-sm font-bold">₦0.00</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] text-white/40 font-bold uppercase">Invested</p>
+                                <p id="sumInvest" class="text-sm font-bold">₦0.00</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] text-white/40 font-bold uppercase">Earnings</p>
+                                <p id="sumEarn" class="text-sm font-bold text-green-400">₦0.00</p>
+                            </div>
+                            <div>
+                                <p class="text-[9px] text-white/40 font-bold uppercase">Referral</p>
+                                <p id="sumRef" class="text-sm font-bold">₦0.00</p>
+                            </div>
+                        </div>
+                        <a href="wallet.html" class="block w-full text-center mt-8 py-3 bg-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-white/20 transition">View Full Portfolio</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+        lucide.createIcons();
+
+        const supabase = createClient(
+            import.meta.env.VITE_SUPABASE_URL,
+            import.meta.env.VITE_SUPABASE_ANON_KEY
+        );
+
+        let user = null;
+
+        // --- 1. Init & Auth ---
+        async function init() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+            user = session.user;
+            document.getElementById('authGuard').classList.add('hidden');
+            
+            loadProfileData();
+            loadFinancials();
+            setupRealtime();
+        }
+
+        // --- 2. Data Fetching ---
+        async function loadProfileData() {
+            const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+            if (data) {
+                // Form Fields
+                document.getElementById('fullName').value = data.full_name;
+                document.getElementById('phoneNumber').value = data.phone;
+                document.getElementById('email').value = user.email;
+
+                // Display UI
+                document.getElementById('profileNameDisplay').textContent = data.full_name;
+                document.getElementById('profileEmailDisplay').textContent = user.email;
+                document.getElementById('referralCode').textContent = data.referral_code;
+                document.getElementById('memberSince').textContent = new Date(data.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                document.getElementById('userId').textContent = user.id;
+                
+                const initials = data.full_name.charAt(0).toUpperCase();
+                document.getElementById('navInitials').textContent = initials;
+                
+                // Avatar
+                if (data.avatar_url) {
+                    const avatarImg = document.getElementById('profileAvatar');
+                    const navAvatar = document.getElementById('navAvatar');
+                    const navInitials = document.getElementById('navInitials');
+                    
+                    avatarImg.src = data.avatar_url;
+                    navAvatar.src = data.avatar_url;
+                    navAvatar.classList.remove('hidden');
+                    navInitials.classList.add('hidden');
+                }
+            }
+        }
+
+        async function loadFinancials() {
+            const [walletRes, earnRes] = await Promise.all([
+                supabase.from('wallets').select('*').eq('user_id', user.id).single(),
+                supabase.from('earnings').select('*').eq('user_id', user.id).single()
+            ]);
+
+            if (walletRes.data) {
+                const w = walletRes.data;
+                document.getElementById('topBalance').textContent = `₦${w.balance.toLocaleString()}`;
+                document.getElementById('sumWallet').textContent = `₦${w.balance.toLocaleString()}`;
+                document.getElementById('sumInvest').textContent = `₦${(w.invested_balance || 0).toLocaleString()}`;
+                document.getElementById('sumRef').textContent = `₦${(w.referral_balance || 0).toLocaleString()}`;
+            }
+
+            if (earnRes.data) {
+                document.getElementById('sumEarn').textContent = `₦${(earnRes.data.total_earnings || 0).toLocaleString()}`;
+            }
+        }
+
+        // --- 3. Profile Actions ---
+        
+        // Update Details
+        document.getElementById('profileForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveProfileBtn');
+            btn.disabled = true;
+            btn.textContent = 'Syncing...';
+
+            const updates = {
+                full_name: document.getElementById('fullName').value,
+                phone: document.getElementById('phoneNumber').value,
+                updated_at: new Date()
+            };
+
+            const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
+            
+            if (error) alert(error.message);
+            else alert('Profile updated successfully.');
+            
+            btn.disabled = false;
+            btn.textContent = 'Update Personal Details';
+        };
+
+        // Change Password
+        document.getElementById('passwordForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const pass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+
+            if (pass !== confirm) return alert('Passwords do not match.');
+            if (pass.length < 6) return alert('Password too short.');
+
+            const { error } = await supabase.auth.updateUser({ password: pass });
+            
+            if (error) alert(error.message);
+            else {
+                alert('Password changed successfully.');
+                e.target.reset();
+            }
+        };
+
+        // Avatar Upload
+        document.getElementById('avatarUpload').onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+            const filePath = `avatars/${fileName}`;
+
+            // 1. Upload to Supabase Storage
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(filePath, file);
+
+            if (uploadError) return alert(uploadError.message);
+
+            // 2. Get Public URL
+            const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+
+            // 3. Update Profile Table
+            await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
+            
+            location.reload();
+        };
+
+        // --- 4. System Logic ---
+        function setupRealtime() {
+            supabase.channel('profile-sync')
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, (payload) => {
+                    loadProfileData();
+                })
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'wallets', filter: `user_id=eq.${user.id}` }, () => {
+                    loadFinancials();
+                })
+                .subscribe();
+        }
+
+        // Sidebar Control
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        document.getElementById('mobileMenuBtn').onclick = () => { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.add('opacity-100'), 10); };
+        document.getElementById('closeSidebar').onclick = overlay.onclick = () => { sidebar.classList.add('-translate-x-full'); overlay.classList.remove('opacity-100'); setTimeout(() => overlay.classList.add('hidden'), 400); };
+        
+        document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+
+        init();
+    </script>
+</body>
+</html>
