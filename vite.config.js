@@ -14,7 +14,7 @@ export default defineConfig({
         login: resolve(__dirname, 'login.html'),
         // Add more pages here as we build them:
          register: resolve(__dirname, 'register.html'),
-        // dashboard: resolve(__dirname, 'dashboard.html'),
+         dashboard: resolve(__dirname, 'dashboard.html'),
       },
     },
   },
