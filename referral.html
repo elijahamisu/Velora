@@ -369,15 +369,15 @@
         <div class="max-w-6xl mx-auto">
 
             <!-- ===== Hero: Referral Earnings + Invite Code ===== -->
-            <div class="ink-gradient rounded-[32px] p-8 md:p-10 relative overflow-hidden mb-8" style="box-shadow: 0 30px 60px -30px rgba(12,14,19,0.55);">
+            <div class="ink-gradient rounded-[28px] md:rounded-[32px] p-6 md:p-10 relative overflow-hidden mb-6 md:mb-8" style="box-shadow: 0 30px 60px -30px rgba(12,14,19,0.55);">
                 <div class="absolute -top-16 -right-16 w-72 h-72 rounded-full" style="background: radial-gradient(circle, rgba(183,147,91,0.16), transparent 70%);"></div>
-                <div class="relative flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+                <div class="relative flex flex-col lg:flex-row lg:items-end justify-between gap-6 md:gap-8">
                     <div>
                         <p class="text-[11px] uppercase tracking-[0.2em] text-white/40 font-semibold mb-3 flex items-center gap-2">
                             <i data-lucide="users" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Total Bonus Earned
                         </p>
-                        <h2 id="totalBonus" class="text-4xl md:text-5xl heading-font font-semibold text-white tracking-tight">₦0.00</h2>
-                        <div class="flex items-center gap-2 mt-4">
+                        <h2 id="totalBonus" class="text-3xl sm:text-4xl md:text-5xl heading-font font-semibold text-white tracking-tight break-all">₦0.00</h2>
+                        <div class="flex flex-wrap items-center gap-2 mt-4">
                             <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-emerald-400/10 text-emerald-400">
                                 <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
                                 <span id="todayBonus">₦0.00</span> today
@@ -389,35 +389,35 @@
                     <!-- Personal Invite Code -->
                     <div class="w-full lg:w-72 shrink-0">
                         <p class="text-[10px] uppercase tracking-[0.15em] text-white/35 font-semibold mb-2">Personal Invite Code</p>
-                        <div class="flex items-center justify-between bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-4">
-                            <h3 id="refCode" class="text-xl mono font-semibold text-[var(--gold-light)] tracking-tight">---</h3>
-                            <button onclick="copyRefCode()" class="text-[var(--gold)] hover:text-[var(--gold-light)] transition p-2 rounded-xl bg-white/[0.04]"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                        <div class="flex items-center justify-between bg-white/[0.05] border border-white/10 rounded-2xl px-4 py-3 md:px-5 md:py-4">
+                            <h3 id="refCode" class="text-lg md:text-xl mono font-semibold text-[var(--gold-light)] tracking-tight truncate">---</h3>
+                            <button onclick="copyRefCode()" class="text-[var(--gold)] hover:text-[var(--gold-light)] transition p-2.5 rounded-xl bg-white/[0.04] shrink-0 ml-2"><i data-lucide="copy" class="w-4 h-4"></i></button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- ===== Compact Metrics Row ===== -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-                <div class="card p-5 rounded-2xl stat-card">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8 md:mb-10">
+                <div class="card p-4 md:p-5 rounded-2xl stat-card">
                     <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
                         <i data-lucide="user-check" class="w-3 h-3"></i> Active Referrals
                     </p>
                     <h4 id="activeRefCount" class="text-lg heading-font font-semibold text-[var(--ink-text)]">0</h4>
                 </div>
-                <div class="card p-5 rounded-2xl stat-card">
+                <div class="card p-4 md:p-5 rounded-2xl stat-card">
                     <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
                         <i data-lucide="users" class="w-3 h-3"></i> Total Network
                     </p>
                     <h4 id="totalRefCount" class="text-lg heading-font font-semibold text-[var(--ink-text)]">0</h4>
                 </div>
-                <div class="card card-gold-edge p-5 rounded-2xl stat-card">
+                <div class="card card-gold-edge p-4 md:p-5 rounded-2xl stat-card">
                     <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
                         <i data-lucide="trending-up" class="w-3 h-3"></i> Today's Bonus
                     </p>
                     <h4 class="text-lg heading-font font-semibold text-[var(--gold-deep)] mono"><span id="todayBonusMetric">₦0.00</span></h4>
                 </div>
-                <div class="card p-5 rounded-2xl stat-card">
+                <div class="card p-4 md:p-5 rounded-2xl stat-card">
                     <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
                         <i data-lucide="bar-chart" class="w-3 h-3"></i> Lifetime Bonus
                     </p>
@@ -426,39 +426,39 @@
             </div>
 
             <!-- ===== Main Grid: Ledger | QR + Share ===== -->
-            <div class="grid lg:grid-cols-3 gap-8">
+            <div class="grid lg:grid-cols-3 gap-6 lg:gap-8">
 
-                <!-- Left column: Referral Ledger -->
-                <div class="lg:col-span-2">
-                    <div class="flex items-center justify-between mb-6">
-                        <h4 class="text-xl font-semibold heading-font italic">Recent Referrals</h4>
+                <!-- Left column: Referral Ledger (shown after Share/QR on mobile — sharing is the primary action) -->
+                <div class="order-2 lg:order-none lg:col-span-2">
+                    <div class="flex items-center justify-between mb-4 md:mb-6">
+                        <h4 class="text-lg md:text-xl font-semibold heading-font italic">Recent Referrals</h4>
                         <span class="text-[10px] font-bold px-3 py-1 bg-[rgba(183,147,91,0.1)] text-[var(--gold-deep)] rounded-full uppercase tracking-wide">Real-time</span>
                     </div>
-                    <div class="card rounded-[32px] overflow-hidden">
+                    <div class="card rounded-[24px] md:rounded-[32px] overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left">
                                 <thead class="bg-black/[0.02] border-b border-black/[0.05]">
                                     <tr>
-                                        <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Referral Name</th>
-                                        <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Joined Date</th>
-                                        <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Status</th>
-                                        <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest text-right">Bonus Earned</th>
+                                        <th class="px-4 md:px-8 py-4 md:py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest whitespace-nowrap">Referral Name</th>
+                                        <th class="px-4 md:px-8 py-4 md:py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest whitespace-nowrap">Joined Date</th>
+                                        <th class="px-4 md:px-8 py-4 md:py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest whitespace-nowrap">Status</th>
+                                        <th class="px-4 md:px-8 py-4 md:py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest text-right whitespace-nowrap">Bonus Earned</th>
                                     </tr>
                                 </thead>
                                 <tbody id="refTable" class="divide-y divide-black/[0.05]">
-                                    <tr><td colspan="4" class="px-8 py-20 text-center text-[var(--muted)] text-xs font-bold uppercase tracking-widest">Fetching your network...</td></tr>
+                                    <tr><td colspan="4" class="px-4 md:px-8 py-16 md:py-20 text-center text-[var(--muted)] text-xs font-bold uppercase tracking-widest">Fetching your network...</td></tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right column: QR + Share -->
-                <div class="space-y-8">
+                <!-- Right column: QR + Share (shown first on mobile) -->
+                <div class="order-1 lg:order-none space-y-6 md:space-y-8">
                     <!-- QR & Link -->
-                    <div class="card p-8 rounded-[32px] text-center">
-                        <h4 class="font-semibold heading-font text-base mb-6">Your Personal QR Code</h4>
-                        <div id="qrcode" class="mb-8 flex justify-center"></div>
+                    <div class="card p-6 md:p-8 rounded-[24px] md:rounded-[32px] text-center">
+                        <h4 class="font-semibold heading-font text-base mb-5 md:mb-6">Your Personal QR Code</h4>
+                        <div id="qrcode" class="mb-6 md:mb-8 flex justify-center"></div>
 
                         <p class="text-[10px] uppercase font-bold text-[var(--muted)] tracking-widest mb-3">Unique Invitation Link</p>
                         <div class="link-box mb-6 mono" id="refLinkText">https://velora.com/register?ref=...</div>
@@ -469,30 +469,31 @@
                     </div>
 
                     <!-- Social Share -->
-                    <div class="card p-8 rounded-[32px]">
-                        <h4 class="font-semibold heading-font text-base mb-6">Share to Socials</h4>
-                        <div class="grid grid-cols-2 gap-4">
-                            <button onclick="share('whatsapp')" class="p-5 bg-emerald-50 rounded-2xl flex flex-col items-center gap-2 hover:bg-emerald-100 transition">
+                    <div class="card p-6 md:p-8 rounded-[24px] md:rounded-[32px]">
+                        <h4 class="font-semibold heading-font text-base mb-5 md:mb-6">Share to Socials</h4>
+                        <div class="grid grid-cols-2 gap-3 md:gap-4">
+                            <button onclick="share('whatsapp')" class="p-4 md:p-5 bg-emerald-50 rounded-2xl flex flex-col items-center gap-2 hover:bg-emerald-100 active:scale-95 transition">
                                 <i data-lucide="message-circle" class="text-emerald-700"></i>
                                 <span class="text-[10px] font-bold uppercase">WhatsApp</span>
                             </button>
-                            <button onclick="share('telegram')" class="p-5 bg-blue-50 rounded-2xl flex flex-col items-center gap-2 hover:bg-blue-100 transition">
+                            <button onclick="share('telegram')" class="p-4 md:p-5 bg-blue-50 rounded-2xl flex flex-col items-center gap-2 hover:bg-blue-100 active:scale-95 transition">
                                 <i data-lucide="send" class="text-blue-600"></i>
                                 <span class="text-[10px] font-bold uppercase">Telegram</span>
                             </button>
-                            <button onclick="share('facebook')" class="p-5 bg-indigo-50 rounded-2xl flex flex-col items-center gap-2 hover:bg-indigo-100 transition">
+                            <button onclick="share('facebook')" class="p-4 md:p-5 bg-indigo-50 rounded-2xl flex flex-col items-center gap-2 hover:bg-indigo-100 active:scale-95 transition">
                                 <i data-lucide="facebook" class="text-indigo-700"></i>
                                 <span class="text-[10px] font-bold uppercase">Facebook</span>
                             </button>
-                            <button onclick="share('x')" class="p-5 bg-black/[0.03] rounded-2xl flex flex-col items-center gap-2 hover:bg-black/[0.06] transition">
+                            <button onclick="share('x')" class="p-4 md:p-5 bg-black/[0.03] rounded-2xl flex flex-col items-center gap-2 hover:bg-black/[0.06] active:scale-95 transition">
                                 <i data-lucide="twitter" class="text-[var(--ink)]"></i>
                                 <span class="text-[10px] font-bold uppercase">X (Twitter)</span>
                             </button>
                         </div>
-                        <button onclick="nativeShare()" class="w-full mt-6 py-4 border border-black/[0.08] rounded-2xl text-xs font-bold text-[var(--muted)] flex items-center justify-center gap-2 hover:bg-black/[0.02] transition">
+                        <button onclick="nativeShare()" class="w-full mt-6 py-4 border border-black/[0.08] rounded-2xl text-xs font-bold text-[var(--muted)] flex items-center justify-center gap-2 hover:bg-black/[0.02] active:scale-95 transition">
                             <i data-lucide="share" class="w-4 h-4"></i> More Share Options
                         </button>
                     </div>
+
                 </div>
             </div>
 
