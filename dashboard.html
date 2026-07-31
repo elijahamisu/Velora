@@ -53,11 +53,70 @@
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
-        /* Mobile Sidebar Toggle */
-        #sidebar { transition: transform 0.3s ease-in-out; }
-        @media (max-width: 1024px) {
-            #sidebar.closed { transform: translateX(-100%); }
+
+        /* ---------- Mobile Island Navigation ---------- */
+        #islandNav {
+            background: rgba(20, 18, 15, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            box-shadow:
+                0 20px 40px -10px rgba(0, 0, 0, 0.45),
+                0 0 0 1px rgba(212, 175, 55, 0.05) inset;
         }
+        .island-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            padding: 8px 10px;
+            color: rgba(255, 255, 255, 0.45);
+            transition: color 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .island-item i { width: 20px; height: 20px; transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .island-item span {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            max-height: 0;
+            opacity: 0;
+            transition: all 0.25s ease;
+        }
+        .island-item.active {
+            color: var(--gold-light);
+            transform: translateY(-6px);
+        }
+        .island-item.active i {
+            transform: scale(1.08);
+            filter: drop-shadow(0 2px 6px rgba(212, 175, 55, 0.5));
+        }
+        .island-item.active span { max-height: 12px; opacity: 1; }
+        .island-item.active::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.35) 0%, rgba(184, 134, 11, 0.15) 100%);
+            z-index: -1;
+        }
+
+        /* ---------- Mobile "More" Sheet ---------- */
+        #moreSheet {
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(100%);
+        }
+        #moreSheet.open { transform: translateY(0); }
+        #moreOverlay {
+            transition: opacity 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #moreOverlay.open { opacity: 1; pointer-events: auto; }
     </style>
 </head>
 <body class="bg-[#F8F9FA]">
@@ -74,8 +133,9 @@
     <header class="fixed top-0 right-0 left-0 h-20 bg-white/80 backdrop-blur-md border-b border-gray-100 z-40 lg:left-64">
         <div class="h-full flex items-center justify-between px-6">
             <div class="flex items-center gap-4">
-                <button id="menuToggle" class="lg:hidden text-gray-500"><i data-lucide="menu"></i></button>
+                <div class="w-7 h-7 gold-gradient rounded-full flex items-center justify-center text-white font-bold text-xs lg:hidden">V</div>
                 <h2 class="text-xl font-bold heading-font hidden md:block">Client <span class="gold-text">Dashboard</span></h2>
+                <h2 class="text-lg font-bold heading-font md:hidden">Velora <span class="gold-text">Dashboard</span></h2>
             </div>
             
             <div class="flex items-center gap-6">
@@ -98,8 +158,8 @@
         </div>
     </header>
 
-    <!-- Sidebar Menu -->
-    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-64 bg-white border-r border-gray-100 z-50 lg:translate-x-0 closed">
+    <!-- Sidebar Menu (Desktop only) -->
+    <aside id="sidebar" class="hidden lg:block fixed top-0 left-0 bottom-0 w-64 bg-white border-r border-gray-100 z-50">
         <div class="p-8">
             <div class="flex items-center gap-3 mb-10">
                 <div class="w-8 h-8 gold-gradient rounded-full flex items-center justify-center text-white font-bold">V</div>
@@ -146,8 +206,71 @@
         </div>
     </aside>
 
+    <!-- ============ Mobile Island Navigation ============ -->
+    <nav id="islandNav" class="lg:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 rounded-full flex items-center gap-1 px-2 py-2">
+        <a href="dashboard.html" class="island-item active">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Home</span>
+        </a>
+        <a href="invest.html" class="island-item">
+            <i data-lucide="gem"></i>
+            <span>Invest</span>
+        </a>
+        <a href="deposit.html" class="island-item">
+            <i data-lucide="plus-circle"></i>
+            <span>Deposit</span>
+        </a>
+        <a href="wallet.html" class="island-item">
+            <i data-lucide="wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <button id="moreToggle" type="button" class="island-item">
+            <i data-lucide="more-horizontal"></i>
+            <span>More</span>
+        </button>
+    </nav>
+
+    <!-- ============ Mobile "More" Sheet ============ -->
+    <div id="moreOverlay" class="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"></div>
+    <div id="moreSheet" class="lg:hidden fixed left-0 right-0 bottom-0 z-[61] bg-white rounded-t-[32px] p-6 pb-10 shadow-2xl">
+        <div class="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-6"></div>
+        <div class="flex items-center gap-3 mb-6 px-2">
+            <div class="w-8 h-8 gold-gradient rounded-full flex items-center justify-center text-white font-bold text-sm">V</div>
+            <h3 class="heading-font font-bold gold-text text-lg tracking-tight">VELORA</h3>
+        </div>
+        <div class="grid grid-cols-4 gap-4 mb-6">
+            <a href="withdraw.html" class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 text-gray-600">
+                <i data-lucide="arrow-up-circle" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold uppercase tracking-tight">Withdraw</span>
+            </a>
+            <a href="transactions.html" class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 text-gray-600">
+                <i data-lucide="history" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold uppercase tracking-tight">History</span>
+            </a>
+            <a href="referral.html" class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 text-gray-600">
+                <i data-lucide="users" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold uppercase tracking-tight">Referral</span>
+            </a>
+            <a href="gift.html" class="flex flex-col items-center gap-2 p-3 rounded-2xl bg-gray-50 text-gray-600">
+                <i data-lucide="gift" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold uppercase tracking-tight">Gift Code</span>
+            </a>
+        </div>
+        <div class="space-y-1 border-t border-gray-50 pt-4">
+            <a href="profile.html" class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-600">
+                <i data-lucide="user" class="w-5 h-5 text-gray-400"></i> Profile
+            </a>
+            <a href="support.html" class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-gray-600">
+                <i data-lucide="help-circle" class="w-5 h-5 text-gray-400"></i> Support
+            </a>
+            <button id="logoutBtnMobile" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-red-400">
+                <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+            </button>
+        </div>
+    </div>
+
     <!-- Main Content -->
-    <main class="lg:ml-64 pt-28 px-6 pb-12">
+    <main class="lg:ml-64 pt-28 px-6 pb-32 lg:pb-12">
         <div class="max-w-7xl mx-auto">
             
             <!-- Welcome Section -->
@@ -321,9 +444,21 @@
             import.meta.env.VITE_SUPABASE_ANON_KEY
         );
 
-        // Sidebar Controls
-        const sidebar = document.getElementById('sidebar');
-        document.getElementById('menuToggle').onclick = () => sidebar.classList.toggle('closed');
+        // Mobile "More" Sheet Controls
+        const moreToggle = document.getElementById('moreToggle');
+        const moreSheet = document.getElementById('moreSheet');
+        const moreOverlay = document.getElementById('moreOverlay');
+
+        function openMoreSheet() {
+            moreSheet.classList.add('open');
+            moreOverlay.classList.add('open');
+        }
+        function closeMoreSheet() {
+            moreSheet.classList.remove('open');
+            moreOverlay.classList.remove('open');
+        }
+        moreToggle.onclick = openMoreSheet;
+        moreOverlay.onclick = closeMoreSheet;
 
         // Global Data Store
         let user = null;
@@ -515,10 +650,12 @@
             alert('Referral link copied to clipboard!');
         };
 
-        document.getElementById('logoutBtn').onclick = async () => {
+        async function handleLogout() {
             await supabase.auth.signOut();
             window.location.href = 'login.html';
-        };
+        }
+        document.getElementById('logoutBtn').onclick = handleLogout;
+        document.getElementById('logoutBtnMobile').onclick = handleLogout;
 
         // Initialize
         checkAuth();
