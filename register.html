@@ -214,46 +214,38 @@
 
             try {
                 // Step A: Auth Sign Up
+                // The database trigger "handle_new_user" (running on the
+                // auth.users table) automatically creates the matching rows in
+                // profiles, wallets, and transactions the moment this succeeds.
+                // Pass referred_by in raw_user_meta_data so the trigger can use it.
                 const { data: authData, error: authError } = await supabase.auth.signUp({
                     email,
                     password,
-                    options: { data: { full_name: fullName, phone: phone } }
+                    options: {
+                        data: {
+                            full_name: fullName,
+                            phone: phone,
+                            referred_by: referralCode || null
+                        }
+                    }
                 });
 
                 if (authError) throw authError;
                 const userId = authData.user.id;
 
-                // Step B: Initialize Tables (Profile, Wallet, Referral)
-                // Note: In a production environment, use a database trigger/function for atomicity.
-                // Here we perform sequential inserts as per project requirements.
+                // NOTE: Step B (manually inserting into profiles/wallets/transactions)
+                // has been removed. The database trigger already does this on signup.
+                // Inserting the same rows again here caused two problems:
+                //   1. "balance" is not a real column on "wallets" (it's
+                //      available_balance / bonus_balance / etc.), which caused
+                //      the "Could not find the 'balance' column" error.
+                //   2. Even after fixing the column name, this code would insert
+                //      a second, duplicate row for a profile/wallet the trigger
+                //      already created, causing a duplicate key error.
 
-                // Create Profile
-                await supabase.from('profiles').insert([{ id: userId, full_name: fullName, phone, referral_code_used: referralCode }]);
-
-                // Create Wallet & ₦600 Welcome Bonus
-                const { error: walletErr } = await supabase.from('wallets').insert([{ 
-                    user_id: userId, 
-                    balance: 600.00 
-                }]);
-                if (walletErr) throw walletErr;
-
-                // Log Bonus Transaction
-                await supabase.from('transactions').insert([{
-                    user_id: userId,
-                    amount: 600.00,
-                    type: 'welcome_bonus',
-                    status: 'completed',
-                    description: 'Initial luxury welcome credit'
-                }]);
-
-                // Create Notifications
-                await supabase.from('notifications').insert([{
-                    user_id: userId,
-                    title: 'Welcome to VELORA',
-                    message: 'Your ₦600 luxury bonus has been credited to your wallet.'
-                }]);
-
-                // Step C: Handle Gift Code (if provided)
+                // Step B: Handle Gift Code (if provided)
+                // This still needs to happen from the client since it's not
+                // covered by the signup trigger.
                 if (giftCode) {
                     const { data: giftData, error: giftSearchErr } = await supabase
                         .from('gift_codes')
@@ -263,8 +255,15 @@
                         .single();
 
                     if (giftData && !giftSearchErr) {
-                        // Apply Gift
-                        await supabase.from('wallets').rpc('increment_balance', { row_id: userId, amt: giftData.amount });
+                        // Credit the gift amount onto bonus_balance (adjust the
+                        // column name here, and inside the increment_balance
+                        // function itself, if your schema uses a different one).
+                        const { error: incErr } = await supabase.rpc('increment_balance', {
+                            row_id: userId,
+                            amt: giftData.amount
+                        });
+                        if (incErr) console.error('Gift code balance increment failed:', incErr);
+
                         await supabase.from('gift_codes').update({ is_used: true, used_by: userId }).eq('id', giftData.id);
                         await supabase.from('transactions').insert([{
                             user_id: userId,
