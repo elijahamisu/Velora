@@ -1,0 +1,45 @@
+/* src/assets/css/variables.css */
+:root {
+    --bg-black: #050505;
+    --card-bg: rgba(20, 20, 20, 0.7);
+    --gold-primary: #D4AF37;
+    --gold-secondary: #F9E2AF;
+    --gold-gradient: linear-gradient(135deg, #D4AF37 0%, #F9E2AF 50%, #C5A028 100%);
+    --glass-border: rgba(212, 175, 55, 0.2);
+    --text-main: #FFFFFF;
+    --text-muted: #A0A0A0;
+    --font-main: 'Inter', sans-serif;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Glassmorphism Utility */
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+}
+
+.gold-text {
+    background: var(--gold-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+}
+
+.gold-btn {
+    background: var(--gold-gradient);
+    color: #000;
+    font-weight: 600;
+    padding: 12px 28px;
+    border-radius: 8px;
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+}
+
+.gold-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+}
