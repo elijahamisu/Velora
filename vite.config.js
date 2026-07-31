@@ -16,6 +16,7 @@ export default defineConfig({
          register: resolve(__dirname, 'register.html'),
          dashboard: resolve(__dirname, 'dashboard.html'),
          invest: resolve(__dirname, 'invest.html'),
+         deposit: resolve(__dirname, 'deposit.html'),
       },
     },
   },
