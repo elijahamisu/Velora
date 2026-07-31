@@ -18,6 +18,7 @@ export default defineConfig({
          invest: resolve(__dirname, 'invest.html'),
          deposit: resolve(__dirname, 'deposit.html'),
          withdraw: resolve(__dirname, 'withdraw.html'),
+         wallet: resolve(__dirname, 'wallet.html'),
       },
     },
   },
