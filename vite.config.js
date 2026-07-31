@@ -21,6 +21,7 @@ export default defineConfig({
          wallet: resolve(__dirname, 'wallet.html'),
          transactions: resolve(__dirname, 'transactions.html'),
          referral: resolve(__dirname, 'referral.html'),
+         gift: resolve(__dirname, 'gift.html'),
       },
     },
   },
