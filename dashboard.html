@@ -341,22 +341,37 @@
         }
 
         // --- 2. Load Dashboard Data ---
+        // NOTE: There is no "earnings" table in the database, so earnings/active
+        // investment figures are derived here from "investments" and "transactions"
+        // instead of a dedicated table. Adjust the column names below if your
+        // investments/transactions tables use different names.
         async function loadDashboardData() {
             try {
-                // Fetch Profile & Wallet
-                const [profileRes, walletRes, earningsRes, transRes, notifRes, statsRes] = await Promise.all([
+                const [profileRes, walletRes, investmentsRes, transRes, notifRes] = await Promise.all([
                     supabase.from('profiles').select('*').eq('id', user.id).single(),
                     supabase.from('wallets').select('*').eq('user_id', user.id).single(),
-                    supabase.from('earnings').select('*').eq('user_id', user.id).single(),
-                    supabase.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
+                    supabase.from('investments').select('*').eq('user_id', user.id),
+                    supabase.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
                     supabase.from('notifications').select('*').eq('user_id', user.id).eq('is_read', false),
-                    supabase.rpc('get_user_summary', { user_id_param: user.id }) // Optional RPC for efficiency
                 ]);
+
+                if (profileRes.error) console.error('Profile load error:', profileRes.error);
+                if (walletRes.error) console.error('Wallet load error:', walletRes.error);
+                if (investmentsRes.error) console.error('Investments load error:', investmentsRes.error);
+                if (transRes.error) console.error('Transactions load error:', transRes.error);
+                if (notifRes.error) console.error('Notifications load error:', notifRes.error);
 
                 if (profileRes.data) updateUIProfile(profileRes.data);
                 if (walletRes.data) updateUIWallet(walletRes.data);
-                if (earningsRes.data) updateUIEarnings(earningsRes.data);
-                if (transRes.data) updateUIActivity(transRes.data);
+
+                const investments = investmentsRes.data || [];
+                const transactions = transRes.data || [];
+
+                updateUIEarnings(investments, transactions);
+
+                // Use only the 5 most recent transactions for the activity feed
+                updateUIActivity(transactions.slice(0, 5));
+
                 if (notifRes.data) updateUINotifs(notifRes.data);
 
             } catch (error) {
@@ -374,14 +389,52 @@
         }
 
         function updateUIWallet(data) {
-            document.getElementById('walletBalance').textContent = `₦${data.balance.toLocaleString()}`;
+            // "wallets" table columns: available_balance, investment_balance,
+            // referral_balance, bonus_balance, total_earnings (no plain "balance" column)
+            document.getElementById('walletBalance').textContent = `₦${(data.available_balance || 0).toLocaleString()}`;
             document.getElementById('refEarnings').textContent = `₦${(data.referral_balance || 0).toLocaleString()}`;
+
+            // Total Deposits / Withdrawals cards are still placeholders here.
+            // If you later add total_deposits/total_withdrawals columns
+            // (or a stats view), wire them up here, e.g.:
+            // document.getElementById('totalDeposits').textContent = `₦${(data.total_deposits || 0).toLocaleString()}`;
         }
 
-        function updateUIEarnings(data) {
-            document.getElementById('todayEarnings').textContent = `₦${(data.today_earnings || 0).toLocaleString()}`;
-            document.getElementById('totalEarnings').textContent = `₦${(data.total_earnings || 0).toLocaleString()}`;
-            document.getElementById('activeInvestment').textContent = `₦${(data.active_investment || 0).toLocaleString()}`;
+        // Derive Active Investment / Today's Earnings / Total Earnings without
+        // a dedicated "earnings" table.
+        function updateUIEarnings(investments, transactions) {
+            // Active Investment = sum of amounts on investments with status 'active'
+            // (falls back to summing everything if there's no status column)
+            const activeInvestment = investments
+                .filter(inv => !('status' in inv) || inv.status === 'active')
+                .reduce((sum, inv) => sum + Number(inv.amount || 0), 0);
+
+            // Total Earnings = sum of all 'earning' type transactions
+            const totalEarnings = transactions
+                .filter(t => t.type === 'earning')
+                .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+            // Today's Earnings = sum of 'earning' type transactions created today
+            const startOfToday = new Date();
+            startOfToday.setHours(0, 0, 0, 0);
+            const todayEarnings = transactions
+                .filter(t => t.type === 'earning' && new Date(t.created_at) >= startOfToday)
+                .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+            document.getElementById('activeInvestment').textContent = `₦${activeInvestment.toLocaleString()}`;
+            document.getElementById('totalEarnings').textContent = `₦${totalEarnings.toLocaleString()}`;
+            document.getElementById('todayEarnings').textContent = `₦${todayEarnings.toLocaleString()}`;
+
+            // Total Deposits / Withdrawals derived from transactions as a fallback
+            const totalDeposits = transactions
+                .filter(t => t.type === 'deposit')
+                .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+            const totalWithdrawals = transactions
+                .filter(t => t.type === 'withdrawal')
+                .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+            document.getElementById('totalDeposits').textContent = `₦${totalDeposits.toLocaleString()}`;
+            document.getElementById('totalWithdrawals').textContent = `₦${totalWithdrawals.toLocaleString()}`;
         }
 
         function updateUIActivity(items) {
