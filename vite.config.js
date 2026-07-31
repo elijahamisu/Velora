@@ -17,6 +17,7 @@ export default defineConfig({
          dashboard: resolve(__dirname, 'dashboard.html'),
          invest: resolve(__dirname, 'invest.html'),
          deposit: resolve(__dirname, 'deposit.html'),
+         withdraw: resolve(__dirname, 'withdraw.html'),
       },
     },
   },
