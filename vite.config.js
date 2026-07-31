@@ -23,6 +23,7 @@ export default defineConfig({
          referral: resolve(__dirname, 'referral.html'),
          gift: resolve(__dirname, 'gift.html'),
          notifications: resolve(__dirname, 'notifications.html'),
+         profile: resolve(__dirname, 'profile.html'),
       },
     },
   },
