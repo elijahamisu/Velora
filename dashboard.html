@@ -70,17 +70,17 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 4px;
-            padding: 10px 6px;
-            border-radius: 16px;
+            gap: 2px;
+            padding: 7px 4px;
+            border-radius: 13px;
             color: rgba(255, 255, 255, 0.4);
             transition: color 0.2s ease, background 0.2s ease;
         }
-        .island-item i { width: 19px; height: 19px; }
+        .island-item i { width: 16px; height: 16px; }
         .island-item span {
-            font-size: 9px;
+            font-size: 8px;
             font-weight: 700;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.03em;
             text-transform: uppercase;
         }
         .island-item.active {
@@ -178,7 +178,7 @@
     </aside>
 
     <!-- ============ Mobile Island Navigation ============ -->
-    <nav id="islandNav" class="lg:hidden fixed bottom-4 left-4 right-4 z-50 rounded-[28px] flex items-center justify-between px-2 py-2">
+    <nav id="islandNav" class="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-[22px] flex items-center gap-1 px-2 py-1.5 w-[92%] max-w-sm">
         <a href="dashboard.html" class="island-item active flex-1">
             <i data-lucide="layout-dashboard"></i>
             <span>Home</span>
@@ -202,7 +202,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="lg:ml-64 pt-28 px-6 pb-28 lg:pb-12">
+    <main class="lg:ml-64 pt-28 px-6 pb-24 lg:pb-12">
         <div class="max-w-7xl mx-auto">
             
             <!-- Welcome Section -->
