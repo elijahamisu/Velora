@@ -3,42 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | VELORA Premium</title>
-    <link rel="stylesheet" href="/src/styles/main.css">
-    <link rel="stylesheet" href="/src/styles/auth.css">
+    <title>Login | VELORA - Premium Investment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-dark: #B8860B;
+            --luxury-white: #FFFFFF;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--luxury-white);
+            background-image: radial-gradient(circle at top right, rgba(212, 175, 55, 0.05), transparent),
+                              radial-gradient(circle at bottom left, rgba(212, 175, 55, 0.05), transparent);
+            min-height: 100vh;
+        }
+        .heading-font { font-family: 'Playfair Display', serif; }
+        .gold-gradient {
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+        }
+        .gold-text {
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+        }
+        .input-focus:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--gold);
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Modal Animation */
+        .modal-enter { animation: modalIn 0.3s ease-out forwards; }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
 </head>
-<body>
-    <div class="auth-container">
-        <div class="auth-card glass-card">
-            <div class="secure-badge">SECURE ENCRYPTION ACTIVE</div>
-            <h1 class="brand-logo">VELORA</h1>
-            <p class="auth-subtitle">Welcome back to excellence.</p>
-            
-            <form id="loginForm" class="auth-form">
-                <div class="input-group">
-                    <label>Phone Number</label>
-                    <input type="tel" id="phone" placeholder="08012345678" required>
+<body class="flex items-center justify-center p-6">
+
+    <div class="w-full max-w-md">
+        <!-- Logo Area -->
+        <div class="text-center mb-8">
+            <div class="w-12 h-12 gold-gradient rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <span class="text-white font-bold text-2xl">V</span>
+            </div>
+            <h1 class="text-3xl heading-font font-bold text-gray-900">Welcome Back</h1>
+            <p class="text-gray-500 mt-2">Access your boutique investment portfolio</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="glass-card rounded-3xl p-8">
+            <form id="loginForm" class="space-y-5">
+                <!-- Status Messages -->
+                <div id="errorMessage" class="hidden bg-red-50 text-red-600 text-sm p-4 rounded-xl border border-red-100 flex items-center gap-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                    <span></span>
+                </div>
+                <div id="successMessage" class="hidden bg-green-50 text-green-600 text-sm p-4 rounded-xl border border-green-100 flex items-center gap-2">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                    <span>Login successful! Finalizing security...</span>
                 </div>
 
-                <div class="input-group">
-                    <label>Password</label>
-                    <input type="password" id="password" placeholder="••••••••" required>
+                <!-- Email -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2 ml-1">Email Address</label>
+                    <div class="relative">
+                        <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300"></i>
+                        <input type="email" id="email" required 
+                            class="w-full pl-12 pr-4 py-4 bg-white border border-gray-100 rounded-2xl input-focus transition-all text-gray-700"
+                            placeholder="name@example.com">
+                    </div>
                 </div>
 
-                <div class="auth-options">
-                    <label class="remember-me">
-                        <input type="checkbox" checked> <span>Keep me signed in</span>
+                <!-- Password -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2 ml-1">Password</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300"></i>
+                        <input type="password" id="password" required 
+                            class="w-full pl-12 pr-12 py-4 bg-white border border-gray-100 rounded-2xl input-focus transition-all text-gray-700"
+                            placeholder="••••••••">
+                        <button type="button" id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500">
+                            <i data-lucide="eye" class="w-5 h-5" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Remember Me -->
+                <div class="flex items-center justify-between px-1">
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-[#D4AF37] focus:ring-[#D4AF37]">
+                        <span class="text-sm text-gray-500 group-hover:text-gray-700 transition">Remember me</span>
                     </label>
+                    <a href="#" class="text-sm font-semibold text-[#D4AF37] hover:text-[#B8860B]">Forgot?</a>
                 </div>
 
-                <button type="submit" class="gold-button w-full" id="loginBtn">Sign In</button>
-            </form>
+                <!-- Login Button -->
+                <button type="submit" id="loginBtn" 
+                    class="w-full py-4 gold-gradient text-white font-bold rounded-2xl shadow-lg hover:opacity-90 transition-all flex items-center justify-center gap-3 active:scale-[0.98]">
+                    <span id="btnText">Sign In to Velora</span>
+                    <div id="btnLoader" class="loader hidden"></div>
+                </button>
 
-            <p class="auth-footer">
-                New to the elite? <a href="/register.html">Join VELORA</a>
-            </p>
+                <!-- Register Link -->
+                <p class="text-center text-gray-500 text-sm mt-6">
+                    New to Velora? 
+                    <a href="register.html" class="text-[#D4AF37] font-bold hover:underline">Create Account</a>
+                </p>
+            </form>
         </div>
     </div>
-    <script type="module" src="/src/pages/login.js"></script>
+
+    <!-- Telegram Popup Modal (Hidden by default) -->
+    <div id="telegramModal" class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm hidden">
+        <div class="bg-white rounded-[32px] w-full max-w-sm p-8 text-center shadow-2xl modal-enter">
+            <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="send" class="w-10 h-10 text-blue-500 -mr-1"></i>
+            </div>
+            <h3 class="text-2xl heading-font font-bold mb-2">Join Our Community</h3>
+            <p class="text-gray-500 mb-8">Stay updated with investment news, daily earnings announcements, and elite support.</p>
+            
+            <div class="space-y-3">
+                <a id="telegramLink" href="#" target="_blank" class="block w-full py-4 bg-[#229ED9] text-white font-bold rounded-2xl hover:bg-[#1c8adb] transition-colors">
+                    Join Telegram
+                </a>
+                <button id="skipTelegram" class="block w-full py-4 bg-gray-50 text-gray-400 font-semibold rounded-2xl hover:bg-gray-100 transition-colors">
+                    Enter Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripting -->
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+        // Initialization
+        lucide.createIcons();
+        
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+        const telegramLink = import.meta.env.VITE_TELEGRAM_LINK;
+        const supabase = createClient(supabaseUrl, supabaseKey);
+
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoader = document.getElementById('btnLoader');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+        const telegramModal = document.getElementById('telegramModal');
+        const skipTelegram = document.getElementById('skipTelegram');
+        const tgJoinBtn = document.getElementById('telegramLink');
+
+        // Toggle Password Visibility
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            eyeIcon.setAttribute('data-lucide', type === 'password' ? 'eye' : 'eye-off');
+            lucide.createIcons();
+        });
+
+        // Handle Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // UI Reset
+            errorMessage.classList.add('hidden');
+            successMessage.classList.add('hidden');
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Simple Validation
+            if (!email || !password) {
+                showError('Please fill in all fields.');
+                return;
+            }
+
+            // Disable UI
+            setLoading(true);
+
+            try {
+                // 1. Supabase Auth
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password,
+                });
+
+                if (error) throw error;
+
+                // 2. Fetch User Profile & Data (Verify existence)
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (profileError) throw new Error("Profile not found. Please contact support.");
+
+                // 3. Success State
+                successMessage.classList.remove('hidden');
+                
+                // Show Telegram Popup
+                setTimeout(() => {
+                    tgJoinBtn.href = telegramLink;
+                    telegramModal.classList.remove('hidden');
+                }, 800);
+
+            } catch (err) {
+                showError(err.message || 'An error occurred during sign in.');
+                setLoading(false);
+            }
+        });
+
+        // Handle Post-Login Redirection
+        skipTelegram.addEventListener('click', () => {
+            window.location.href = 'dashboard.html';
+        });
+
+        tgJoinBtn.addEventListener('click', () => {
+            // Give them a moment to open the link before redirecting
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1500);
+        });
+
+        // Helpers
+        function setLoading(isLoading) {
+            loginBtn.disabled = isLoading;
+            if (isLoading) {
+                btnText.textContent = 'Verifying...';
+                btnLoader.classList.remove('hidden');
+                loginBtn.classList.add('opacity-80');
+            } else {
+                btnText.textContent = 'Sign In to Velora';
+                btnLoader.classList.add('hidden');
+                loginBtn.classList.remove('opacity-80');
+            }
+        }
+
+        function showError(msg) {
+            errorMessage.querySelector('span').textContent = msg;
+            errorMessage.classList.remove('hidden');
+            // Shake effect
+            loginBtn.classList.add('animate-bounce');
+            setTimeout(() => loginBtn.classList.remove('animate-bounce'), 500);
+        }
+    </script>
 </body>
 </html>
