@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit Verification | VELORA Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-dark: #B8860B;
+            --luxury-white: #FBFAFA;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F4F5F7;
+            color: #1a1a1a;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .heading-font { font-family: 'Playfair Display', serif; }
+        .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%); }
+        .gold-text {
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Nav Styles (Shared) */
+        .sidebar-item:hover, .sidebar-active {
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.08) 0%, transparent 100%);
+            color: var(--gold);
+            border-left: 3px solid var(--gold);
+        }
+        .island-nav {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            width: 92%; max-width: 450px; background: rgba(10, 10, 10, 0.92);
+            backdrop-filter: blur(20px); border-radius: 35px; padding: 12px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); z-index: 100;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .island-item { color: rgba(255,255,255,0.5); transition: 0.3s; }
+        .island-item.active { color: var(--gold); transform: translateY(-3px); }
+
+        #sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        #sidebarOverlay { backdrop-filter: blur(6px); transition: opacity 0.4s ease; }
+
+        .status-pending { background: #FEF3C7; color: #92400E; }
+        .status-approved { background: #DCFCE7; color: #15803D; }
+        .status-rejected { background: #FEE2E2; color: #991B1B; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-[#F8F9FA]">
+
+    <!-- Auth Guard Loader -->
+    <div id="authGuard" class="fixed inset-0 z-[200] bg-white flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-12 h-12 border-4 border-gray-100 border-t-[#D4AF37] rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="heading-font gold-text text-lg tracking-widest uppercase">Admin Terminal</p>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 z-[140] bg-black/40 hidden opacity-0"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-72 bg-white border-r border-gray-100 z-[150] lg:translate-x-0 -translate-x-full">
+        <div class="p-8 h-full flex flex-col">
+            <div class="flex items-center justify-between mb-10">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 gold-gradient rounded-xl flex items-center justify-center text-white font-bold shadow-lg">V</div>
+                    <span class="text-xl font-bold heading-font gold-text tracking-tight">VELORA ADMIN</span>
+                </div>
+                <button id="closeSidebar" class="lg:hidden text-gray-300"><i data-lucide="x"></i></button>
+            </div>
+            <nav class="space-y-1 flex-1">
+                <a href="dashboard.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                </a>
+                <a href="users.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
+                    <i data-lucide="users" class="w-5 h-5"></i> Manage Users
+                </a>
+                <a href="deposits.html" class="sidebar-item sidebar-active flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold">
+                    <i data-lucide="arrow-down-circle" class="w-5 h-5"></i> Deposits
+                </a>
+                <a href="withdrawals.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
+                    <i data-lucide="arrow-up-circle" class="w-5 h-5"></i> Withdrawals
+                </a>
+                <div class="pt-8 mt-8 border-t border-gray-50">
+                    <button id="logoutBtn" class="w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-red-400 hover:bg-red-50">
+                        <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Top Navbar -->
+    <header class="fixed top-0 right-0 left-0 h-20 bg-white/80 backdrop-blur-md border-b border-gray-50 z-40 lg:left-72">
+        <div class="h-full flex items-center justify-between px-6 lg:px-10">
+            <div class="flex items-center gap-4">
+                <button id="mobileMenuBtn" class="lg:hidden p-2 text-gray-400"><i data-lucide="menu"></i></button>
+                <h2 class="text-xl font-bold heading-font hidden md:block">Deposit <span class="gold-text">Queue</span></h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="px-4 py-2 bg-gold/10 text-gold rounded-full text-[10px] font-bold uppercase tracking-widest">
+                    <span id="pendingCount">0</span> Pending
+                </div>
+                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white font-bold" id="adminInitials">A</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Island Nav -->
+    <div class="island-nav lg:hidden">
+        <a href="dashboard.html" class="island-item"><i data-lucide="layout-dashboard"></i></a>
+        <a href="users.html" class="island-item"><i data-lucide="users"></i></a>
+        <a href="deposits.html" class="island-item active"><i data-lucide="arrow-down-circle"></i></a>
+        <a href="withdrawals.html" class="island-item"><i data-lucide="arrow-up-circle"></i></a>
+        <button id="mobileMenuBtn2" class="island-item"><i data-lucide="menu"></i></button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="lg:ml-72 pt-28 px-6 pb-36">
+        <div class="max-w-[1600px] mx-auto">
+            
+            <!-- Filters Bar -->
+            <div class="glass-card rounded-[32px] p-6 mb-8 flex flex-col lg:flex-row gap-4 items-center">
+                <div class="relative w-full lg:flex-1">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300"></i>
+                    <input type="text" id="depositSearch" placeholder="Search Ref, Name, or Amount..." 
+                        class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:outline-none focus:border-gold transition">
+                </div>
+                <div class="flex gap-2 w-full lg:w-auto">
+                    <select id="statusFilter" class="flex-1 lg:w-40 px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-xs font-bold uppercase outline-none focus:border-gold">
+                        <option value="all">All Deposits</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                    <button onclick="exportData()" class="p-3 bg-white border border-gray-100 rounded-2xl text-gold"><i data-lucide="download" class="w-5 h-5"></i></button>
+                    <button onclick="refreshData()" class="p-3 bg-white border border-gray-100 rounded-2xl text-gold"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
+                </div>
+            </div>
+
+            <!-- Deposits Table -->
+            <div class="glass-card rounded-[40px] overflow-hidden">
+                <div class="overflow-x-auto no-scrollbar">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-gray-50/50 border-b border-gray-100">
+                            <tr>
+                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Investor</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Amount & Ref</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Receipt</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Date</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="depositTableBody" class="divide-y divide-gray-50">
+                            <tr>
+                                <td colspan="6" class="px-8 py-20 text-center">
+                                    <div class="w-10 h-10 border-2 border-gold/20 border-t-gold rounded-full animate-spin mx-auto mb-4"></div>
+                                    <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Syncing with Kuda Ledger...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Deposit Detail Modal -->
+    <div id="depositModal" class="fixed inset-0 z-[200] bg-black/60 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl rounded-[40px] overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+                <div>
+                    <h4 id="modalRef" class="text-xl font-bold heading-font">Verify Deposit</h4>
+                    <p id="modalUser" class="text-xs text-gray-400">...</p>
+                </div>
+                <button onclick="closeModal()" class="p-2 text-gray-400 hover:text-gold transition"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-8 no-scrollbar space-y-8">
+                <!-- Receipt Preview -->
+                <div class="bg-gray-100 rounded-3xl overflow-hidden border border-gray-200 aspect-video relative group">
+                    <img id="modalReceipt" src="" alt="Payment Receipt" class="w-full h-full object-contain">
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                        <a id="modalReceiptLink" href="#" target="_blank" class="px-6 py-2 bg-white rounded-full text-xs font-bold uppercase">Open Original</a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="p-4 bg-gray-50 rounded-2xl">
+                        <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">Expected Amount</p>
+                        <p id="modalAmount" class="text-lg font-bold">₦0</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-2xl">
+                        <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">Kuda Reference</p>
+                        <p id="modalRefText" class="text-sm font-mono font-bold">---</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block ml-1">Internal Admin Notes</label>
+                    <textarea id="adminNotes" rows="3" placeholder="Add verification details or rejection reason..." 
+                        class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:outline-none focus:border-gold transition"></textarea>
+                </div>
+
+                <!-- Control Buttons -->
+                <div id="modalActions" class="grid grid-cols-2 gap-4">
+                    <button onclick="processDeposit('rejected')" class="py-4 bg-red-50 text-red-600 rounded-2xl font-bold text-sm uppercase hover:bg-red-100 transition">Reject Payment</button>
+                    <button onclick="processDeposit('approved')" class="py-4 gold-gradient text-white rounded-2xl font-bold text-sm uppercase shadow-lg shadow-gold/20 hover:scale-[1.02] transition">Approve & Credit</button>
+                </div>
+                
+                <div id="processedInfo" class="hidden p-4 bg-gray-50 border border-gray-100 rounded-2xl text-center">
+                    <p class="text-xs font-bold text-gray-400 uppercase">Processed by <span id="processedAdmin" class="text-gray-800"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+        lucide.createIcons();
+
+        const supabase = createClient(
+            import.meta.env.VITE_SUPABASE_URL,
+            import.meta.env.VITE_SUPABASE_ANON_KEY
+        );
+
+        let allDeposits = [];
+        let selectedDeposit = null;
+        let adminProfile = null;
+
+        // --- 1. Init & Security ---
+        async function init() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+            if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
+                window.location.href = '../login.html';
+                return;
+            }
+
+            adminProfile = profile;
+            document.getElementById('adminInitials').textContent = profile.full_name.charAt(0);
+            document.getElementById('authGuard').classList.add('hidden');
+            
+            fetchDeposits();
+            setupRealtime();
+        }
+
+        // --- 2. Data Fetching ---
+        async function fetchDeposits() {
+            try {
+                const { data, error } = await supabase
+                    .from('deposits')
+                    .select('*, profiles(full_name, email, phone)')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                allDeposits = data;
+                renderTable();
+                updatePendingBadge();
+            } catch (err) {
+                console.error("Fetch Error:", err);
+            }
+        }
+
+        function updatePendingBadge() {
+            const pending = allDeposits.filter(d => d.status === 'pending').length;
+            const badge = document.getElementById('pendingCount');
+            badge.textContent = pending;
+        }
+
+        // --- 3. UI Rendering ---
+        function renderTable() {
+            const search = document.getElementById('depositSearch').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            const container = document.getElementById('depositTableBody');
+
+            const filtered = allDeposits.filter(d => {
+                const userName = d.profiles?.full_name?.toLowerCase() || '';
+                const ref = d.reference?.toLowerCase() || '';
+                const matchesSearch = userName.includes(search) || ref.includes(search) || d.amount.toString().includes(search);
+                const matchesStatus = status === 'all' || d.status === status;
+                return matchesSearch && matchesStatus;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<tr><td colspan="6" class="px-8 py-20 text-center text-gray-400 text-xs font-bold uppercase tracking-widest">No deposits found in queue</td></tr>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(d => `
+                <tr class="hover:bg-gray-50 transition cursor-default">
+                    <td class="px-8 py-6">
+                        <p class="text-sm font-bold text-gray-800">${d.profiles?.full_name || 'Unknown'}</p>
+                        <p class="text-[10px] text-gray-400 font-medium">${d.profiles?.email || 'N/A'}</p>
+                    </td>
+                    <td class="px-8 py-6">
+                        <p class="text-sm font-bold text-gray-800">₦${d.amount.toLocaleString()}</p>
+                        <p class="text-[10px] text-gold font-mono font-bold">${d.reference}</p>
+                    </td>
+                    <td class="px-8 py-6">
+                        ${d.receipt_url ? `
+                            <div class="w-10 h-10 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 flex items-center justify-center">
+                                <img src="${d.receipt_url}" class="w-full h-full object-cover">
+                            </div>
+                        ` : `<span class="text-[10px] text-gray-300 italic font-medium">No Receipt</span>`}
+                    </td>
+                    <td class="px-8 py-6 text-xs text-gray-400 font-medium">
+                        ${new Date(d.created_at).toLocaleDateString()}
+                    </td>
+                    <td class="px-8 py-6">
+                        <span class="text-[9px] font-bold uppercase px-3 py-1 rounded-full status-${d.status}">
+                            ${d.status}
+                        </span>
+                    </td>
+                    <td class="px-8 py-6 text-right">
+                        <button onclick="viewDeposit('${d.id}')" class="px-4 py-2 bg-gray-900 text-white text-[10px] font-bold rounded-xl hover:bg-gold transition uppercase">Review</button>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // --- 4. Admin Actions ---
+        window.viewDeposit = (id) => {
+            selectedDeposit = allDeposits.find(d => d.id === id);
+            if (!selectedDeposit) return;
+
+            document.getElementById('modalRef').textContent = `Deposit Verification`;
+            document.getElementById('modalUser').textContent = `${selectedDeposit.profiles.full_name} • ${selectedDeposit.profiles.phone}`;
+            document.getElementById('modalAmount').textContent = `₦${selectedDeposit.amount.toLocaleString()}`;
+            document.getElementById('modalRefText').textContent = selectedDeposit.reference;
+            document.getElementById('modalReceipt').src = selectedDeposit.receipt_url || 'https://via.placeholder.com/400x225?text=No+Receipt+Provided';
+            document.getElementById('modalReceiptLink').href = selectedDeposit.receipt_url || '#';
+            document.getElementById('adminNotes').value = selectedDeposit.admin_notes || '';
+
+            if (selectedDeposit.status !== 'pending') {
+                document.getElementById('modalActions').classList.add('hidden');
+                document.getElementById('processedInfo').classList.remove('hidden');
+                document.getElementById('processedAdmin').textContent = selectedDeposit.admin_name || 'Administrator';
+            } else {
+                document.getElementById('modalActions').classList.remove('hidden');
+                document.getElementById('processedInfo').classList.add('hidden');
+            }
+
+            document.getElementById('depositModal').classList.remove('hidden');
+        };
+
+        window.processDeposit = async (newStatus) => {
+            if (!confirm(`Are you sure you want to ${newStatus.toUpperCase()} this deposit?`)) return;
+            
+            const notes = document.getElementById('adminNotes').value;
+            const depositId = selectedDeposit.id;
+            const userId = selectedDeposit.user_id;
+            const amount = selectedDeposit.amount;
+
+            try {
+                // 1. Double check status to prevent race conditions
+                const { data: current } = await supabase.from('deposits').select('status').eq('id', depositId).single();
+                if (current.status !== 'pending') throw new Error("Deposit already processed.");
+
+                // 2. Update Deposit Status
+                const { error: depErr } = await supabase
+                    .from('deposits')
+                    .update({ 
+                        status: newStatus, 
+                        admin_notes: notes, 
+                        admin_id: adminProfile.id,
+                        admin_name: adminProfile.full_name,
+                        approved_at: newStatus === 'approved' ? new Date() : null
+                    })
+                    .eq('id', depositId);
+                
+                if (depErr) throw depErr;
+
+                if (newStatus === 'approved') {
+                    // 3. CREDIT WALLET (Fetch current then update)
+                    const { data: wallet } = await supabase.from('wallets').select('balance').eq('user_id', userId).single();
+                    const newBalance = (wallet?.balance || 0) + amount;
+
+                    await supabase.from('wallets').update({ balance: newBalance }).eq('user_id', userId);
+
+                    // 4. Update Pending Transaction to Completed
+                    await supabase.from('transactions')
+                        .update({ status: 'completed' })
+                        .eq('user_id', userId)
+                        .eq('reference', selectedDeposit.reference);
+
+                    // 5. Notify User
+                    await supabase.from('notifications').insert([{
+                        user_id: userId,
+                        title: 'Deposit Approved',
+                        message: `Your deposit of ₦${amount.toLocaleString()} has been verified and credited.`,
+                        category: 'deposit'
+                    }]);
+                } else {
+                    // REJECTED Flow
+                    await supabase.from('transactions')
+                        .update({ status: 'rejected' })
+                        .eq('user_id', userId)
+                        .eq('reference', selectedDeposit.reference);
+
+                    await supabase.from('notifications').insert([{
+                        user_id: userId,
+                        title: 'Deposit Rejected',
+                        message: `Your deposit of ₦${amount.toLocaleString()} was not approved. Reason: ${notes || 'Verification failed.'}`,
+                        category: 'deposit'
+                    }]);
+                }
+
+                alert(`Deposit ${newStatus} successfully.`);
+                closeModal();
+                fetchDeposits();
+
+            } catch (err) {
+                alert(err.message);
+            }
+        };
+
+        // --- 5. System Logic ---
+        function setupRealtime() {
+            supabase.channel('admin-deposits-sync')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'deposits' }, () => {
+                    fetchDeposits(); // Load new requests instantly
+                })
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'deposits' }, () => {
+                    fetchDeposits(); // Sync status changes
+                })
+                .subscribe();
+        }
+
+        window.closeModal = () => document.getElementById('depositModal').classList.add('hidden');
+        window.refreshData = () => fetchDeposits();
+        
+        document.getElementById('depositSearch').addEventListener('input', renderTable);
+        document.getElementById('statusFilter').addEventListener('change', renderTable);
+
+        // Sidebar/Nav Controls
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const toggleSidebar = (state) => {
+            if (state) { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.add('opacity-100'), 10); }
+            else { sidebar.classList.add('-translate-x-full'); overlay.classList.remove('opacity-100'); setTimeout(() => overlay.classList.add('hidden'), 400); }
+        };
+        document.getElementById('mobileMenuBtn').onclick = () => toggleSidebar(true);
+        document.getElementById('mobileMenuBtn2').onclick = () => toggleSidebar(true);
+        document.getElementById('closeSidebar').onclick = overlay.onclick = () => toggleSidebar(false);
+        document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+
+        init();
+    </script>
+</body>
+</html>
