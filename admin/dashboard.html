@@ -425,30 +425,169 @@
             const styles = {
                 deposit: 'bg-green-50 text-green-700',
                 withdrawal: 'bg-red-50 text-red-700',
-                investment: 'bg-gold/10 text-gold',
-                earning: 'bg-blue-50 text-blue-700'
-            };
-            return styles[type] || 'bg-gray-100 text-gray-600';
+<script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+    lucide.createIcons();
+
+    const supabase = createClient(
+        import.meta.env.VITE_SUPABASE_URL,
+        import.meta.env.VITE_SUPABASE_ANON_KEY
+    );
+
+    let adminUser = null;
+
+    // --- 1. Init and Security ---
+    async function init() {
+        console.log("Terminal: Initiating Security Protocol...");
+        try {
+            const { data: { session }, error: authError } = await supabase.auth.getSession();
+            
+            if (authError || !session) {
+                console.error("Auth Error:", authError);
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Verify Admin Role in 'profiles' table
+            // Ensure your table has a column named 'role'
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('role, full_name')
+                .eq('id', session.user.id)
+                .single();
+
+            if (profileError) {
+                console.error("Profile Fetch Error:", profileError);
+                alert("Database Error: Could not verify permissions.");
+                return;
+            }
+
+            if (!profile || profile.role !== 'admin') { 
+                console.warn("Access Denied: Non-admin attempt recorded.");
+                await supabase.auth.signOut();
+                window.location.href = 'login.html?error=unauthorized'; 
+                return; 
+            }
+
+            // Success: Set Data
+            adminUser = profile;
+            document.getElementById('adminName').textContent = profile.full_name;
+            document.getElementById('adminInitials').textContent = profile.full_name.charAt(0);
+            
+            // HIDE LOADER
+            document.getElementById('authGuard').classList.add('hidden');
+            console.log("Terminal: Access Granted.");
+
+            // Load Dashboard Components
+            loadStats();
+            loadActivity();
+            if (typeof initChart === 'function') initChart();
+            setupRealtime();
+
+        } catch (globalError) {
+            console.error("Global Init Error:", globalError);
+            // Fallback: Show the page anyway if we have a session, 
+            // but log the error so we can fix it.
+            document.getElementById('authGuard').innerHTML = `
+                <div class="text-center p-6">
+                    <p class="text-red-500 font-bold mb-4">Connection Timeout</p>
+                    <button onclick="location.reload()" class="px-6 py-2 gold-gradient text-white rounded-xl">Retry Connection</button>
+                </div>
+            `;
         }
+    }
 
-        // Navigation Controls
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const toggleSidebar = (open) => {
-            if(open) { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.add('opacity-100'), 10); }
-            else { sidebar.classList.add('-translate-x-full'); overlay.classList.remove('opacity-100'); setTimeout(() => overlay.classList.add('hidden'), 400); }
+    // --- 2. Data Fetching ---
+    async function loadStats() {
+        try {
+            const [
+                users,
+                wallets,
+                activeInvest,
+                pendingDep,
+                pendingWith,
+                pendingTickets
+            ] = await Promise.all([
+                supabase.from('profiles').select('*', { count: 'exact', head: true }),
+                supabase.from('wallets').select('balance'),
+                supabase.from('investments').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+                supabase.from('deposits').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+                supabase.from('withdrawals').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+                supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('status', 'Open')
+            ]);
+
+            const totalLiability = wallets.data ? wallets.data.reduce((acc, curr) => acc + curr.balance, 0) : 0;
+
+            document.getElementById('statTotalUsers').textContent = users.count || 0;
+            document.getElementById('statActiveInvestments').textContent = activeInvest.count || 0;
+            document.getElementById('statTotalWallet').textContent = `₦${totalLiability.toLocaleString()}`;
+            document.getElementById('statPendingItems').textContent = (pendingDep.count || 0) + (pendingWith.count || 0) + (pendingTickets.count || 0);
+            
+            const { data: withs } = await supabase.from('withdrawals').select('charge').eq('status', 'approved');
+            const revenue = withs ? withs.reduce((acc, curr) => acc + curr.charge, 0) : 0;
+            document.getElementById('statRevenue').textContent = `₦${revenue.toLocaleString()}`;
+
+        } catch (err) { console.error("Stats Load Failed:", err); }
+    }
+
+    async function loadActivity() {
+        const { data, error } = await supabase.from('transactions')
+            .select('*, profiles(full_name)')
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+        if (error) return;
+
+        const body = document.getElementById('activityBody');
+        body.innerHTML = data.map(tx => `
+            <tr class="hover:bg-gray-50 transition duration-150">
+                <td class="px-8 py-5 text-xs text-gray-500 font-medium">${new Date(tx.created_at).toLocaleTimeString()}</td>
+                <td class="px-8 py-5">
+                    <span class="px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-tighter ${getCategoryStyle(tx.type)}">
+                        ${tx.type}
+                    </span>
+                </td>
+                <td class="px-8 py-5">
+                    <p class="text-sm font-bold text-gray-800">${tx.profiles?.full_name || 'System'}</p>
+                    <p class="text-[10px] text-gray-400 font-medium">${tx.description}</p>
+                </td>
+                <td class="px-8 py-5 text-sm font-bold text-gray-800">₦${tx.amount.toLocaleString()}</td>
+                <td class="px-8 py-5 text-right">
+                    <span class="text-[9px] font-bold uppercase ${tx.status === 'completed' ? 'text-green-600' : 'text-yellow-600'}">
+                        ${tx.status}
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function getCategoryStyle(type) {
+        const styles = {
+            deposit: 'bg-green-50 text-green-700',
+            withdrawal: 'bg-red-50 text-red-700',
+            investment: 'bg-gold/10 text-gold',
+            earning: 'bg-blue-50 text-blue-700'
         };
+        return styles[type] || 'bg-gray-100 text-gray-600';
+    }
 
-        document.getElementById('menuToggle').onclick = () => toggleSidebar(true);
-        document.getElementById('mobileMenuBtn').onclick = () => toggleSidebar(true);
-        overlay.onclick = () => toggleSidebar(false);
+    function setupRealtime() {
+        supabase.channel('admin-dashboard-sync')
+            .on('postgres_changes', { event: '*', schema: 'public' }, () => {
+                loadStats();
+                loadActivity();
+            })
+            .subscribe();
+    }
 
-        document.getElementById('logoutBtn').onclick = async () => {
-            await supabase.auth.signOut();
-            window.location.href = 'login.html';
-        };
+    document.getElementById('logoutBtn').onclick = async () => {
+        await supabase.auth.signOut();
+        window.location.href = 'login.html';
+    };
 
-        init();
-    </script>
+    // Run Initialization
+    init();
+</script>
 </body>
 </html>
