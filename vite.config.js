@@ -27,6 +27,7 @@ export default defineConfig({
          support: resolve(__dirname, 'support.html'),
          terms: resolve(__dirname, 'terms.html'),
          admin_login: resolve(__dirname, 'admin/login.html'), 
+         admin_dashboard: resolve(__dirname, 'admin/dashboard.html'), 
       },
     },
   },
