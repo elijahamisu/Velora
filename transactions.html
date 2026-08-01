@@ -209,6 +209,22 @@
             import.meta.env.VITE_SUPABASE_ANON_KEY
         );
 
+        // --- Safe helpers ---
+        // Supabase numeric columns come back as strings, and any missing
+        // field is null/undefined. This guards every place that formats or
+        // filters a value so one bad/missing row can't throw and silently
+        // blank the entire table.
+        function n(val) {
+            const num = Number(val);
+            return Number.isFinite(num) ? num : 0;
+        }
+        function money(val) {
+            return `₦${n(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+        function safeLower(val) {
+            return (val ?? '').toString().toLowerCase();
+        }
+
         let user = null;
         let allTransactions = [];
         let currentPage = 0;
@@ -239,16 +255,20 @@
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
-                allTransactions = data;
+                allTransactions = data || [];
                 applyFilters();
             } catch (err) {
-                console.error(err);
+                console.error('Transaction fetch error:', err);
+                const body = document.getElementById('transactionBody');
+                body.innerHTML = `<tr><td colspan="5" class="px-8 py-20 text-center text-red-400 text-xs font-bold uppercase tracking-widest">Could not load ledger — check console</td></tr>`;
             }
         }
 
         async function loadWallet() {
-            const { data } = await supabase.from('wallets').select('balance').eq('user_id', user.id).single();
-            if (data) document.getElementById('topBalance').textContent = `₦${data.balance.toLocaleString()}`;
+            // NOTE: column is `available_balance` on the wallets table, not `balance`
+            const { data, error } = await supabase.from('wallets').select('available_balance').eq('user_id', user.id).single();
+            if (error) console.error('Wallet fetch error:', error);
+            document.getElementById('topBalance').textContent = money(data?.available_balance);
         }
 
         // --- 3. Filters & Pagination ---
@@ -257,10 +277,13 @@
             const type = document.getElementById('typeFilter').value;
             const status = document.getElementById('statusFilter').value;
 
+            // Every field is null-guarded via safeLower() — a transaction
+            // with a missing reference, type, or id can no longer throw and
+            // abort filtering for the whole list.
             let filtered = allTransactions.filter(t => {
-                const matchesSearch = t.reference.toLowerCase().includes(search) || 
-                                     t.type.toLowerCase().includes(search) ||
-                                     t.id.toLowerCase().includes(search);
+                const matchesSearch = safeLower(t.reference).includes(search) ||
+                                     safeLower(t.type).includes(search) ||
+                                     safeLower(t.id).includes(search);
                 const matchesType = type === 'all' || t.type === type;
                 const matchesStatus = status === 'all' || t.status === status;
                 return matchesSearch && matchesType && matchesStatus;
@@ -291,20 +314,20 @@
                                     <i data-lucide="${getIcon(t.type)}" class="w-5 h-5"></i>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold text-gray-800 capitalize">${t.type.replace('_', ' ')}</p>
-                                    <p class="text-[10px] text-gray-400 font-medium truncate w-32">${t.description}</p>
+                                    <p class="text-sm font-bold text-gray-800 capitalize">${(t.type || 'unknown').replace('_', ' ')}</p>
+                                    <p class="text-[10px] text-gray-400 font-medium truncate w-32">${t.description || ''}</p>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-8 py-6 font-mono text-[10px] text-gray-500">${t.reference}</td>
+                        <td class="px-8 py-6 font-mono text-[10px] text-gray-500">${t.reference || '—'}</td>
                         <td class="px-8 py-6">
                             <p class="text-sm font-bold ${isGain ? 'text-green-600' : 'text-gray-900'}">
-                                ${isGain ? '+' : '-'} ₦${t.amount.toLocaleString()}
+                                ${isGain ? '+' : '-'} ${money(t.amount)}
                             </p>
                         </td>
                         <td class="px-8 py-6">
                             <span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full ${getStatusStyle(t.status)}">
-                                ${t.status}
+                                ${t.status || 'unknown'}
                             </span>
                         </td>
                         <td class="px-8 py-6 text-right">
