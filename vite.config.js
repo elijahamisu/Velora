@@ -25,6 +25,7 @@ export default defineConfig({
          notifications: resolve(__dirname, 'notifications.html'),
          profile: resolve(__dirname, 'profile.html'),
          support: resolve(__dirname, 'support.html'),
+         terms: resolve(__dirname, 'terms.html'),
       },
     },
   },
