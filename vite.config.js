@@ -24,6 +24,7 @@ export default defineConfig({
          gift: resolve(__dirname, 'gift.html'),
          notifications: resolve(__dirname, 'notifications.html'),
          profile: resolve(__dirname, 'profile.html'),
+         support: resolve(__dirname, 'support.html'),
       },
     },
   },
