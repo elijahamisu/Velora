@@ -52,13 +52,6 @@
         }
         .field:focus { outline: none; border-color: var(--gold); background: #fff; }
 
-        .field-locked {
-            background: #F0EEE8;
-            border: 1px solid rgba(20,22,28,0.08);
-            color: var(--ink-text);
-            cursor: not-allowed;
-        }
-
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
             -webkit-appearance: none; margin: 0;
         }
@@ -419,10 +412,6 @@
                                 <span class="w-1.5 h-1.5 rounded-full bg-[var(--gold)] mt-1.5 shrink-0"></span>
                                 You can have multiple active investments simultaneously.
                             </li>
-                            <li class="flex items-start gap-3">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[var(--gold)] mt-1.5 shrink-0"></span>
-                                Each plan has a fixed entry amount and a fixed daily profit — these cannot be changed at checkout.
-                            </li>
                         </ul>
                     </div>
                 </div>
@@ -441,7 +430,7 @@
                                     <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Amount</th>
                                     <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Started</th>
                                     <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Status</th>
-                                    <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest text-right">Daily Profit</th>
+                                    <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest text-right">Daily Yield</th>
                                 </tr>
                             </thead>
                             <tbody id="historyTable" class="divide-y divide-black/[0.05]">
@@ -509,14 +498,13 @@
         let currentBalance = 0;
 
         // --- Plan catalogue ---
-        // NOTE: placeholder plan figures. Each plan now has a FIXED entry amount
-        // (minInvest, which is also the exact amount charged — not user-editable)
-        // and a FIXED daily profit in ₦ (dailyProfit), instead of a percentage.
-        // Adjust names, amounts, profit and durations to match your actual offer.
+        // NOTE: these are placeholder plan figures modeled on the reference design
+        // (Starter / Professional), plus an added "Elite" tier for a 3-plan spread.
+        // Adjust names, percentages, minimums and durations to match your actual offer.
         const PLANS = [
-            { id: 'starter', name: 'Starter Plan', dailyProfit: 250, minInvest: 5000, durationDays: 30, popular: true },
-            { id: 'professional', name: 'Professional Plan', dailyProfit: 4000, minInvest: 50000, durationDays: 45, popular: true },
-            { id: 'elite', name: 'Elite Plan', dailyProfit: 18000, minInvest: 150000, durationDays: 60, popular: false }
+            { id: 'starter', name: 'Starter Plan', dailyRoiPct: 5, minInvest: 5000, durationDays: 30, popular: true },
+            { id: 'professional', name: 'Professional Plan', dailyRoiPct: 8, minInvest: 50000, durationDays: 45, popular: true },
+            { id: 'elite', name: 'Elite Plan', dailyRoiPct: 12, minInvest: 150000, durationDays: 60, popular: false }
         ];
 
         // --- 1. Auth Guard ---
@@ -573,14 +561,14 @@
                     <div class="flex items-start justify-between gap-4 mb-1">
                         <div>
                             <h3 class="text-xl md:text-2xl heading-font font-semibold gold-text">${plan.name}</h3>
-                            <p class="text-emerald-600 font-semibold text-sm mt-1 mono">₦${plan.dailyProfit.toLocaleString()} Daily Profit</p>
+                            <p class="text-emerald-600 font-semibold text-sm mt-1">${plan.dailyRoiPct}% Daily Profit</p>
                         </div>
                         ${plan.popular ? `<span class="shrink-0 text-[10px] font-bold px-3 py-1.5 rounded-full bg-[rgba(183,147,91,0.1)] text-[var(--gold-deep)] uppercase tracking-wide">Popular</span>` : ''}
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 mt-6 mb-6">
                         <div>
-                            <p class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Entry Amount</p>
+                            <p class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Min Invest</p>
                             <p class="text-base font-semibold mono">₦${plan.minInvest.toLocaleString()}</p>
                         </div>
                         <div>
@@ -593,21 +581,20 @@
                         Invest Now
                     </button>
 
-                    <!-- Collapsible confirmation panel, revealed on "Invest Now". Amount is fixed and cannot be edited. -->
+                    <!-- Collapsible amount entry, revealed on "Invest Now" -->
                     <div class="plan-form hidden mt-6 pt-6 border-t border-black/[0.06] space-y-4">
                         <div>
                             <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-widest mb-2 ml-1">Investment Amount (₦)</label>
-                            <input type="text" class="plan-amount field-locked w-full px-5 py-4 rounded-2xl text-lg font-semibold mono" value="₦${plan.minInvest.toLocaleString()}" readonly disabled>
-                            <p class="text-[11px] text-[var(--muted)] mt-2 ml-1">This plan has a fixed entry amount and cannot be adjusted.</p>
+                            <input type="number" class="plan-amount field w-full px-5 py-4 rounded-2xl text-lg font-semibold mono" value="${plan.minInvest}" min="${plan.minInvest}">
                         </div>
                         <div class="bg-black/[0.02] rounded-2xl p-5 border border-black/[0.05] space-y-3">
                             <div class="flex justify-between text-sm">
-                                <span class="text-[var(--muted)]">Daily Profit</span>
-                                <span class="font-bold text-emerald-600 mono">₦${plan.dailyProfit.toLocaleString()}</span>
+                                <span class="text-[var(--muted)]">Expected Daily ROI</span>
+                                <span class="font-bold text-emerald-600 mono plan-preview-roi">₦${Math.round(plan.minInvest * plan.dailyRoiPct / 100).toLocaleString()}</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-[var(--muted)]">New Wallet Balance</span>
-                                <span class="font-bold mono plan-preview-balance">₦${Math.max(currentBalance - plan.minInvest, 0).toLocaleString()}</span>
+                                <span class="font-bold mono plan-preview-balance">₦0.00</span>
                             </div>
                         </div>
                         <button type="button" class="plan-confirm-btn w-full py-4 bg-[var(--ink)] text-white font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-[var(--ink-soft)] transition">
@@ -628,11 +615,15 @@
                 const plan = PLANS.find(p => p.id === planId);
                 const toggleBtn = card.querySelector('.plan-toggle-btn');
                 const form = card.querySelector('.plan-form');
+                const amountInput = card.querySelector('.plan-amount');
+                const previewRoi = card.querySelector('.plan-preview-roi');
                 const previewBalance = card.querySelector('.plan-preview-balance');
                 const confirmBtn = card.querySelector('.plan-confirm-btn');
 
                 const updatePreview = () => {
-                    previewBalance.textContent = `₦${Math.max(currentBalance - plan.minInvest, 0).toLocaleString()}`;
+                    const amt = parseFloat(amountInput.value) || 0;
+                    previewRoi.textContent = `₦${Math.round(amt * plan.dailyRoiPct / 100).toLocaleString()}`;
+                    previewBalance.textContent = `₦${Math.max(currentBalance - amt, 0).toLocaleString()}`;
                 };
 
                 toggleBtn.addEventListener('click', () => {
@@ -641,13 +632,19 @@
                     toggleBtn.textContent = isHidden ? 'Hide' : 'Invest Now';
                     if (isHidden) {
                         updatePreview();
+                        amountInput.focus();
                     }
                 });
 
-                confirmBtn.addEventListener('click', async () => {
-                    // Amount is fixed to the plan's entry amount — never taken from user input.
-                    const amount = plan.minInvest;
+                amountInput.addEventListener('input', updatePreview);
 
+                confirmBtn.addEventListener('click', async () => {
+                    const amount = parseFloat(amountInput.value);
+
+                    if (amount < plan.minInvest) {
+                        alert(`Minimum investment for ${plan.name} is ₦${plan.minInvest.toLocaleString()}`);
+                        return;
+                    }
                     if (amount > currentBalance) {
                         alert('Insufficient wallet balance.');
                         return;
@@ -671,7 +668,7 @@
                             .insert([{
                                 user_id: user.id,
                                 amount: amount,
-                                daily_profit: plan.dailyProfit,
+                                daily_roi_pct: plan.dailyRoiPct,
                                 status: 'active'
                             }]);
 
@@ -683,7 +680,7 @@
                             amount: amount,
                             type: 'investment',
                             status: 'completed',
-                            description: `Committed ₦${amount.toLocaleString()} to the ${plan.name}`
+                            description: `Committed ₦${amount} to the ${plan.name}`
                         }]);
 
                         alert('Investment Successful!');
@@ -720,7 +717,7 @@
                             ${row.status}
                         </span>
                     </td>
-                    <td class="px-8 py-6 text-right font-bold text-emerald-600 mono">₦${(row.daily_profit || 0).toLocaleString()}</td>
+                    <td class="px-8 py-6 text-right font-bold text-emerald-600 mono">₦${(row.amount * (row.daily_roi_pct/100)).toLocaleString()}</td>
                 </tr>
             `).join('');
         }
