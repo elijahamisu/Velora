@@ -251,6 +251,19 @@
             import.meta.env.VITE_SUPABASE_ANON_KEY
         );
 
+        // --- Safe number coercion helper ---
+        // Supabase returns Postgres `numeric` columns as strings, and any
+        // missing/null column comes back as null/undefined. This normalizes
+        // every value to a real number before it touches math or
+        // .toLocaleString(), so a missing field can never throw or produce NaN.
+        function n(val) {
+            const num = Number(val);
+            return Number.isFinite(num) ? num : 0;
+        }
+        function money(val) {
+            return `₦${n(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
         let user = null;
 
         // --- 1. Init & Auth ---
@@ -302,22 +315,24 @@
         }
 
         async function loadFinancials() {
-            const [walletRes, earnRes] = await Promise.all([
-                supabase.from('wallets').select('*').eq('user_id', user.id).single(),
-                supabase.from('earnings').select('*').eq('user_id', user.id).single()
-            ]);
+            // NOTE: column names match the actual `wallets` table schema —
+            // available_balance / investment_balance / referral_balance /
+            // bonus_balance / total_earnings. There is no separate `earnings`
+            // table; total_earnings lives directly on the wallets row.
+            const { data: w, error } = await supabase
+                .from('wallets')
+                .select('*')
+                .eq('user_id', user.id)
+                .single();
 
-            if (walletRes.data) {
-                const w = walletRes.data;
-                document.getElementById('topBalance').textContent = `₦${w.balance.toLocaleString()}`;
-                document.getElementById('sumWallet').textContent = `₦${w.balance.toLocaleString()}`;
-                document.getElementById('sumInvest').textContent = `₦${(w.invested_balance || 0).toLocaleString()}`;
-                document.getElementById('sumRef').textContent = `₦${(w.referral_balance || 0).toLocaleString()}`;
-            }
+            if (error) console.error('Wallet fetch error:', error);
 
-            if (earnRes.data) {
-                document.getElementById('sumEarn').textContent = `₦${(earnRes.data.total_earnings || 0).toLocaleString()}`;
-            }
+            const wallet = w || {};
+            document.getElementById('topBalance').textContent = money(wallet.available_balance);
+            document.getElementById('sumWallet').textContent = money(wallet.available_balance);
+            document.getElementById('sumInvest').textContent = money(wallet.investment_balance);
+            document.getElementById('sumRef').textContent = money(wallet.referral_balance);
+            document.getElementById('sumEarn').textContent = money(wallet.total_earnings);
         }
 
         // --- 3. Profile Actions ---
