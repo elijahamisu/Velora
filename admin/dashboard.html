@@ -13,11 +13,10 @@
             --gold: #D4AF37;
             --gold-light: #F4E3AD;
             --luxury-white: #FBFAFA;
-            --admin-black: #0A0A0A;
         }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #F3F4F6;
+            background-color: #F8F9FB;
             color: #1a1a1a;
             overflow-x: hidden;
         }
@@ -34,16 +33,12 @@
             border: 1px solid rgba(212, 175, 55, 0.1);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
-
-        /* Sidebar Styles */
-        .sidebar-item { transition: all 0.3s ease; border-left: 4px solid transparent; }
+        .sidebar-item { transition: all 0.3s ease; border-left: 4px solid transparent; color: #6B7280; }
         .sidebar-item:hover, .sidebar-active {
             background: rgba(212, 175, 55, 0.05);
             color: var(--gold);
             border-left: 4px solid var(--gold);
         }
-
-        /* Mobile Island Nav */
         .island-nav {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             width: 90%; max-width: 400px; background: rgba(10, 10, 10, 0.9);
@@ -54,18 +49,15 @@
         }
         .island-item { color: rgba(255,255,255,0.6); transition: 0.3s; }
         .island-item.active { color: var(--gold); transform: translateY(-3px); }
-
         #sidebar { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        .stat-card-glow:hover { box-shadow: 0 0 20px rgba(212, 175, 55, 0.15); }
     </style>
 </head>
 <body class="bg-[#F8F9FA]">
 
     <!-- Auth Guard Loader -->
     <div id="authGuard" class="fixed inset-0 z-[200] bg-white flex items-center justify-center">
-        <div class="text-center">
+        <div class="text-center" id="loaderContent">
             <div class="w-16 h-16 border-4 border-gray-100 border-t-[#D4AF37] rounded-full animate-spin mx-auto mb-4"></div>
             <p class="heading-font gold-text text-xl animate-pulse tracking-widest uppercase">Velora Terminal</p>
         </div>
@@ -78,58 +70,16 @@
                 <div class="w-8 h-8 gold-gradient rounded-lg flex items-center justify-center text-white font-bold shadow-lg">V</div>
                 <h1 class="text-2xl font-bold heading-font gold-text tracking-tighter">VELORA ADMIN</h1>
             </div>
-
             <nav class="space-y-1">
-                <!-- Navigation Items -->
                 <a href="dashboard.html" class="sidebar-item sidebar-active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold">
                     <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
                 </a>
-                <a href="users.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500">
-                    <i data-lucide="users" class="w-5 h-5"></i> Users
-                </a>
-                <a href="deposits.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500">
-                    <i data-lucide="arrow-down-circle" class="w-5 h-5"></i> Deposits
-                </a>
-                <a href="withdrawals.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500">
-                    <i data-lucide="arrow-up-circle" class="w-5 h-5"></i> Withdrawals
-                </a>
-                <a href="investments.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500">
-                    <i data-lucide="gem" class="w-5 h-5"></i> Investments
-                </a>
-                <a href="investment-plans.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500">
-                    <i data-lucide="layers" class="w-5 h-5"></i> Investment Plans
-                </a>
-                <a href="earnings.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500">
-                    <i data-lucide="zap" class="w-5 h-5"></i> Daily Earnings
-                </a>
-                <a href="gift-codes.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500">
-                    <i data-lucide="gift" class="w-5 h-5"></i> Gift Codes
-                </a>
-                <a href="referrals.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500">
-                    <i data-lucide="network" class="w-5 h-5"></i> Referral Management
-                </a>
-                <a href="transactions.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500">
-                    <i data-lucide="history" class="w-5 h-5"></i> Transactions
-                </a>
-                <a href="notifications.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500">
-                    <i data-lucide="bell" class="w-5 h-5"></i> Notifications
-                </a>
-                <a href="support-tickets.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500">
-                    <i data-lucide="message-square" class="w-5 h-5"></i> Support Tickets
-                </a>
-                <a href="reports.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500">
-                    <i data-lucide="bar-chart-3" class="w-5 h-5"></i> Reports
-                </a>
-                <a href="settings.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500">
-                    <i data-lucide="settings" class="w-5 h-5"></i> Settings
-                </a>
-                <a href="profile.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500">
-                    <i data-lucide="user-cog" class="w-5 h-5"></i> Admin Profile
-                </a>
-                <a href="activity-logs.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-500">
-                    <i data-lucide="file-text" class="w-5 h-5"></i> Activity Logs
-                </a>
-                
+                <a href="users.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold"><i data-lucide="users" class="w-5 h-5"></i> Users</a>
+                <a href="deposits.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold"><i data-lucide="arrow-down-circle" class="w-5 h-5"></i> Deposits</a>
+                <a href="withdrawals.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold"><i data-lucide="arrow-up-circle" class="w-5 h-5"></i> Withdrawals</a>
+                <a href="investments.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold"><i data-lucide="gem" class="w-5 h-5"></i> Investments</a>
+                <a href="gift-codes.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold"><i data-lucide="gift" class="w-5 h-5"></i> Gift Codes</a>
+                <a href="support.html" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold"><i data-lucide="headphones" class="w-5 h-5"></i> Support</a>
                 <div class="pt-10">
                     <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition">
                         <i data-lucide="log-out" class="w-5 h-5"></i> Logout
@@ -144,21 +94,13 @@
         <div class="h-full flex items-center justify-between px-6 lg:px-10">
             <div class="flex items-center gap-4">
                 <button id="menuToggle" class="lg:hidden text-gray-500"><i data-lucide="menu"></i></button>
-                <div class="hidden md:flex items-center bg-gray-50 px-4 py-2 rounded-2xl border border-gray-100 w-64 lg:w-96">
-                    <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
-                    <input type="text" placeholder="Global search users, refs, tx..." class="bg-transparent border-none text-xs ml-3 focus:outline-none w-full">
-                </div>
+                <h2 class="text-xl font-bold heading-font hidden md:block">System <span class="gold-text italic">Overview</span></h2>
             </div>
-            
             <div class="flex items-center gap-6">
-                <div class="relative cursor-pointer">
-                    <i data-lucide="bell" class="text-gray-400"></i>
-                    <span id="notifBadge" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[8px] flex items-center justify-center rounded-full hidden">0</span>
-                </div>
                 <div class="flex items-center gap-3 border-l border-gray-100 pl-6">
                     <div class="text-right hidden sm:block">
                         <p id="adminName" class="text-sm font-bold">Admin</p>
-                        <p id="adminRole" class="text-[9px] gold-text font-bold uppercase tracking-widest">Super Administrator</p>
+                        <p id="adminRole" class="text-[9px] gold-text font-bold uppercase tracking-widest">Authorized Personnel</p>
                     </div>
                     <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white font-bold" id="adminInitials">A</div>
                 </div>
@@ -179,98 +121,45 @@
     <main class="lg:ml-72 pt-28 px-6 pb-32">
         <div class="max-w-7xl mx-auto">
             
-            <!-- Welcome Header -->
-            <div class="mb-10">
-                <h2 class="text-3xl font-bold heading-font">Executive <span class="gold-text italic">Overview</span></h2>
-                <p class="text-gray-400 text-sm">Real-time platform performance monitoring.</p>
-            </div>
-
             <!-- Stats Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6 mb-12">
-                <!-- Top Summary Cards dynamically updated -->
-                <div class="glass-card p-6 rounded-[32px] stat-card-glow">
-                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Total Investors</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6 mb-12">
+                <div class="glass-card p-6 rounded-[32px]">
+                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Total Users</p>
                     <h3 id="statTotalUsers" class="text-2xl font-bold">0</h3>
                 </div>
-                <div class="glass-card p-6 rounded-[32px] stat-card-glow">
-                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Active Assets</p>
-                    <h3 id="statActiveInvestments" class="text-2xl font-bold">0</h3>
+                <div class="glass-card p-6 rounded-[32px]">
+                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Total Deposits</p>
+                    <h3 id="statTotalDeposits" class="text-2xl font-bold">₦0</h3>
                 </div>
-                <div class="glass-card p-6 rounded-[32px] stat-card-glow">
-                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Liability Balance</p>
-                    <h3 id="statTotalWallet" class="text-2xl font-bold">₦0</h3>
+                <div class="glass-card p-6 rounded-[32px]">
+                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Total Payouts</p>
+                    <h3 id="statTotalPayouts" class="text-2xl font-bold">₦0</h3>
                 </div>
                 <div class="glass-card p-6 rounded-[32px] border-gold/30">
-                    <p class="text-[10px] text-gold uppercase font-bold tracking-widest mb-1">Platform Revenue</p>
+                    <p class="text-[10px] text-gold uppercase font-bold tracking-widest mb-1">Total Revenue</p>
                     <h3 id="statRevenue" class="text-2xl font-bold gold-text">₦0</h3>
-                </div>
-                <div class="glass-card p-6 rounded-[32px] stat-card-glow">
-                    <p class="text-[10px] text-gray-400 uppercase font-bold tracking-widest mb-1">Pending Requests</p>
-                    <h3 id="statPendingItems" class="text-2xl font-bold text-red-500">0</h3>
-                </div>
-            </div>
-
-            <!-- Charts Section -->
-            <div class="grid lg:grid-cols-3 gap-8 mb-12">
-                <div class="lg:col-span-2 glass-card p-8 rounded-[40px]">
-                    <div class="flex justify-between items-center mb-8">
-                        <h4 class="text-lg font-bold heading-font">Growth Analytics</h4>
-                        <select id="chartPeriod" class="bg-gray-50 border border-gray-100 rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-widest text-gold outline-none">
-                            <option value="7">Last 7 Days</option>
-                            <option value="30" selected>Last 30 Days</option>
-                            <option value="90">Last 90 Days</option>
-                        </select>
-                    </div>
-                    <div class="h-[350px]">
-                        <canvas id="growthChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="space-y-6">
-                    <h4 class="text-lg font-bold heading-font">Quick Actions</h4>
-                    <div class="grid grid-cols-2 gap-4">
-                        <a href="deposits.html" class="flex flex-col items-center justify-center p-6 bg-white rounded-[32px] border border-gray-50 shadow-sm hover:border-gold transition group">
-                            <div class="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center text-green-600 mb-3 group-hover:scale-110 transition"><i data-lucide="check-circle-2"></i></div>
-                            <span class="text-[10px] font-bold uppercase tracking-tighter text-center">Approve Deposits</span>
-                        </a>
-                        <a href="withdrawals.html" class="flex flex-col items-center justify-center p-6 bg-white rounded-[32px] border border-gray-50 shadow-sm hover:border-gold transition group">
-                            <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 mb-3 group-hover:scale-110 transition"><i data-lucide="send"></i></div>
-                            <span class="text-[10px] font-bold uppercase tracking-tighter text-center">Approve Payouts</span>
-                        </a>
-                        <a href="support-tickets.html" class="flex flex-col items-center justify-center p-6 bg-white rounded-[32px] border border-gray-50 shadow-sm hover:border-gold transition group">
-                            <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 mb-3 group-hover:scale-110 transition"><i data-lucide="headphones"></i></div>
-                            <span class="text-[10px] font-bold uppercase tracking-tighter text-center">Concierge Tickets</span>
-                        </a>
-                        <a href="notifications.html" class="flex flex-col items-center justify-center p-6 bg-white rounded-[32px] border border-gray-50 shadow-sm hover:border-gold transition group">
-                            <div class="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center text-gold mb-3 group-hover:scale-110 transition"><i data-lucide="megaphone"></i></div>
-                            <span class="text-[10px] font-bold uppercase tracking-tighter text-center">Broadcast Msg</span>
-                        </a>
-                    </div>
                 </div>
             </div>
 
             <!-- Activity Table -->
-            <div class="glass-card rounded-[40px] overflow-hidden shadow-sm">
-                <div class="p-8 border-b border-gray-50 flex justify-between items-center">
-                    <h4 class="text-lg font-bold heading-font">Live Network Activity</h4>
-                    <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full bg-green-500 animate-ping"></div>
-                        <span class="text-[9px] font-bold uppercase tracking-widest text-gray-400">Syncing...</span>
-                    </div>
+            <div class="glass-card rounded-[40px] overflow-hidden">
+                <div class="p-8 border-b border-gray-50 flex justify-between items-center bg-white/50">
+                    <h4 class="text-lg font-bold heading-font">Live Platform Activity</h4>
+                    <span class="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[9px] font-bold uppercase tracking-widest">Realtime Sync</span>
                 </div>
                 <div class="overflow-x-auto no-scrollbar">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-full text-left">
                         <thead class="bg-gray-50/50">
                             <tr>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Timestamp</th>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Category</th>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Detail</th>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Volume</th>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Status</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase">Timestamp</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase">Category</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase">Description</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase">Volume</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase text-right">Status</th>
                             </tr>
                         </thead>
                         <tbody id="activityBody" class="divide-y divide-gray-50">
-                            <!-- Injected by JS -->
+                            <tr><td colspan="5" class="p-12 text-center text-gray-400 text-xs italic">Syncing secure records...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -289,82 +178,80 @@
             import.meta.env.VITE_SUPABASE_ANON_KEY
         );
 
-        let myChart;
-
-        // --- 1. Init and Auth Guard ---
+        // --- 1. Init and Robust Security ---
         async function init() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) { window.location.href = 'login.html'; return; }
+            try {
+                const { data: { session }, error: authError } = await supabase.auth.getSession();
+                if (authError || !session) throw new Error("No valid session found.");
 
-            // Verify Admin Role
-            const { data: profile } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single();
-            if (!profile || profile.role !== 'admin') { 
-                await supabase.auth.signOut();
-                window.location.href = 'login.html'; 
-                return; 
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('role, full_name')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (profileError || !profile || !['admin', 'super_admin'].includes(profile.role)) {
+                    await supabase.auth.signOut();
+                    window.location.href = 'login.html?error=unauthorized';
+                    return;
+                }
+
+                // Success
+                document.getElementById('adminName').textContent = profile.full_name;
+                document.getElementById('adminInitials').textContent = profile.full_name.charAt(0);
+                document.getElementById('authGuard').classList.add('hidden');
+
+                loadStats();
+                loadActivity();
+                setupRealtime();
+
+            } catch (err) {
+                console.error("Security Halt:", err);
+                document.getElementById('loaderContent').innerHTML = `
+                    <p class="text-red-500 font-bold mb-4">Access Denied or Connection Failure</p>
+                    <a href="login.html" class="px-6 py-2 gold-gradient text-white rounded-xl text-sm font-bold">Return to Login</a>
+                `;
             }
-
-            document.getElementById('adminName').textContent = profile.full_name;
-            document.getElementById('adminInitials').textContent = profile.full_name.charAt(0);
-            document.getElementById('authGuard').classList.add('hidden');
-
-            loadStats();
-            loadActivity();
-            initChart();
-            setupRealtime();
         }
 
         // --- 2. Data Fetching ---
         async function loadStats() {
             try {
-                // Parallel fetching of summary counts
-                const [
-                    { count: totalUsers },
-                    { data: wallets },
-                    { count: activeInvest },
-                    { count: pendingDep },
-                    { count: pendingWith },
-                    { count: pendingTickets }
-                ] = await Promise.all([
+                const [users, deps, withs] = await Promise.all([
                     supabase.from('profiles').select('*', { count: 'exact', head: true }),
-                    supabase.from('wallets').select('balance'),
-                    supabase.from('investments').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-                    supabase.from('deposits').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-                    supabase.from('withdrawals').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-                    supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('status', 'Open')
+                    supabase.from('deposits').select('amount').eq('status', 'approved'),
+                    supabase.from('withdrawals').select('amount, charge').eq('status', 'approved')
                 ]);
 
-                const totalLiability = wallets.reduce((acc, curr) => acc + curr.balance, 0);
+                const totalDeposits = deps.data.reduce((acc, curr) => acc + curr.amount, 0);
+                const totalPayouts = withs.data.reduce((acc, curr) => acc + curr.amount, 0);
+                const totalRevenue = withs.data.reduce((acc, curr) => acc + (curr.charge || 0), 0);
 
-                // Update UI
-                document.getElementById('statTotalUsers').textContent = totalUsers;
-                document.getElementById('statActiveInvestments').textContent = activeInvest;
-                document.getElementById('statTotalWallet').textContent = `₦${totalLiability.toLocaleString()}`;
-                document.getElementById('statPendingItems').textContent = pendingDep + pendingWith + pendingTickets;
-                
-                // Revenue simulation (Based on 15% withdrawal charges)
-                const { data: withs } = await supabase.from('withdrawals').select('charge').eq('status', 'approved');
-                const revenue = withs.reduce((acc, curr) => acc + curr.charge, 0);
-                document.getElementById('statRevenue').textContent = `₦${revenue.toLocaleString()}`;
+                document.getElementById('statTotalUsers').textContent = users.count || 0;
+                document.getElementById('statTotalDeposits').textContent = `₦${totalDeposits.toLocaleString()}`;
+                document.getElementById('statTotalPayouts').textContent = `₦${totalPayouts.toLocaleString()}`;
+                document.getElementById('statRevenue').textContent = `₦${totalRevenue.toLocaleString()}`;
 
-            } catch (err) { console.error(err); }
+            } catch (err) { console.error("Stats fail:", err); }
         }
 
         async function loadActivity() {
-            // Fetching latest across multiple tables
             const { data } = await supabase.from('transactions')
                 .select('*, profiles(full_name)')
                 .order('created_at', { ascending: false })
                 .limit(10);
 
             const body = document.getElementById('activityBody');
+            if (!data || data.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-gray-400 text-xs italic">No activity recorded.</td></tr>`;
+                return;
+            }
+
             body.innerHTML = data.map(tx => `
                 <tr class="hover:bg-gray-50 transition duration-150">
                     <td class="px-8 py-5 text-xs text-gray-500 font-medium">${new Date(tx.created_at).toLocaleTimeString()}</td>
                     <td class="px-8 py-5">
-                        <span class="px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-tighter ${getCategoryStyle(tx.type)}">
-                            ${tx.type}
-                        </span>
+                        <span class="px-3 py-1 rounded-full text-[9px] font-bold uppercase ${getCatColor(tx.type)}">${tx.type}</span>
                     </td>
                     <td class="px-8 py-5">
                         <p class="text-sm font-bold text-gray-800">${tx.profiles?.full_name || 'System'}</p>
@@ -372,222 +259,39 @@
                     </td>
                     <td class="px-8 py-5 text-sm font-bold text-gray-800">₦${tx.amount.toLocaleString()}</td>
                     <td class="px-8 py-5 text-right">
-                        <span class="text-[9px] font-bold uppercase ${tx.status === 'completed' ? 'text-green-600' : 'text-yellow-600'}">
-                            ${tx.status}
-                        </span>
+                        <span class="text-[9px] font-bold uppercase ${tx.status === 'completed' ? 'text-green-600' : 'text-yellow-600'}">${tx.status}</span>
                     </td>
                 </tr>
             `).join('');
         }
 
-        // --- 3. Visualization ---
-        function initChart() {
-            const ctx = document.getElementById('growthChart').getContext('2d');
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    datasets: [{
-                        label: 'Gross Deposits',
-                        data: [12000, 19000, 3000, 5000, 20000, 30000],
-                        borderColor: '#D4AF37',
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointRadius: 0,
-                        fill: true,
-                        backgroundColor: 'rgba(212, 175, 55, 0.05)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { display: false },
-                        x: { grid: { display: false }, ticks: { font: { size: 10, weight: 'bold' }, color: '#9CA3AF' } }
-                    }
-                }
-            });
+        function getCatColor(type) {
+            if (type === 'deposit') return 'bg-green-50 text-green-700';
+            if (type === 'withdrawal') return 'bg-red-50 text-red-700';
+            return 'bg-blue-50 text-blue-700';
         }
 
-        // --- 4. System Logic ---
         function setupRealtime() {
-            // Global listener for table changes
-            supabase.channel('admin-dashboard')
+            supabase.channel('global-sync')
                 .on('postgres_changes', { event: '*', schema: 'public' }, () => {
                     loadStats();
                     loadActivity();
-                })
-                .subscribe();
+                }).subscribe();
         }
 
-        function getCategoryStyle(type) {
-            const styles = {
-                deposit: 'bg-green-50 text-green-700',
-                withdrawal: 'bg-red-50 text-red-700',
-<script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
-
-    lucide.createIcons();
-
-    const supabase = createClient(
-        import.meta.env.VITE_SUPABASE_URL,
-        import.meta.env.VITE_SUPABASE_ANON_KEY
-    );
-
-    let adminUser = null;
-
-    // --- 1. Init and Security ---
-    async function init() {
-        console.log("Terminal: Initiating Security Protocol...");
-        try {
-            const { data: { session }, error: authError } = await supabase.auth.getSession();
-            
-            if (authError || !session) {
-                console.error("Auth Error:", authError);
-                window.location.href = 'login.html';
-                return;
-            }
-
-            // Verify Admin Role in 'profiles' table
-            // Ensure your table has a column named 'role'
-            const { data: profile, error: profileError } = await supabase
-                .from('profiles')
-                .select('role, full_name')
-                .eq('id', session.user.id)
-                .single();
-
-            if (profileError) {
-                console.error("Profile Fetch Error:", profileError);
-                alert("Database Error: Could not verify permissions.");
-                return;
-            }
-
-            if (!profile || profile.role !== 'admin') { 
-                console.warn("Access Denied: Non-admin attempt recorded.");
-                await supabase.auth.signOut();
-                window.location.href = 'login.html?error=unauthorized'; 
-                return; 
-            }
-
-            // Success: Set Data
-            adminUser = profile;
-            document.getElementById('adminName').textContent = profile.full_name;
-            document.getElementById('adminInitials').textContent = profile.full_name.charAt(0);
-            
-            // HIDE LOADER
-            document.getElementById('authGuard').classList.add('hidden');
-            console.log("Terminal: Access Granted.");
-
-            // Load Dashboard Components
-            loadStats();
-            loadActivity();
-            if (typeof initChart === 'function') initChart();
-            setupRealtime();
-
-        } catch (globalError) {
-            console.error("Global Init Error:", globalError);
-            // Fallback: Show the page anyway if we have a session, 
-            // but log the error so we can fix it.
-            document.getElementById('authGuard').innerHTML = `
-                <div class="text-center p-6">
-                    <p class="text-red-500 font-bold mb-4">Connection Timeout</p>
-                    <button onclick="location.reload()" class="px-6 py-2 gold-gradient text-white rounded-xl">Retry Connection</button>
-                </div>
-            `;
-        }
-    }
-
-    // --- 2. Data Fetching ---
-    async function loadStats() {
-        try {
-            const [
-                users,
-                wallets,
-                activeInvest,
-                pendingDep,
-                pendingWith,
-                pendingTickets
-            ] = await Promise.all([
-                supabase.from('profiles').select('*', { count: 'exact', head: true }),
-                supabase.from('wallets').select('balance'),
-                supabase.from('investments').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-                supabase.from('deposits').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-                supabase.from('withdrawals').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-                supabase.from('tickets').select('*', { count: 'exact', head: true }).eq('status', 'Open')
-            ]);
-
-            const totalLiability = wallets.data ? wallets.data.reduce((acc, curr) => acc + curr.balance, 0) : 0;
-
-            document.getElementById('statTotalUsers').textContent = users.count || 0;
-            document.getElementById('statActiveInvestments').textContent = activeInvest.count || 0;
-            document.getElementById('statTotalWallet').textContent = `₦${totalLiability.toLocaleString()}`;
-            document.getElementById('statPendingItems').textContent = (pendingDep.count || 0) + (pendingWith.count || 0) + (pendingTickets.count || 0);
-            
-            const { data: withs } = await supabase.from('withdrawals').select('charge').eq('status', 'approved');
-            const revenue = withs ? withs.reduce((acc, curr) => acc + curr.charge, 0) : 0;
-            document.getElementById('statRevenue').textContent = `₦${revenue.toLocaleString()}`;
-
-        } catch (err) { console.error("Stats Load Failed:", err); }
-    }
-
-    async function loadActivity() {
-        const { data, error } = await supabase.from('transactions')
-            .select('*, profiles(full_name)')
-            .order('created_at', { ascending: false })
-            .limit(10);
-
-        if (error) return;
-
-        const body = document.getElementById('activityBody');
-        body.innerHTML = data.map(tx => `
-            <tr class="hover:bg-gray-50 transition duration-150">
-                <td class="px-8 py-5 text-xs text-gray-500 font-medium">${new Date(tx.created_at).toLocaleTimeString()}</td>
-                <td class="px-8 py-5">
-                    <span class="px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-tighter ${getCategoryStyle(tx.type)}">
-                        ${tx.type}
-                    </span>
-                </td>
-                <td class="px-8 py-5">
-                    <p class="text-sm font-bold text-gray-800">${tx.profiles?.full_name || 'System'}</p>
-                    <p class="text-[10px] text-gray-400 font-medium">${tx.description}</p>
-                </td>
-                <td class="px-8 py-5 text-sm font-bold text-gray-800">₦${tx.amount.toLocaleString()}</td>
-                <td class="px-8 py-5 text-right">
-                    <span class="text-[9px] font-bold uppercase ${tx.status === 'completed' ? 'text-green-600' : 'text-yellow-600'}">
-                        ${tx.status}
-                    </span>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    function getCategoryStyle(type) {
-        const styles = {
-            deposit: 'bg-green-50 text-green-700',
-            withdrawal: 'bg-red-50 text-red-700',
-            investment: 'bg-gold/10 text-gold',
-            earning: 'bg-blue-50 text-blue-700'
+        // Navigation
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const toggle = (o) => {
+            if(o) { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); setTimeout(()=>overlay.classList.add('opacity-100'),10); }
+            else { sidebar.classList.add('-translate-x-full'); overlay.classList.remove('opacity-100'); setTimeout(()=>overlay.classList.add('hidden'),400); }
         };
-        return styles[type] || 'bg-gray-100 text-gray-600';
-    }
+        document.getElementById('menuToggle').onclick = () => toggle(true);
+        document.getElementById('mobileMenuBtn').onclick = () => toggle(true);
+        overlay.onclick = () => toggle(false);
+        document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
 
-    function setupRealtime() {
-        supabase.channel('admin-dashboard-sync')
-            .on('postgres_changes', { event: '*', schema: 'public' }, () => {
-                loadStats();
-                loadActivity();
-            })
-            .subscribe();
-    }
-
-    document.getElementById('logoutBtn').onclick = async () => {
-        await supabase.auth.signOut();
-        window.location.href = 'login.html';
-    };
-
-    // Run Initialization
-    init();
-</script>
+        init();
+    </script>
 </body>
 </html>
