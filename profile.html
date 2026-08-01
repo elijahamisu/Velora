@@ -3,237 +3,524 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile | VELORA — Elite Identity</title>
+    <title>Profile | VELORA — Private Wealth</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --gold: #D4AF37;
-            --gold-dark: #B8860B;
-            --luxury-white: #FBFAFA;
+            --ink: #0C0E13;
+            --ink-soft: #171A22;
+            --paper: #F6F4EF;
+            --paper-card: #FFFFFF;
+            --gold: #B7935B;
+            --gold-deep: #8F6E3E;
+            --gold-light: #E7D9BC;
+            --line: rgba(183, 147, 91, 0.16);
+            --ink-text: #14161C;
+            --muted: #7A7E88;
         }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--luxury-white);
-            color: #1a1a1a;
+            background-color: var(--paper);
+            color: var(--ink-text);
+            overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
         }
-        .heading-font { font-family: 'Playfair Display', serif; }
-        .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%); }
+        .heading-font { font-family: 'Fraunces', serif; font-feature-settings: "ss01"; }
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+
+        .gold-gradient { background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%); }
         .gold-text {
-            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(212, 175, 55, 0.12);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
-        }
+        .ink-gradient { background: linear-gradient(160deg, var(--ink) 0%, var(--ink-soft) 100%); }
 
-        /* Sidebar & Nav (Identical to Dashboard) */
-        .sidebar-item:hover, .sidebar-active {
-            background: linear-gradient(90deg, rgba(212, 175, 55, 0.08) 0%, transparent 100%);
-            color: var(--gold);
-            border-left: 3px solid var(--gold);
+        .card {
+            background: var(--paper-card);
+            border: 1px solid rgba(20, 22, 28, 0.06);
+            box-shadow: 0 1px 2px rgba(12,14,19,0.03), 0 12px 24px -18px rgba(12,14,19,0.18);
         }
-        .island-nav {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            width: 92%; max-width: 420px; background: rgba(15, 15, 15, 0.88);
-            backdrop-filter: blur(24px); border-radius: 40px; padding: 10px 24px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4); z-index: 100;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .island-item { color: rgba(255,255,255,0.5); transition: 0.3s; }
-        .island-item.active { color: var(--gold); }
-        
-        #sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        #sidebarOverlay { backdrop-filter: blur(6px); transition: 0.3s; }
+        .card-gold-edge { border-top: 2px solid var(--gold); }
 
-        /* Profile Specific */
-        .avatar-container { position: relative; width: 100px; height: 100px; }
-        .avatar-container img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .avatar-edit { position: absolute; bottom: 0; right: 0; background: var(--gold); color: white; padding: 6px; border-radius: 50%; cursor: pointer; border: 2px solid white; }
-        
-        input:disabled { background: #f9f9f9; color: #aaa; cursor: not-allowed; }
-        .section-label { font-size: 10px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 1.5px; }
+        .field {
+            background: #FAF9F6;
+            border: 1px solid rgba(20,22,28,0.08);
+            transition: border-color .18s ease, background .18s ease;
+        }
+        .field:focus { outline: none; border-color: var(--gold); background: #fff; }
+        .field:disabled { background: #F1EFEA; color: var(--muted); cursor: not-allowed; }
+
+        .section-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; }
+
+        .avatar-ring {
+            width: 96px; height: 96px;
+            border-radius: 9999px;
+            padding: 3px;
+            background: linear-gradient(135deg, #C9A468, #8F6E3E);
+        }
+        .avatar-ring img, .avatar-ring .avatar-fallback {
+            width: 100%; height: 100%; border-radius: 9999px; object-fit: cover;
+            border: 3px solid var(--ink);
+        }
+        .avatar-edit {
+            position: absolute; bottom: 2px; right: 2px;
+            background: var(--gold); color: white; padding: 7px; border-radius: 9999px;
+            cursor: pointer; border: 2px solid var(--ink);
+            transition: background .18s ease;
+        }
+        .avatar-edit:hover { background: var(--gold-deep); }
+
+        /* ---------- Sidebar (desktop) ---------- */
+        #sidebar { background: var(--ink); }
+        #sidebar .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+        .sidebar-item {
+            color: rgba(246, 244, 239, 0.55);
+            border-left: 2px solid transparent;
+            transition: color .18s ease, background .18s ease, border-color .18s ease;
+        }
+        .sidebar-item:hover {
+            background: linear-gradient(90deg, rgba(183,147,91,0.12) 0%, transparent 85%);
+            color: var(--gold-light);
+        }
+        .sidebar-active {
+            background: linear-gradient(90deg, rgba(183,147,91,0.16) 0%, transparent 85%);
+            color: var(--gold-light) !important;
+            border-left: 2px solid var(--gold);
+        }
+        .sidebar-item i { width: 17px; height: 17px; }
+
+        /* ---------- Mobile Island Navigation ---------- */
+        #islandNav {
+            background: rgba(12, 14, 19, 0.97);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(183, 147, 91, 0.22);
+            box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(183,147,91,0.05) inset;
+        }
+        .island-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            padding: 7px 4px;
+            border-radius: 13px;
+            color: rgba(246, 244, 239, 0.4);
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+        .island-item i { width: 16px; height: 16px; }
+        .island-item span {
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+        .island-item.active {
+            color: var(--gold-light);
+            background: linear-gradient(135deg, rgba(183,147,91,0.22) 0%, rgba(143,110,62,0.10) 100%);
+        }
+        .island-item.active i { filter: drop-shadow(0 2px 6px rgba(183,147,91,0.45)); }
+
+        ::selection { background: var(--gold-light); color: var(--ink); }
+        :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+        /* ---------- Mobile Drawer Sidebar ---------- */
+        #drawerOverlay {
+            background: rgba(8, 9, 13, 0.55);
+            backdrop-filter: blur(2px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .28s ease;
+        }
+        #drawerOverlay.open { opacity: 1; pointer-events: auto; }
+
+        #mobileDrawer {
+            background: var(--ink);
+            width: min(86vw, 320px);
+            transform: translateX(-100%);
+            transition: transform .32s cubic-bezier(.32,.72,0,1);
+            box-shadow: 24px 0 60px -20px rgba(0,0,0,0.5);
+        }
+        #mobileDrawer.open { transform: translateX(0); }
+        #mobileDrawer .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+
+        .drawer-item {
+            color: rgba(246, 244, 239, 0.6);
+            border-left: 2px solid transparent;
+            transition: color .18s ease, background .18s ease, border-color .18s ease;
+        }
+        .drawer-item:active,
+        .drawer-item:hover {
+            background: linear-gradient(90deg, rgba(183,147,91,0.14) 0%, transparent 85%);
+            color: var(--gold-light);
+        }
+        .drawer-active {
+            background: linear-gradient(90deg, rgba(183,147,91,0.18) 0%, transparent 85%);
+            color: var(--gold-light) !important;
+            border-left: 2px solid var(--gold);
+        }
+        .drawer-item i { width: 18px; height: 18px; }
+
+        #menuToggle {
+            width: 38px; height: 38px;
+            border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(20,22,28,0.08);
+            color: var(--ink-text);
+            transition: background .18s ease, border-color .18s ease;
+        }
+        #menuToggle:hover { background: rgba(183,147,91,0.08); border-color: rgba(183,147,91,0.3); }
+        #menuToggle i { width: 18px; height: 18px; }
     </style>
 </head>
-<body class="bg-[#F8F9FA]">
+<body class="bg-[var(--paper)]">
 
     <!-- Auth Guard Loader -->
-    <div id="authGuard" class="fixed inset-0 z-[200] bg-white flex items-center justify-center">
+    <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
         <div class="text-center">
-            <div class="w-12 h-12 border-4 border-gray-100 border-t-[#D4AF37] rounded-full animate-spin mx-auto mb-4"></div>
-            <p class="heading-font gold-text text-lg tracking-widest uppercase">Velora</p>
+            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(183,147,91,0.25); border-top-color: var(--gold);"></div>
+            <p class="heading-font gold-text text-2xl tracking-wide">VELORA</p>
+            <p class="text-[10px] uppercase tracking-[0.3em] text-white/30 mt-2">Verifying Access</p>
         </div>
     </div>
 
-    <!-- Navigation Components -->
-    <div id="sidebarOverlay" class="fixed inset-0 z-[140] bg-black/40 hidden opacity-0"></div>
-    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-72 bg-white border-r border-gray-100 z-[150] lg:translate-x-0 -translate-x-full">
-        <div class="p-8 h-full flex flex-col">
-            <div class="flex items-center justify-between mb-10">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 gold-gradient rounded-full flex items-center justify-center text-white font-bold">V</div>
-                    <span class="text-2xl font-bold heading-font gold-text">VELORA</span>
+    <!-- Navigation Header -->
+    <header class="fixed top-0 right-0 left-0 h-20 bg-[var(--paper)]/85 backdrop-blur-md border-b border-black/[0.06] z-40 lg:left-64">
+        <div class="h-full flex items-center justify-between px-6">
+            <div class="flex items-center gap-3">
+                <button id="menuToggle" class="lg:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="w-7 h-7 gold-gradient rounded-full flex items-center justify-center text-white heading-font text-xs lg:hidden">V</div>
+                <div>
+                    <h2 class="text-lg font-semibold heading-font hidden md:block tracking-tight">Private <span class="gold-text italic">Identity</span></h2>
+                    <h2 class="text-base font-semibold heading-font md:hidden">Profile</h2>
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] hidden md:block">Account &amp; Security</p>
                 </div>
-                <button id="closeSidebar" class="lg:hidden text-gray-400"><i data-lucide="x"></i></button>
             </div>
-            <nav class="space-y-1 flex-1">
-                <a href="dashboard.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard</a>
-                <a href="invest.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500"><i data-lucide="gem" class="w-5 h-5"></i> Invest</a>
-                <a href="deposit.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500"><i data-lucide="arrow-down-circle" class="w-5 h-5"></i> Deposit</a>
-                <a href="withdraw.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500"><i data-lucide="arrow-up-circle" class="w-5 h-5"></i> Withdraw</a>
-                <a href="wallet.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500"><i data-lucide="wallet" class="w-5 h-5"></i> Wallet</a>
-                <a href="profile.html" class="sidebar-item sidebar-active flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold"><i data-lucide="user" class="w-5 h-5"></i> Profile</a>
-                <div class="pt-8 mt-8 border-t border-gray-50">
-                    <button id="logoutBtn" class="w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-red-400 hover:bg-red-50"><i data-lucide="log-out" class="w-5 h-5"></i> Logout</button>
-                </div>
-            </nav>
-        </div>
-    </aside>
 
-    <header class="fixed top-0 right-0 left-0 h-20 bg-white/80 backdrop-blur-md border-b border-gray-50 z-40 lg:left-72 hidden lg:block">
-        <div class="h-full flex items-center justify-between px-10">
-            <h2 class="text-xl font-bold heading-font">Elite <span class="gold-text">Identity</span></h2>
-            <div class="flex items-center gap-4">
-                <div id="topWallet" class="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-100">
-                    <i data-lucide="wallet" class="w-3 h-3 text-gold"></i>
-                    <span id="topBalance" class="text-[10px] font-bold">₦0.00</span>
+            <div class="flex items-center gap-6">
+                <div class="hidden sm:flex items-center gap-2 bg-black/[0.03] px-4 py-2 rounded-full border border-black/[0.06]">
+                    <i data-lucide="wallet" class="w-4 h-4 text-[var(--gold-deep)]"></i>
+                    <span id="topBalance" class="text-xs font-bold mono">₦0.00</span>
                 </div>
-                <div class="w-10 h-10 rounded-full gold-gradient overflow-hidden border-2 border-white shadow-sm">
+                <div class="relative cursor-pointer group">
+                    <i data-lucide="bell" class="text-[var(--muted)] group-hover:text-[var(--gold)] transition w-5 h-5"></i>
+                </div>
+                <div class="w-10 h-10 rounded-full gold-gradient overflow-hidden flex items-center justify-center text-white heading-font font-semibold">
                     <img id="navAvatar" src="" alt="" class="w-full h-full object-cover hidden">
-                    <div id="navInitials" class="w-full h-full flex items-center justify-center text-white font-bold">V</div>
+                    <span id="navInitials">V</span>
                 </div>
             </div>
         </div>
     </header>
 
-    <div class="island-nav lg:hidden">
-        <a href="dashboard.html" class="island-item"><i data-lucide="layout-dashboard"></i></a>
-        <a href="invest.html" class="island-item"><i data-lucide="gem"></i></a>
-        <a href="wallet.html" class="island-item"><i data-lucide="wallet"></i></a>
-        <a href="profile.html" class="island-item active"><i data-lucide="user"></i></a>
-        <button id="mobileMenuBtn" class="island-item"><i data-lucide="menu"></i></button>
-    </div>
+    <!-- Sidebar Menu (Desktop only) -->
+    <aside id="sidebar" class="hidden lg:block fixed top-0 left-0 bottom-0 w-64 z-50">
+        <div class="p-8 h-full flex flex-col">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-9 h-9 rounded-full border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
+                <h1 class="text-2xl heading-font gold-text tracking-tight font-semibold">VELORA</h1>
+            </div>
+            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-8 ml-12 -mt-1">Private Wealth</p>
+            <div class="h-px w-full brand-hair mb-8"></div>
+
+            <nav class="space-y-1 flex-1" id="sidebarNav">
+                <a href="dashboard.html" data-page="dashboard" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="invest.html" data-page="invest" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gem"></i> Invest
+                </a>
+                <a href="deposit.html" data-page="deposit" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-down-circle"></i> Deposit
+                </a>
+                <a href="withdraw.html" data-page="withdraw" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-up-circle"></i> Withdraw
+                </a>
+                <a href="wallet.html" data-page="wallet" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="wallet"></i> Wallet
+                </a>
+                <a href="transactions.html" data-page="transactions" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="history"></i> Transactions
+                </a>
+                <a href="referral.html" data-page="referral" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="users"></i> Referral
+                </a>
+                <a href="gift.html" data-page="gift" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gift"></i> Gift Code
+                </a>
+
+                <div class="pt-8 mt-8 border-t border-white/[0.06] space-y-1">
+                    <a href="profile.html" data-page="profile" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                        <i data-lucide="user"></i> Profile
+                    </a>
+                    <a href="support.html" data-page="support" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                        <i data-lucide="help-circle"></i> Support
+                    </a>
+                    <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
+                        <i data-lucide="log-out" class="w-[17px] h-[17px]"></i> Logout
+                    </button>
+                </div>
+            </nav>
+
+            <div class="pt-6 border-t border-white/[0.06]">
+                <div class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/25">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Secured Session
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ============ Mobile Drawer Sidebar ============ -->
+    <div id="drawerOverlay" class="lg:hidden fixed inset-0 z-[60]"></div>
+    <aside id="mobileDrawer" class="lg:hidden fixed top-0 left-0 bottom-0 z-[70] overflow-y-auto">
+        <div class="p-7 min-h-full flex flex-col">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
+                    <h1 class="text-xl heading-font gold-text tracking-tight font-semibold">VELORA</h1>
+                </div>
+                <button id="drawerClose" aria-label="Close menu" class="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-[var(--gold-light)] hover:bg-white/5 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-6 ml-12 -mt-1">Private Wealth</p>
+            <div class="h-px w-full brand-hair mb-6"></div>
+
+            <!-- Account chip -->
+            <div class="flex items-center gap-3 p-3 mb-6 rounded-2xl bg-white/[0.04] border border-white/10">
+                <div class="w-10 h-10 rounded-full gold-gradient overflow-hidden flex items-center justify-center text-white heading-font font-semibold shrink-0">
+                    <img id="drawerAvatar" src="" alt="" class="w-full h-full object-cover hidden">
+                    <span id="drawerInitials">V</span>
+                </div>
+                <div class="min-w-0">
+                    <p id="drawerName" class="text-sm font-semibold text-white truncate">...</p>
+                    <p id="drawerBalance" class="text-[10px] text-[var(--gold-light)] font-bold tracking-widest uppercase mono truncate">₦0.00</p>
+                </div>
+            </div>
+
+            <nav class="space-y-1 flex-1" id="drawerNav">
+                <a href="dashboard.html" data-page="dashboard" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="invest.html" data-page="invest" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gem"></i> Invest
+                </a>
+                <a href="deposit.html" data-page="deposit" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-down-circle"></i> Deposit
+                </a>
+                <a href="withdraw.html" data-page="withdraw" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-up-circle"></i> Withdraw
+                </a>
+                <a href="wallet.html" data-page="wallet" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="wallet"></i> Wallet
+                </a>
+                <a href="transactions.html" data-page="transactions" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="history"></i> Transactions
+                </a>
+                <a href="referral.html" data-page="referral" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="users"></i> Referral
+                </a>
+                <a href="gift.html" data-page="gift" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gift"></i> Gift Code
+                </a>
+
+                <div class="pt-6 mt-6 border-t border-white/[0.06] space-y-1">
+                    <a href="profile.html" data-page="profile" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                        <i data-lucide="user"></i> Profile
+                    </a>
+                    <a href="support.html" data-page="support" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                        <i data-lucide="help-circle"></i> Support
+                    </a>
+                    <button id="drawerLogoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
+                        <i data-lucide="log-out" class="w-[18px] h-[18px]"></i> Logout
+                    </button>
+                </div>
+            </nav>
+
+            <div class="pt-6 mt-6 border-t border-white/[0.06]">
+                <div class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/25">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Secured Session
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ============ Mobile Island Navigation ============ -->
+    <nav id="islandNav" class="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-[22px] flex items-center gap-1 px-2 py-1.5 w-[92%] max-w-sm">
+        <a href="dashboard.html" data-page="dashboard" class="island-item flex-1">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Home</span>
+        </a>
+        <a href="invest.html" data-page="invest" class="island-item flex-1">
+            <i data-lucide="gem"></i>
+            <span>Plans</span>
+        </a>
+        <a href="wallet.html" data-page="wallet" class="island-item flex-1">
+            <i data-lucide="wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a href="referral.html" data-page="referral" class="island-item flex-1">
+            <i data-lucide="users"></i>
+            <span>Referrals</span>
+        </a>
+        <a href="profile.html" data-page="profile" class="island-item flex-1">
+            <i data-lucide="user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
 
     <!-- Main Content -->
-    <main class="lg:ml-72 pt-6 lg:pt-28 px-6 pb-36 min-h-screen">
+    <main class="lg:ml-64 pt-28 px-6 pb-24 lg:pb-12">
         <div class="max-w-5xl mx-auto">
-            
-            <!-- Mobile Profile Header -->
-            <div class="lg:hidden flex flex-col items-center mb-10 mt-2">
-                <div class="avatar-container mb-4">
-                    <img id="profileAvatar" src="https://ui-avatars.com/api/?name=User&background=D4AF37&color=fff" alt="Avatar">
-                    <label for="avatarUpload" class="avatar-edit">
-                        <i data-lucide="camera" class="w-4 h-4"></i>
-                        <input type="file" id="avatarUpload" class="hidden" accept="image/*">
-                    </label>
+
+            <!-- ===== Identity Hero ===== -->
+            <div class="ink-gradient rounded-[32px] p-8 md:p-10 relative overflow-hidden mb-8" style="box-shadow: 0 30px 60px -30px rgba(12,14,19,0.55);">
+                <div class="absolute -top-16 -right-16 w-72 h-72 rounded-full" style="background: radial-gradient(circle, rgba(183,147,91,0.16), transparent 70%);"></div>
+                <div class="relative flex flex-col sm:flex-row sm:items-center gap-6">
+                    <div class="relative avatar-ring shrink-0 mx-auto sm:mx-0">
+                        <img id="profileAvatar" src="" alt="" class="hidden">
+                        <div id="profileAvatarFallback" class="avatar-fallback flex items-center justify-center bg-[var(--ink-soft)] text-2xl heading-font font-semibold text-[var(--gold-light)]">V</div>
+                        <label for="avatarUpload" class="avatar-edit">
+                            <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+                            <input type="file" id="avatarUpload" class="hidden" accept="image/*">
+                        </label>
+                    </div>
+
+                    <div class="text-center sm:text-left flex-1 min-w-0">
+                        <div class="flex items-center justify-center sm:justify-start gap-2 mb-1">
+                            <h2 id="profileNameDisplay" class="text-2xl heading-font font-semibold text-white truncate">...</h2>
+                            <span class="shrink-0 inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-400/10 text-emerald-400">
+                                <i data-lucide="badge-check" class="w-3 h-3"></i> Verified
+                            </span>
+                        </div>
+                        <p id="profileEmailDisplay" class="text-sm text-white/40 mb-4">...</p>
+                        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-x-6 gap-y-2 text-xs">
+                            <span class="text-white/35">Member since <span id="memberSince" class="text-white/70 font-semibold">...</span></span>
+                            <span class="flex items-center gap-1.5 text-white/35">Referral code:
+                                <span id="referralCode" class="mono font-semibold text-[var(--gold-light)]">...</span>
+                                <button id="copyRefBtn" class="text-[var(--gold)] hover:text-[var(--gold-light)] transition"><i data-lucide="copy" class="w-3 h-3"></i></button>
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <h2 id="profileNameDisplay" class="text-2xl font-bold heading-font">...</h2>
-                <p id="profileEmailDisplay" class="text-xs text-gray-400">...</p>
+            </div>
+
+            <!-- ===== Wealth Summary Strip ===== -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+                <div class="card p-5 rounded-2xl">
+                    <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
+                        <i data-lucide="wallet" class="w-3 h-3"></i> Wallet
+                    </p>
+                    <h4 id="sumWallet" class="text-lg heading-font font-semibold">₦0.00</h4>
+                </div>
+                <div class="card p-5 rounded-2xl">
+                    <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
+                        <i data-lucide="gem" class="w-3 h-3"></i> Invested
+                    </p>
+                    <h4 id="sumInvest" class="text-lg heading-font font-semibold">₦0.00</h4>
+                </div>
+                <div class="card card-gold-edge p-5 rounded-2xl">
+                    <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
+                        <i data-lucide="zap" class="w-3 h-3"></i> Earnings
+                    </p>
+                    <h4 id="sumEarn" class="text-lg heading-font font-semibold text-emerald-600">₦0.00</h4>
+                </div>
+                <div class="card p-5 rounded-2xl">
+                    <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
+                        <i data-lucide="users" class="w-3 h-3"></i> Referral
+                    </p>
+                    <h4 id="sumRef" class="text-lg heading-font font-semibold">₦0.00</h4>
+                </div>
             </div>
 
             <div class="grid lg:grid-cols-3 gap-8">
-                
-                <!-- Left: Edit Form -->
+
+                <!-- Left: Edit Forms -->
                 <div class="lg:col-span-2 space-y-8">
                     <!-- Personal Details -->
-                    <div class="glass-card rounded-[40px] p-8">
-                        <h4 class="text-lg font-bold heading-font mb-8">Personal Information</h4>
+                    <div class="card rounded-[32px] p-8">
+                        <h4 class="text-lg font-semibold heading-font mb-8">Personal Information</h4>
                         <form id="profileForm" class="space-y-6">
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="section-label mb-2 block">Full Name</label>
-                                    <input type="text" id="fullName" class="w-full px-5 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:border-gold outline-none transition">
+                                    <input type="text" id="fullName" class="field w-full px-5 py-3 rounded-2xl text-sm">
                                 </div>
                                 <div>
                                     <label class="section-label mb-2 block">Phone Number</label>
-                                    <input type="tel" id="phoneNumber" class="w-full px-5 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:border-gold outline-none transition">
+                                    <input type="tel" id="phoneNumber" class="field w-full px-5 py-3 rounded-2xl text-sm mono">
                                 </div>
                             </div>
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="section-label mb-2 block">Email Address</label>
-                                    <input type="email" id="email" disabled class="w-full px-5 py-3 border border-gray-100 rounded-2xl text-sm">
+                                    <input type="email" id="email" disabled class="field w-full px-5 py-3 rounded-2xl text-sm">
                                 </div>
                                 <div>
                                     <label class="section-label mb-2 block">Account Status</label>
-                                    <div class="px-5 py-3 bg-green-50 text-green-600 rounded-2xl text-xs font-bold uppercase tracking-widest border border-green-100">Verified Client</div>
+                                    <div class="px-5 py-3 bg-emerald-50 text-emerald-700 rounded-2xl text-xs font-bold uppercase tracking-widest border border-emerald-100 flex items-center gap-2">
+                                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Verified Client
+                                    </div>
                                 </div>
                             </div>
-                            <button type="submit" id="saveProfileBtn" class="w-full py-4 gold-gradient text-white font-bold rounded-2xl shadow-lg shadow-gold/20 active:scale-95 transition">
+                            <button type="submit" id="saveProfileBtn" class="w-full py-4 gold-gradient text-white font-bold rounded-2xl active:scale-95 transition" style="box-shadow: 0 20px 40px -20px rgba(143,110,62,0.5);">
                                 Update Personal Details
                             </button>
                         </form>
                     </div>
 
                     <!-- Security Section -->
-                    <div class="glass-card rounded-[40px] p-8">
-                        <h4 class="text-lg font-bold heading-font mb-8">Security & Access</h4>
+                    <div class="card rounded-[32px] p-8">
+                        <h4 class="text-lg font-semibold heading-font mb-8 flex items-center gap-2">
+                            <i data-lucide="lock" class="w-4 h-4 text-[var(--gold-deep)]"></i> Security &amp; Access
+                        </h4>
                         <form id="passwordForm" class="space-y-6">
                             <div>
                                 <label class="section-label mb-2 block">New Password</label>
-                                <input type="password" id="newPassword" placeholder="Minimum 6 characters" class="w-full px-5 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:border-gold outline-none transition">
+                                <input type="password" id="newPassword" placeholder="Minimum 6 characters" class="field w-full px-5 py-3 rounded-2xl text-sm">
                             </div>
                             <div>
                                 <label class="section-label mb-2 block">Confirm New Password</label>
-                                <input type="password" id="confirmPassword" class="w-full px-5 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:border-gold outline-none transition">
+                                <input type="password" id="confirmPassword" class="field w-full px-5 py-3 rounded-2xl text-sm">
                             </div>
-                            <button type="submit" id="savePassBtn" class="w-full py-4 bg-gray-900 text-white font-bold rounded-2xl active:scale-95 transition">
+                            <button type="submit" id="savePassBtn" class="w-full py-4 ink-gradient text-white font-bold rounded-2xl active:scale-95 transition">
                                 Change Password
                             </button>
                         </form>
                     </div>
                 </div>
 
-                <!-- Right: Account Summary & Metadata -->
+                <!-- Right: Account Meta -->
                 <div class="space-y-8">
-                    <!-- Identity Metadata -->
-                    <div class="bg-white rounded-[40px] border border-gray-100 p-8">
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Identity Records</h4>
-                        <div class="space-y-6">
+                    <div class="card rounded-[32px] p-8">
+                        <h4 class="text-xs font-bold text-[var(--muted)] uppercase tracking-widest mb-6">Account Details</h4>
+                        <div class="space-y-5">
                             <div>
-                                <p class="text-[10px] text-gray-400 font-bold uppercase">Member Since</p>
-                                <p id="memberSince" class="text-sm font-bold">...</p>
+                                <p class="text-[10px] text-[var(--muted)] font-bold uppercase">Member Since</p>
+                                <p id="memberSinceMeta" class="text-sm font-semibold">...</p>
                             </div>
                             <div>
-                                <p class="text-[10px] text-gray-400 font-bold uppercase">Referral Code</p>
-                                <p id="referralCode" class="text-sm font-mono font-bold gold-text tracking-tighter">...</p>
+                                <p class="text-[10px] text-[var(--muted)] font-bold uppercase">Referral Code</p>
+                                <p id="referralCodeMeta" class="text-sm mono font-semibold gold-text">...</p>
                             </div>
                             <div>
-                                <p class="text-[10px] text-gray-400 font-bold uppercase">User ID</p>
-                                <p id="userId" class="text-[10px] text-gray-400 break-all font-mono">...</p>
+                                <p class="text-[10px] text-[var(--muted)] font-bold uppercase">User ID</p>
+                                <p id="userId" class="text-[10px] text-[var(--muted)] break-all mono">...</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Financial Summary (Read Only) -->
-                    <div class="bg-gray-900 rounded-[40px] p-8 text-white">
-                        <h4 class="text-xs font-bold text-white/40 uppercase tracking-widest mb-6">Wealth Summary</h4>
-                        <div class="grid grid-cols-2 gap-y-6">
-                            <div>
-                                <p class="text-[9px] text-white/40 font-bold uppercase">Wallet</p>
-                                <p id="sumWallet" class="text-sm font-bold">₦0.00</p>
-                            </div>
-                            <div>
-                                <p class="text-[9px] text-white/40 font-bold uppercase">Invested</p>
-                                <p id="sumInvest" class="text-sm font-bold">₦0.00</p>
-                            </div>
-                            <div>
-                                <p class="text-[9px] text-white/40 font-bold uppercase">Earnings</p>
-                                <p id="sumEarn" class="text-sm font-bold text-green-400">₦0.00</p>
-                            </div>
-                            <div>
-                                <p class="text-[9px] text-white/40 font-bold uppercase">Referral</p>
-                                <p id="sumRef" class="text-sm font-bold">₦0.00</p>
-                            </div>
-                        </div>
-                        <a href="wallet.html" class="block w-full text-center mt-8 py-3 bg-white/10 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-white/20 transition">View Full Portfolio</a>
+                    <div class="card rounded-[32px] p-8">
+                        <h4 class="text-xs font-bold text-[var(--muted)] uppercase tracking-widest mb-4">Full Portfolio</h4>
+                        <p class="text-xs text-[var(--muted)] leading-relaxed mb-5">View your complete wallet breakdown, active investments, and transaction ledger.</p>
+                        <a href="wallet.html" class="block w-full text-center py-3 bg-black/[0.03] hover:bg-black/[0.05] rounded-xl text-[10px] font-bold uppercase tracking-widest transition">View Full Portfolio</a>
                     </div>
                 </div>
 
@@ -264,6 +551,44 @@
             return `₦${n(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         }
 
+        // --- 0. Active nav state (sidebar + mobile island + drawer) ---
+        function setActiveNav() {
+            const current = (window.location.pathname.split('/').pop() || 'dashboard.html').replace('.html', '') || 'dashboard';
+            document.querySelectorAll('#sidebarNav a[data-page]').forEach(a => {
+                a.classList.toggle('sidebar-active', a.dataset.page === current);
+            });
+            document.querySelectorAll('#islandNav a[data-page]').forEach(a => {
+                a.classList.toggle('active', a.dataset.page === current);
+            });
+            document.querySelectorAll('#drawerNav a[data-page]').forEach(a => {
+                a.classList.toggle('drawer-active', a.dataset.page === current);
+            });
+        }
+
+        // --- 0b. Mobile drawer open/close ---
+        const drawer = document.getElementById('mobileDrawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+        const drawerClose = document.getElementById('drawerClose');
+
+        function openDrawer() {
+            drawer.classList.add('open');
+            drawerOverlay.classList.add('open');
+            menuToggle.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeDrawer() {
+            drawer.classList.remove('open');
+            drawerOverlay.classList.remove('open');
+            menuToggle.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+        menuToggle.addEventListener('click', openDrawer);
+        drawerClose.addEventListener('click', closeDrawer);
+        drawerOverlay.addEventListener('click', closeDrawer);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+        document.querySelectorAll('#drawerNav a[data-page]').forEach(a => a.addEventListener('click', closeDrawer));
+
         let user = null;
 
         // --- 1. Init & Auth ---
@@ -275,7 +600,7 @@
             }
             user = session.user;
             document.getElementById('authGuard').classList.add('hidden');
-            
+
             loadProfileData();
             loadFinancials();
             setupRealtime();
@@ -293,23 +618,40 @@
                 // Display UI
                 document.getElementById('profileNameDisplay').textContent = data.full_name;
                 document.getElementById('profileEmailDisplay').textContent = user.email;
+                document.getElementById('drawerName').textContent = data.full_name;
+
+                const memberSinceText = new Date(data.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                document.getElementById('memberSince').textContent = memberSinceText;
+                document.getElementById('memberSinceMeta').textContent = memberSinceText;
+
                 document.getElementById('referralCode').textContent = data.referral_code;
-                document.getElementById('memberSince').textContent = new Date(data.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                document.getElementById('referralCodeMeta').textContent = data.referral_code;
                 document.getElementById('userId').textContent = user.id;
-                
+
                 const initials = data.full_name.charAt(0).toUpperCase();
                 document.getElementById('navInitials').textContent = initials;
-                
+                document.getElementById('drawerInitials').textContent = initials;
+
                 // Avatar
                 if (data.avatar_url) {
                     const avatarImg = document.getElementById('profileAvatar');
+                    const avatarFallback = document.getElementById('profileAvatarFallback');
                     const navAvatar = document.getElementById('navAvatar');
                     const navInitials = document.getElementById('navInitials');
-                    
+                    const drawerAvatar = document.getElementById('drawerAvatar');
+                    const drawerInitials = document.getElementById('drawerInitials');
+
                     avatarImg.src = data.avatar_url;
+                    avatarImg.classList.remove('hidden');
+                    avatarFallback.classList.add('hidden');
+
                     navAvatar.src = data.avatar_url;
                     navAvatar.classList.remove('hidden');
                     navInitials.classList.add('hidden');
+
+                    drawerAvatar.src = data.avatar_url;
+                    drawerAvatar.classList.remove('hidden');
+                    drawerInitials.classList.add('hidden');
                 }
             }
         }
@@ -329,6 +671,7 @@
 
             const wallet = w || {};
             document.getElementById('topBalance').textContent = money(wallet.available_balance);
+            document.getElementById('drawerBalance').textContent = money(wallet.available_balance);
             document.getElementById('sumWallet').textContent = money(wallet.available_balance);
             document.getElementById('sumInvest').textContent = money(wallet.investment_balance);
             document.getElementById('sumRef').textContent = money(wallet.referral_balance);
@@ -336,7 +679,7 @@
         }
 
         // --- 3. Profile Actions ---
-        
+
         // Update Details
         document.getElementById('profileForm').onsubmit = async (e) => {
             e.preventDefault();
@@ -351,10 +694,10 @@
             };
 
             const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
-            
+
             if (error) alert(error.message);
             else alert('Profile updated successfully.');
-            
+
             btn.disabled = false;
             btn.textContent = 'Update Personal Details';
         };
@@ -369,7 +712,7 @@
             if (pass.length < 6) return alert('Password too short.');
 
             const { error } = await supabase.auth.updateUser({ password: pass });
-            
+
             if (error) alert(error.message);
             else {
                 alert('Password changed successfully.');
@@ -398,8 +741,15 @@
 
             // 3. Update Profile Table
             await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
-            
+
             location.reload();
+        };
+
+        // Copy referral code
+        document.getElementById('copyRefBtn').onclick = () => {
+            const code = document.getElementById('referralCode').textContent;
+            navigator.clipboard.writeText(code);
+            alert('Referral code copied to clipboard!');
         };
 
         // --- 4. System Logic ---
@@ -414,14 +764,10 @@
                 .subscribe();
         }
 
-        // Sidebar Control
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        document.getElementById('mobileMenuBtn').onclick = () => { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.add('opacity-100'), 10); };
-        document.getElementById('closeSidebar').onclick = overlay.onclick = () => { sidebar.classList.add('-translate-x-full'); overlay.classList.remove('opacity-100'); setTimeout(() => overlay.classList.add('hidden'), 400); };
-        
         document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+        document.getElementById('drawerLogoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
 
+        setActiveNav();
         init();
     </script>
 </body>
