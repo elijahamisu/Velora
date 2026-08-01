@@ -188,10 +188,10 @@
 
             <div class="flex items-center gap-6">
                 <!-- Notifications -->
-                <a href="notifications.html" class="relative cursor-pointer group" aria-label="View notifications">
+                <div class="relative cursor-pointer group">
                     <i data-lucide="bell" class="text-[var(--muted)] group-hover:text-[var(--gold)] transition w-5 h-5"></i>
                     <span id="notifBadge" class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full hidden">0</span>
-                </a>
+                </div>
                 <!-- Profile Summary -->
                 <div class="flex items-center gap-3 pl-6 border-l border-black/[0.06]">
                     <div class="text-right hidden sm:block">
@@ -415,6 +415,49 @@
                 </div>
             </div>
 
+            <!-- ===== Account Services (icon grid) ===== -->
+            <div class="card rounded-[28px] p-6 md:p-8 mb-10">
+                <h4 class="text-base font-semibold heading-font mb-6">Account Services</h4>
+                <div class="grid grid-cols-3 gap-4 md:gap-6">
+                    <a href="invest.html" class="flex flex-col items-center gap-2.5 group">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-[var(--gold-deep)] group-hover:-translate-y-0.5 transition" style="background: rgba(183,147,91,0.08);">
+                            <i data-lucide="gem" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-[var(--ink-text)]">Invest</span>
+                    </a>
+                    <a href="deposit.html" class="flex flex-col items-center gap-2.5 group">
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-700 group-hover:-translate-y-0.5 transition">
+                            <i data-lucide="arrow-down-circle" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-[var(--ink-text)]">Deposit</span>
+                    </a>
+                    <a href="withdraw.html" class="flex flex-col items-center gap-2.5 group">
+                        <div class="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-700 group-hover:-translate-y-0.5 transition">
+                            <i data-lucide="arrow-up-circle" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-[var(--ink-text)]">Withdraw</span>
+                    </a>
+                    <a href="referral.html" class="flex flex-col items-center gap-2.5 group">
+                        <div class="w-14 h-14 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-700 group-hover:-translate-y-0.5 transition">
+                            <i data-lucide="users" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-[var(--ink-text)]">Team</span>
+                    </a>
+                    <a href="gift.html" class="flex flex-col items-center gap-2.5 group">
+                        <div class="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-700 group-hover:-translate-y-0.5 transition">
+                            <i data-lucide="gift" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-[var(--ink-text)]">Gift Code</span>
+                    </a>
+                    <a href="transactions.html" class="flex flex-col items-center gap-2.5 group">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-[var(--ink)] group-hover:-translate-y-0.5 transition" style="background: rgba(12,14,19,0.05);">
+                            <i data-lucide="history" class="w-6 h-6"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-[var(--ink-text)]">History</span>
+                    </a>
+                </div>
+            </div>
+
             <!-- ===== Compact Metrics Row ===== -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
                 <div class="card p-5 rounded-2xl">
@@ -511,45 +554,29 @@
                         </div>
                     </div>
 
-                    <!-- Quick Actions -->
-                    <div class="card rounded-[28px] overflow-hidden">
-                        <h4 class="font-semibold heading-font text-base px-7 pt-7 pb-4">Quick Actions</h4>
-                        <div class="divide-y divide-black/[0.05]">
-                            <a href="invest.html" class="flex items-center gap-4 px-7 py-4 hover:bg-black/[0.02] transition group">
-                                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-[var(--gold-deep)] shrink-0" style="background: rgba(183,147,91,0.08);">
-                                    <i data-lucide="gem" class="w-5 h-5"></i>
-                                </div>
-                                <span class="text-sm font-semibold flex-1">Invest</span>
-                                <i data-lucide="chevron-right" class="w-4 h-4 text-[var(--muted)] group-hover:translate-x-0.5 transition"></i>
-                            </a>
-                            <a href="deposit.html" class="flex items-center gap-4 px-7 py-4 hover:bg-black/[0.02] transition group">
-                                <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700 shrink-0">
-                                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                                </div>
-                                <span class="text-sm font-semibold flex-1">Deposit</span>
-                                <i data-lucide="chevron-right" class="w-4 h-4 text-[var(--muted)] group-hover:translate-x-0.5 transition"></i>
-                            </a>
-                            <a href="withdraw.html" class="flex items-center gap-4 px-7 py-4 hover:bg-black/[0.02] transition group">
-                                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-700 shrink-0">
-                                    <i data-lucide="external-link" class="w-5 h-5"></i>
-                                </div>
-                                <span class="text-sm font-semibold flex-1">Withdraw</span>
-                                <i data-lucide="chevron-right" class="w-4 h-4 text-[var(--muted)] group-hover:translate-x-0.5 transition"></i>
-                            </a>
-                            <a href="gift.html" class="flex items-center gap-4 px-7 py-4 hover:bg-black/[0.02] transition group">
-                                <div class="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center text-rose-700 shrink-0">
-                                    <i data-lucide="gift" class="w-5 h-5"></i>
-                                </div>
-                                <span class="text-sm font-semibold flex-1">Redeem Gift Code</span>
-                                <i data-lucide="chevron-right" class="w-4 h-4 text-[var(--muted)] group-hover:translate-x-0.5 transition"></i>
-                            </a>
-                            <a href="support.html" class="flex items-center gap-4 px-7 py-4 hover:bg-black/[0.02] transition group">
-                                <div class="w-10 h-10 rounded-xl flex items-center justify-center text-[var(--ink)] shrink-0" style="background: rgba(12,14,19,0.05);">
-                                    <i data-lucide="message-circle" class="w-5 h-5"></i>
-                                </div>
-                                <span class="text-sm font-semibold flex-1">Support</span>
-                                <i data-lucide="chevron-right" class="w-4 h-4 text-[var(--muted)] group-hover:translate-x-0.5 transition"></i>
-                            </a>
+                    <!-- Plan & Terms -->
+                    <div class="ink-gradient rounded-[28px] overflow-hidden">
+                        <div class="px-7 pt-7 pb-5 flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font text-xs font-semibold">V</div>
+                            <h4 class="font-semibold heading-font text-base text-white">Velora Terms</h4>
+                        </div>
+                        <div class="px-7 pb-7 grid grid-cols-2 gap-x-6 gap-y-4 text-xs">
+                            <div>
+                                <p class="text-white/35 uppercase tracking-wide text-[9px] font-bold mb-1">Daily ROI</p>
+                                <p class="text-white font-semibold mono">10%</p>
+                            </div>
+                            <div>
+                                <p class="text-white/35 uppercase tracking-wide text-[9px] font-bold mb-1">Min. Investment</p>
+                                <p class="text-white font-semibold mono">₦3,000</p>
+                            </div>
+                            <div>
+                                <p class="text-white/35 uppercase tracking-wide text-[9px] font-bold mb-1">Min. Withdrawal</p>
+                                <p class="text-white font-semibold mono">₦600</p>
+                            </div>
+                            <div>
+                                <p class="text-white/35 uppercase tracking-wide text-[9px] font-bold mb-1">Withdrawal Charge</p>
+                                <p class="text-[var(--gold-light)] font-semibold mono">15%</p>
+                            </div>
                         </div>
                     </div>
 
