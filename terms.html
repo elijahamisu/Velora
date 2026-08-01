@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service | VELORA — Premium Investment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F4E3AD;
+            --luxury-white: #FFFFFF;
+            --soft-gray: #F9F9F9;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--soft-gray);
+            color: #1a1a1a;
+            scroll-behavior: smooth;
+        }
+        .heading-font { font-family: 'Playfair Display', serif; }
+        .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%); }
+        .gold-text {
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+
+        /* Reading Progress Bar */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: var(--gold);
+            width: 0%;
+            z-index: 100;
+            transition: width 0.1s ease;
+        }
+
+        /* Section Search Highlight */
+        .highlight { background-color: rgba(212, 175, 55, 0.2); border-radius: 2px; }
+
+        /* Sticky ToC for Desktop */
+        @media (min-width: 1024px) {
+            .sticky-toc { position: sticky; top: 100px; max-height: calc(100vh - 120px); overflow-y: auto; }
+        }
+
+        /* Custom Scrollbar for ToC */
+        .no-scrollbar::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        /* Print Styles */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            .print-area { width: 100%; box-shadow: none; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="progress-bar"></div>
+
+    <!-- Navigation (Matches Home Page) -->
+    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 no-print">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-2">
+                <div class="w-8 h-8 gold-gradient rounded-full flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">V</span>
+                </div>
+                <span class="text-2xl font-bold tracking-tighter heading-font gold-text">VELORA</span>
+            </a>
+            <div class="hidden md:flex gap-8 items-center font-medium text-sm tracking-wide">
+                <a href="login.html" class="hover:text-[#D4AF37] transition">LOGIN</a>
+                <a href="register.html" class="px-6 py-2 gold-gradient text-white rounded-full">GET STARTED</a>
+            </div>
+            <button class="md:hidden text-gray-500"><i data-lucide="menu"></i></button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-12 px-6 text-center bg-white border-b border-gray-50 no-print">
+        <h1 class="text-4xl md:text-5xl heading-font mb-4">Terms of <span class="gold-text italic">Service</span></h1>
+        <p class="text-gray-400 text-sm uppercase tracking-widest font-semibold">Last Updated: October 24, 2024</p>
+        
+        <!-- Search within Terms -->
+        <div class="max-w-xl mx-auto mt-8 relative">
+            <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300"></i>
+            <input type="text" id="termsSearch" placeholder="Search keywords (e.g. Withdrawal, Bonus)..." 
+                class="w-full pl-12 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-gold transition shadow-sm">
+        </div>
+    </section>
+
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        <div class="flex flex-col lg:flex-row gap-12">
+            
+            <!-- Table of Contents (Desktop Sidebar / Mobile Header) -->
+            <aside class="lg:w-1/4 no-print">
+                <div class="sticky-toc glass-card rounded-3xl p-6 shadow-sm border border-gray-50">
+                    <h4 class="font-bold heading-font text-lg mb-6 border-b border-gray-50 pb-4">Table of Contents</h4>
+                    <ul class="space-y-3 text-sm" id="toc-list">
+                        <li><a href="#about" class="toc-link hover:text-gold transition text-gray-500">1. About Velora</a></li>
+                        <li><a href="#eligibility" class="toc-link hover:text-gold transition text-gray-500">2. Eligibility</a></li>
+                        <li><a href="#account" class="toc-link hover:text-gold transition text-gray-500">3. Account Registration</a></li>
+                        <li><a href="#investments" class="toc-link hover:text-gold transition text-gray-500">4. Investment Rules</a></li>
+                        <li><a href="#deposits" class="toc-link hover:text-gold transition text-gray-500">5. Deposits & Withdrawals</a></li>
+                        <li><a href="#earnings" class="toc-link hover:text-gold transition text-gray-500">6. Daily Earnings</a></li>
+                        <li><a href="#referrals" class="toc-link hover:text-gold transition text-gray-500">7. Referral & Gift Codes</a></li>
+                        <li><a href="#prohibited" class="toc-link hover:text-gold transition text-gray-500">8. Prohibited Activities</a></li>
+                        <li><a href="#liability" class="toc-link hover:text-gold transition text-gray-500">9. Limitation of Liability</a></li>
+                        <li><a href="#support" class="toc-link hover:text-gold transition text-gray-500">10. Support & Contact</a></li>
+                    </ul>
+                    <button onclick="window.print()" class="w-full mt-8 py-3 border border-gold text-gold rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-gold-light transition">
+                        <i data-lucide="printer" class="w-4 h-4"></i> Download PDF
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Terms Content -->
+            <div class="lg:w-3/4 space-y-12 print-area" id="terms-content">
+                
+                <!-- Section: About -->
+                <section id="about" class="terms-section scroll-mt-28">
+                    <button class="md:hidden w-full flex justify-between items-center text-left py-4 border-b border-gray-100 mobile-toggle">
+                        <h2 class="text-2xl font-bold heading-font gold-text">1. About Velora</h2>
+                        <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div class="section-body mt-4 text-gray-600 leading-relaxed space-y-4">
+                        <h2 class="hidden md:block text-2xl font-bold heading-font gold-text">1. About Velora</h2>
+                        <p>Velora is a boutique investment platform designed to provide elite financial growth opportunities for users in Nigeria. We specialize in providing automated daily returns on capital through proprietary asset management strategies.</p>
+                    </div>
+                </section>
+
+                <!-- Section: Eligibility -->
+                <section id="eligibility" class="terms-section scroll-mt-28">
+                    <button class="md:hidden w-full flex justify-between items-center text-left py-4 border-b border-gray-100 mobile-toggle">
+                        <h2 class="text-2xl font-bold heading-font gold-text">2. Eligibility</h2>
+                        <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div class="section-body mt-4 text-gray-600 leading-relaxed space-y-4">
+                        <h2 class="hidden md:block text-2xl font-bold heading-font gold-text">2. Eligibility</h2>
+                        <p>To use Velora, you must be at least 18 years of age and possess a valid Nigerian bank account. By registering, you represent that all information provided is accurate and that your use of the platform does not violate any applicable law.</p>
+                    </div>
+                </section>
+
+                <!-- Section: Account -->
+                <section id="account" class="terms-section scroll-mt-28">
+                    <button class="md:hidden w-full flex justify-between items-center text-left py-4 border-b border-gray-100 mobile-toggle">
+                        <h2 class="text-2xl font-bold heading-font gold-text">3. Account Registration</h2>
+                        <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div class="section-body mt-4 text-gray-600 leading-relaxed space-y-4">
+                        <h2 class="hidden md:block text-2xl font-bold heading-font gold-text">3. Account Registration</h2>
+                        <p>Users are responsible for maintaining the confidentiality of their login credentials. Velora operates a strictly "No KYC" policy for your privacy, however, we reserve the right to suspend accounts that show patterns of fraudulent activity or multiple account creation by a single user.</p>
+                    </div>
+                </section>
+
+                <!-- Section: Investments -->
+                <section id="investments" class="terms-section scroll-mt-28">
+                    <button class="md:hidden w-full flex justify-between items-center text-left py-4 border-b border-gray-100 mobile-toggle">
+                        <h2 class="text-2xl font-bold heading-font gold-text">4. Investment Rules</h2>
+                        <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div class="section-body mt-4 text-gray-600 leading-relaxed space-y-4">
+                        <h2 class="hidden md:block text-2xl font-bold heading-font gold-text">4. Investment Rules</h2>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Minimum investment is ₦3,000.</li>
+                            <li>Users can reinvest using their wallet balance.</li>
+                            <li>Investments are committed to specific cycles and generate yield daily.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- Section: Deposits -->
+                <section id="deposits" class="terms-section scroll-mt-28">
+                    <button class="md:hidden w-full flex justify-between items-center text-left py-4 border-b border-gray-100 mobile-toggle">
+                        <h2 class="text-2xl font-bold heading-font gold-text">5. Deposits & Withdrawals</h2>
+                        <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div class="section-body mt-4 text-gray-600 leading-relaxed space-y-4">
+                        <h2 class="hidden md:block text-2xl font-bold heading-font gold-text">5. Deposits & Withdrawals</h2>
+                        <p>Velora exclusively uses Kuda Bank for manual deposit processing. Verification may take 2-24 hours.</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>Minimum Withdrawal: ₦600.</li>
+                            <li>Withdrawal Charge: 15% (Flat fee for platform maintenance).</li>
+                            <li>Processing Time: Typically 2-48 hours.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- Section: Earnings -->
+                <section id="earnings" class="terms-section scroll-mt-28">
+                    <button class="md:hidden w-full flex justify-between items-center text-left py-4 border-b border-gray-100 mobile-toggle">
+                        <h2 class="text-2xl font-bold heading-font gold-text">6. Daily Earnings</h2>
+                        <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div class="section-body mt-4 text-gray-600 leading-relaxed space-y-4">
+                        <h2 class="hidden md:block text-2xl font-bold heading-font gold-text">6. Daily Earnings</h2>
+                        <p>Daily earnings are credited automatically every midnight. While we strive for consistent returns, yields are subject to market conditions and platform sustainability protocols.</p>
+                    </div>
+                </section>
+
+                <!-- Section: Referrals -->
+                <section id="referrals" class="terms-section scroll-mt-28">
+                    <button class="md:hidden w-full flex justify-between items-center text-left py-4 border-b border-gray-100 mobile-toggle">
+                        <h2 class="text-2xl font-bold heading-font gold-text">7. Referral & Gift Codes</h2>
+                        <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div class="section-body mt-4 text-gray-600 leading-relaxed space-y-4">
+                        <h2 class="hidden md:block text-2xl font-bold heading-font gold-text">7. Referral & Gift Codes</h2>
+                        <p>Welcome Bonus: ₦600 credited upon registration. Referral rewards are earned when a direct invitee makes a successful deposit. Gift codes are one-time use and subject to individual code terms.</p>
+                    </div>
+                </section>
+
+                <!-- Section: Prohibited -->
+                <section id="prohibited" class="terms-section scroll-mt-28">
+                    <button class="md:hidden w-full flex justify-between items-center text-left py-4 border-b border-gray-100 mobile-toggle">
+                        <h2 class="text-2xl font-bold heading-font gold-text">8. Prohibited Activities</h2>
+                        <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div class="section-body mt-4 text-gray-600 leading-relaxed space-y-4">
+                        <h2 class="hidden md:block text-2xl font-bold heading-font gold-text">8. Prohibited Activities</h2>
+                        <p>Users are forbidden from exploiting platform vulnerabilities, reverse engineering platform code, or engaging in coordinated spamming of referral links. Violations will result in permanent account forfeiture.</p>
+                    </div>
+                </section>
+
+                <!-- Section: Liability -->
+                <section id="liability" class="terms-section scroll-mt-28">
+                    <button class="md:hidden w-full flex justify-between items-center text-left py-4 border-b border-gray-100 mobile-toggle">
+                        <h2 class="text-2xl font-bold heading-font gold-text">9. Limitation of Liability</h2>
+                        <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div class="section-body mt-4 text-gray-600 leading-relaxed space-y-4">
+                        <h2 class="hidden md:block text-2xl font-bold heading-font gold-text">9. Limitation of Liability</h2>
+                        <p>Investing involves risk. Velora is not liable for financial losses incurred due to market volatility or user-side security breaches. Use the platform at your own discretion.</p>
+                    </div>
+                </section>
+
+                <!-- Section: Support -->
+                <section id="support" class="terms-section scroll-mt-28">
+                    <button class="md:hidden w-full flex justify-between items-center text-left py-4 border-b border-gray-100 mobile-toggle">
+                        <h2 class="text-2xl font-bold heading-font gold-text">10. Support & Contact</h2>
+                        <i data-lucide="chevron-down" class="w-5 h-5 transition-transform"></i>
+                    </button>
+                    <div class="section-body mt-4 text-gray-600 leading-relaxed space-y-4">
+                        <h2 class="hidden md:block text-2xl font-bold heading-font gold-text">10. Support & Contact</h2>
+                        <p>For inquiries, please use our in-app <a href="support.html" class="text-gold font-bold">Concierge Support</a> or join our official Telegram community. Our team is available 24/7 to assist elite users.</p>
+                    </div>
+                </section>
+
+                <!-- Accept Terms (Supabase Integrated) -->
+                <div id="acceptance-card" class="glass-card p-10 rounded-[40px] text-center border-2 border-gold/20 no-print">
+                    <h3 class="text-xl font-bold heading-font mb-4">Acceptance of Agreement</h3>
+                    <p class="text-sm text-gray-500 mb-8">By continuing to use VELORA, you acknowledge that you have read, understood, and agreed to these terms.</p>
+                    <button id="acceptBtn" class="px-12 py-4 gold-gradient text-white font-bold rounded-full shadow-xl hover:scale-105 transition-all">
+                        I Understand & Accept
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-100 pt-16 pb-8 px-6 no-print">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="flex items-center justify-center gap-2 mb-6">
+                <div class="w-6 h-6 gold-gradient rounded-full"></div>
+                <span class="text-xl font-bold heading-font gold-text">VELORA</span>
+            </div>
+            <p class="text-gray-400 text-xs mb-8">© 2024 VELORA LUXURY INVESTMENTS. ALL RIGHTS RESERVED.</p>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top -->
+    <button id="scrollTop" class="fixed bottom-8 right-8 w-12 h-12 gold-gradient text-white rounded-full shadow-2xl items-center justify-center hidden no-print">
+        <i data-lucide="arrow-up"></i>
+    </button>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+        lucide.createIcons();
+
+        const supabase = createClient(
+            import.meta.env.VITE_SUPABASE_URL,
+            import.meta.env.VITE_SUPABASE_ANON_KEY
+        );
+
+        // 1. Reading Progress Logic
+        window.onscroll = () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById("progress-bar").style.width = scrolled + "%";
+
+            const scrollBtn = document.getElementById('scrollTop');
+            if (winScroll > 400) scrollBtn.classList.remove('hidden');
+            else scrollBtn.classList.add('hidden');
+        };
+
+        document.getElementById('scrollTop').onclick = () => window.scrollTo(0, 0);
+
+        // 2. Mobile Collapsible Logic
+        const toggles = document.querySelectorAll('.mobile-toggle');
+        toggles.forEach(toggle => {
+            toggle.onclick = () => {
+                const body = toggle.nextElementSibling;
+                const icon = toggle.querySelector('i');
+                const isOpen = !body.classList.contains('hidden');
+                
+                // Toggle
+                if (window.innerWidth < 1024) {
+                    body.classList.toggle('hidden');
+                    icon.style.transform = body.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+                }
+            };
+        });
+
+        // Ensure bodies are visible on desktop
+        window.onresize = () => {
+            if (window.innerWidth >= 1024) {
+                document.querySelectorAll('.section-body').forEach(b => b.classList.remove('hidden'));
+            }
+        };
+
+        // 3. Search within Terms
+        document.getElementById('termsSearch').oninput = (e) => {
+            const term = e.target.value.toLowerCase();
+            const sections = document.querySelectorAll('.terms-section');
+            
+            sections.forEach(sec => {
+                const text = sec.innerText.toLowerCase();
+                if (text.includes(term) && term.length > 2) {
+                    sec.classList.remove('opacity-20');
+                    sec.style.display = 'block';
+                } else if (term.length > 2) {
+                    sec.classList.add('opacity-20');
+                } else {
+                    sec.classList.remove('opacity-20');
+                    sec.style.display = 'block';
+                }
+            });
+        };
+
+        // 4. Supabase Acceptance
+        const acceptBtn = document.getElementById('acceptBtn');
+        acceptBtn.onclick = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                alert("Agreement acknowledged. Please login to save your preferences.");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const { error } = await supabase.from('profiles').update({
+                terms_accepted: true,
+                terms_accepted_at: new Date()
+            }).eq('id', session.user.id);
+
+            if (!error) {
+                alert("Terms Accepted. Welcome back to Velora.");
+                window.location.href = 'dashboard.html';
+            }
+        };
+    </script>
+</body>
+</html>
