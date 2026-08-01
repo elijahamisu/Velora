@@ -454,6 +454,20 @@
             import.meta.env.VITE_SUPABASE_ANON_KEY
         );
 
+        // --- Safe number coercion helper ---
+        // Supabase returns Postgres `numeric` columns as strings, and any
+        // missing/null column comes back as null/undefined. Number(null) is 0,
+        // but Number(undefined) is NaN, and string + number concatenates
+        // instead of adding. This normalizes every value to a real number
+        // before it ever touches math or .toLocaleString().
+        function n(val) {
+            const num = Number(val);
+            return Number.isFinite(num) ? num : 0;
+        }
+        function money(val) {
+            return `₦${n(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
         // --- 0. Active nav state (sidebar + mobile island + drawer) ---
         function setActiveNav() {
             const current = (window.location.pathname.split('/').pop() || 'dashboard.html').replace('.html', '') || 'dashboard';
@@ -521,36 +535,41 @@
                     supabase.from('withdrawals').select('amount').eq('user_id', user.id).eq('status', 'pending')
                 ]);
 
-                // Update Balances
-                if (walletRes.data) {
-                    const w = walletRes.data;
-                    document.getElementById('mainBalance').textContent = `₦${(w.balance + (w.invested_balance || 0)).toLocaleString()}`;
-                    document.getElementById('availBalance').textContent = `₦${w.balance.toLocaleString()}`;
-                    document.getElementById('topBarBalance').textContent = `₦${w.balance.toLocaleString()}`;
-                    document.getElementById('drawerBalance').textContent = `₦${w.balance.toLocaleString()}`;
-                    document.getElementById('investBalance').textContent = `₦${(w.invested_balance || 0).toLocaleString()}`;
-                    document.getElementById('refBonus').textContent = `₦${(w.referral_balance || 0).toLocaleString()}`;
-                    document.getElementById('giftBonus').textContent = `₦${(w.gift_balance || 0).toLocaleString()}`;
-                }
+                if (walletRes.error) console.error('Wallet fetch error:', walletRes.error);
+
+                // Update Balances — every field goes through n()/money() so a
+                // missing column, a null, or a stringified numeric type can
+                // never produce NaN or silently throw and abort the function.
+                const w = walletRes.data || {};
+                const available = n(w.balance);
+                const invested = n(w.invested_balance);
+                const referral = n(w.referral_balance);
+                const gift = n(w.gift_balance);
+
+                document.getElementById('mainBalance').textContent = money(available + invested);
+                document.getElementById('availBalance').textContent = money(available);
+                document.getElementById('topBarBalance').textContent = money(available);
+                document.getElementById('drawerBalance').textContent = money(available);
+                document.getElementById('investBalance').textContent = money(invested);
+                document.getElementById('refBonus').textContent = money(referral);
+                document.getElementById('giftBonus').textContent = money(gift);
 
                 // Update Profile Initials
-                if (profileRes.data) {
+                if (profileRes.data && profileRes.data.full_name) {
                     const initial = profileRes.data.full_name.charAt(0).toUpperCase();
                     document.getElementById('userInitials').textContent = initial;
                     document.getElementById('drawerInitials').textContent = initial;
                 }
 
                 // Update Earnings
-                if (earningsRes.data) {
-                    const e = earningsRes.data;
-                    document.getElementById('todayEarn').textContent = `₦${(e.today_earnings || 0).toLocaleString()}`;
-                    document.getElementById('totalEarn').textContent = `₦${(e.total_earnings || 0).toLocaleString()}`;
-                }
+                const e = earningsRes.data || {};
+                document.getElementById('todayEarn').textContent = money(e.today_earnings);
+                document.getElementById('totalEarn').textContent = money(e.total_earnings);
 
                 // Update Pendings
-                const sum = (arr) => arr.reduce((acc, curr) => acc + curr.amount, 0);
-                document.getElementById('pendDep').textContent = `₦${sum(pendDepRes.data || []).toLocaleString()}`;
-                document.getElementById('pendWith').textContent = `₦${sum(pendWithRes.data || []).toLocaleString()}`;
+                const sum = (arr) => (arr || []).reduce((acc, curr) => acc + n(curr.amount), 0);
+                document.getElementById('pendDep').textContent = money(sum(pendDepRes.data));
+                document.getElementById('pendWith').textContent = money(sum(pendWithRes.data));
 
                 // Update Transactions
                 renderTransactions(transRes.data || []);
@@ -604,7 +623,7 @@
                         </div>
                         <div class="text-right">
                             <p class="text-sm font-semibold mono ${isGain ? 'text-emerald-600' : 'text-[var(--ink-text)]'}">
-                                ${isGain ? '+' : '-'} ₦${item.amount.toLocaleString()}
+                                ${isGain ? '+' : '-'} ${money(item.amount)}
                             </p>
                             <span class="text-[9px] font-bold uppercase tracking-tighter px-2 py-0.5 rounded ${item.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
                                 ${item.status}
