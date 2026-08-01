@@ -31,6 +31,7 @@ export default defineConfig({
          admin_users: resolve(__dirname, 'admin/users.html'),
          admin_deposits: resolve(__dirname, 'admin/deposits.html'), 
          admin_withdrawals: resolve(__dirname, 'admin/withdrawals.html'),
+         admin_investments: resolve(__dirname, 'admin/investments.html'),
       },
     },
   },
