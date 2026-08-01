@@ -526,25 +526,35 @@
         async function loadWalletData() {
             try {
                 // Parallel fetching for performance
-                const [walletRes, profileRes, earningsRes, transRes, pendDepRes, pendWithRes] = await Promise.all([
+                // NOTE: there is no separate `earnings` table, and `wallets`
+                // has total_earnings but no today_earnings column. Today's
+                // earnings is instead derived by summing today's `earning`
+                // type transactions from the ledger.
+                const startOfToday = new Date();
+                startOfToday.setHours(0, 0, 0, 0);
+
+                const [walletRes, profileRes, transRes, todayEarnRes, pendDepRes, pendWithRes] = await Promise.all([
                     supabase.from('wallets').select('*').eq('user_id', user.id).single(),
                     supabase.from('profiles').select('*').eq('id', user.id).single(),
-                    supabase.from('earnings').select('*').eq('user_id', user.id).single(),
                     supabase.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(6),
+                    supabase.from('transactions').select('amount').eq('user_id', user.id).eq('type', 'earning').gte('created_at', startOfToday.toISOString()),
                     supabase.from('deposits').select('amount').eq('user_id', user.id).eq('status', 'pending'),
                     supabase.from('withdrawals').select('amount').eq('user_id', user.id).eq('status', 'pending')
                 ]);
 
                 if (walletRes.error) console.error('Wallet fetch error:', walletRes.error);
 
-                // Update Balances — every field goes through n()/money() so a
-                // missing column, a null, or a stringified numeric type can
-                // never produce NaN or silently throw and abort the function.
+                // Update Balances — column names match the actual `wallets`
+                // table schema (available_balance / investment_balance /
+                // bonus_balance / referral_balance). Every field also goes
+                // through n()/money() so a missing column, a null, or a
+                // stringified numeric type can never produce NaN or silently
+                // throw and abort the function.
                 const w = walletRes.data || {};
-                const available = n(w.balance);
-                const invested = n(w.invested_balance);
+                const available = n(w.available_balance);
+                const invested = n(w.investment_balance);
                 const referral = n(w.referral_balance);
-                const gift = n(w.gift_balance);
+                const gift = n(w.bonus_balance);
 
                 document.getElementById('mainBalance').textContent = money(available + invested);
                 document.getElementById('availBalance').textContent = money(available);
@@ -561,13 +571,12 @@
                     document.getElementById('drawerInitials').textContent = initial;
                 }
 
-                // Update Earnings
-                const e = earningsRes.data || {};
-                document.getElementById('todayEarn').textContent = money(e.today_earnings);
-                document.getElementById('totalEarn').textContent = money(e.total_earnings);
+                // Update Earnings — total from the wallets row, today's from the ledger
+                const sum = (arr) => (arr || []).reduce((acc, curr) => acc + n(curr.amount), 0);
+                document.getElementById('todayEarn').textContent = money(sum(todayEarnRes.data));
+                document.getElementById('totalEarn').textContent = money(w.total_earnings);
 
                 // Update Pendings
-                const sum = (arr) => (arr || []).reduce((acc, curr) => acc + n(curr.amount), 0);
                 document.getElementById('pendDep').textContent = money(sum(pendDepRes.data));
                 document.getElementById('pendWith').textContent = money(sum(pendWithRes.data));
 
