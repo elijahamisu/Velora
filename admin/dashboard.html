@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executive Terminal | VELORA Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-dark: #B8860B;
+            --luxury-white: #FBFAFA;
+            --admin-black: #0A0A0A;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F4F5F7;
+            color: #1a1a1a;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .heading-font { font-family: 'Playfair Display', serif; }
+        .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%); }
+        .gold-text {
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Desktop Sidebar */
+        .sidebar-item:hover, .sidebar-active {
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.08) 0%, transparent 100%);
+            color: var(--gold);
+            border-left: 3px solid var(--gold);
+        }
+
+        /* Mobile Island Nav */
+        .island-nav {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            width: 92%; max-width: 450px; background: rgba(10, 10, 10, 0.92);
+            backdrop-filter: blur(20px); border-radius: 35px; padding: 12px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); z-index: 100;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .island-item { color: rgba(255,255,255,0.5); transition: 0.3s; }
+        .island-item.active { color: var(--gold); transform: translateY(-3px); }
+
+        /* Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        #sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        #sidebarOverlay { backdrop-filter: blur(6px); transition: opacity 0.4s ease; }
+
+        .stat-card { transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-5px); border-color: var(--gold); }
+    </style>
+</head>
+<body>
+
+    <!-- Auth Guard Loader -->
+    <div id="authGuard" class="fixed inset-0 z-[200] bg-white flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-12 h-12 border-4 border-gray-100 border-t-[#D4AF37] rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="heading-font gold-text text-lg tracking-widest uppercase animate-pulse">Velora Terminal</p>
+        </div>
+    </div>
+
+    <!-- Navigation Components -->
+    <div id="sidebarOverlay" class="fixed inset-0 z-[140] bg-black/40 hidden opacity-0"></div>
+    
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-72 bg-white border-r border-gray-100 z-[150] lg:translate-x-0 -translate-x-full">
+        <div class="p-8 h-full flex flex-col">
+            <div class="flex items-center justify-between mb-10">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 gold-gradient rounded-xl flex items-center justify-center text-white font-bold shadow-lg">V</div>
+                    <span class="text-xl font-bold heading-font gold-text tracking-tight">VELORA ADMIN</span>
+                </div>
+                <button id="closeSidebar" class="lg:hidden text-gray-300"><i data-lucide="x"></i></button>
+            </div>
+            <nav class="space-y-1 flex-1 no-scrollbar overflow-y-auto">
+                <a href="dashboard.html" class="sidebar-item sidebar-active flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                </a>
+                <a href="users.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
+                    <i data-lucide="users" class="w-5 h-5"></i> Manage Users
+                </a>
+                <a href="deposits.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
+                    <i data-lucide="arrow-down-circle" class="w-5 h-5"></i> Deposits
+                    <span id="badgePendingDep" class="ml-auto bg-gold text-white text-[10px] px-2 py-0.5 rounded-full hidden">0</span>
+                </a>
+                <a href="withdrawals.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
+                    <i data-lucide="arrow-up-circle" class="w-5 h-5"></i> Withdrawals
+                    <span id="badgePendingWith" class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full hidden">0</span>
+                </a>
+                <a href="investments.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
+                    <i data-lucide="gem" class="w-5 h-5"></i> Investments
+                </a>
+                <a href="earnings.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
+                    <i data-lucide="zap" class="w-5 h-5"></i> Daily Earnings
+                </a>
+                <a href="gift-codes.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
+                    <i data-lucide="gift" class="w-5 h-5"></i> Gift Codes
+                </a>
+                <a href="support.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
+                    <i data-lucide="headphones" class="w-5 h-5"></i> Support Tickets
+                    <span id="badgeUnreadTickets" class="ml-auto bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full hidden">0</span>
+                </a>
+                <div class="pt-8 mt-8 border-t border-gray-50">
+                    <a href="settings.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
+                        <i data-lucide="settings" class="w-5 h-5"></i> System Settings
+                    </a>
+                    <button id="logoutBtn" class="w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-red-400 hover:bg-red-50">
+                        <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Top Navbar -->
+    <header class="fixed top-0 right-0 left-0 h-20 bg-white/80 backdrop-blur-md border-b border-gray-50 z-40 lg:left-72">
+        <div class="h-full flex items-center justify-between px-6 lg:px-10">
+            <div class="flex items-center gap-4">
+                <button id="mobileMenuBtn" class="lg:hidden p-2 text-gray-400"><i data-lucide="menu"></i></button>
+                <div class="relative hidden md:block">
+                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300"></i>
+                    <input type="text" id="globalSearch" placeholder="Search Terminal..." 
+                        class="pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-2xl text-xs focus:outline-none focus:border-gold transition w-64">
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="flex flex-col text-right hidden sm:block">
+                    <p id="adminName" class="text-sm font-bold text-gray-800">Admin</p>
+                    <p id="adminRole" class="text-[9px] font-bold gold-text uppercase tracking-widest">Super Administrator</p>
+                </div>
+                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white font-bold shadow-md">
+                    <span id="adminInitials">A</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Island Navbar -->
+    <div class="island-nav lg:hidden">
+        <a href="dashboard.html" class="island-item active"><i data-lucide="layout-dashboard"></i></a>
+        <a href="users.html" class="island-item"><i data-lucide="users"></i></a>
+        <a href="deposits.html" class="island-item"><i data-lucide="arrow-down-circle"></i></a>
+        <a href="withdrawals.html" class="island-item"><i data-lucide="arrow-up-circle"></i></a>
+        <a href="support.html" class="island-item"><i data-lucide="headphones"></i></a>
+    </div>
+
+    <!-- Main Content -->
+    <main class="lg:ml-72 pt-28 px-6 pb-36">
+        <div class="max-w-[1600px] mx-auto">
+            
+            <!-- Welcome Header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
+                <div>
+                    <h2 class="text-3xl font-bold heading-font">System <span class="gold-text">Overview</span></h2>
+                    <p class="text-xs text-gray-400 font-medium mt-1">Real-time performance metrics and network health.</p>
+                </div>
+                <div class="flex items-center gap-3 bg-white p-2 rounded-2xl shadow-sm border border-gray-50">
+                    <div class="flex items-center gap-2 px-4 py-2 border-r border-gray-100">
+                        <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Database Live</span>
+                    </div>
+                    <button onclick="refreshStats()" class="p-2 text-gold hover:bg-gold/5 rounded-xl transition"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
+                </div>
+            </div>
+
+            <!-- Dashboard Alerts -->
+            <div id="alertBanner" class="hidden mb-10 p-5 bg-red-50 border border-red-100 rounded-[32px] flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600">
+                        <i data-lucide="alert-octagon"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-red-900">Critical Attention Required</p>
+                        <p id="alertText" class="text-xs text-red-700">There are pending withdrawals over 24 hours old.</p>
+                    </div>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-red-400"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <!-- Statistics Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mb-12">
+                <!-- User Stats -->
+                <div class="glass-card p-6 rounded-[32px] stat-card">
+                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Users</p>
+                    <h4 id="statTotalUsers" class="text-2xl font-bold">0</h4>
+                </div>
+                <div class="glass-card p-6 rounded-[32px] stat-card">
+                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">New Today</p>
+                    <h4 id="statNewUsers" class="text-2xl font-bold text-blue-500">0</h4>
+                </div>
+                <!-- Financial Stats -->
+                <div class="glass-card p-6 rounded-[32px] stat-card">
+                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Liabilities</p>
+                    <h4 id="statTotalLiability" class="text-2xl font-bold">₦0</h4>
+                </div>
+                <div class="glass-card p-6 rounded-[32px] stat-card border-gold/20">
+                    <p class="text-[9px] font-bold text-gold uppercase tracking-widest mb-1">Active Invest</p>
+                    <h4 id="statActiveInvest" class="text-2xl font-bold gold-text">₦0</h4>
+                </div>
+                <!-- Deposit Stats -->
+                <div class="glass-card p-6 rounded-[32px] stat-card">
+                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Pending Dep.</p>
+                    <h4 id="statPendDep" class="text-2xl font-bold text-yellow-600">0</h4>
+                </div>
+                <div class="glass-card p-6 rounded-[32px] stat-card bg-green-50/30">
+                    <p class="text-[9px] font-bold text-green-600 uppercase tracking-widest mb-1">Today's Dep.</p>
+                    <h4 id="statTodayDep" class="text-2xl font-bold text-green-600">₦0</h4>
+                </div>
+                <!-- Withdrawal Stats -->
+                <div class="glass-card p-6 rounded-[32px] stat-card">
+                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Pending With.</p>
+                    <h4 id="statPendWith" class="text-2xl font-bold text-red-500">0</h4>
+                </div>
+                <div class="glass-card p-6 rounded-[32px] stat-card">
+                    <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Support Tickets</p>
+                    <h4 id="statOpenTickets" class="text-2xl font-bold">0</h4>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-10">
+                <!-- Live Activity Feed -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center justify-between mb-6">
+                        <h4 class="text-lg font-bold heading-font">Live Activity <span class="text-xs font-normal text-gray-400 ml-2">(Real-time)</span></h4>
+                        <div class="w-2 h-2 rounded-full bg-green-500 animate-ping"></div>
+                    </div>
+                    <div class="bg-white rounded-[40px] border border-gray-100 overflow-hidden">
+                        <div id="activityFeed" class="divide-y divide-gray-50 max-h-[600px] overflow-y-auto no-scrollbar">
+                            <div class="p-20 text-center text-gray-400 text-xs font-bold uppercase tracking-widest">Listening for signals...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Management -->
+                <div class="space-y-8">
+                    <h4 class="text-lg font-bold heading-font">Quick Actions</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <a href="deposits.html" class="p-6 bg-white border border-gray-100 rounded-[32px] text-center hover:border-gold transition group">
+                            <i data-lucide="arrow-down-to-line" class="w-6 h-6 text-gold mx-auto mb-3 group-hover:scale-110 transition"></i>
+                            <p class="text-[10px] font-bold uppercase">Approvals</p>
+                        </a>
+                        <a href="withdrawals.html" class="p-6 bg-white border border-gray-100 rounded-[32px] text-center hover:border-gold transition group">
+                            <i data-lucide="send" class="w-6 h-6 text-red-500 mx-auto mb-3 group-hover:scale-110 transition"></i>
+                            <p class="text-[10px] font-bold uppercase">Payouts</p>
+                        </a>
+                        <a href="earnings.html" class="p-6 bg-white border border-gray-100 rounded-[32px] text-center hover:border-gold transition group">
+                            <i data-lucide="zap" class="w-6 h-6 text-pink-500 mx-auto mb-3 group-hover:scale-110 transition"></i>
+                            <p class="text-[10px] font-bold uppercase">Run ROI</p>
+                        </a>
+                        <a href="gift-codes.html" class="p-6 bg-white border border-gray-100 rounded-[32px] text-center hover:border-gold transition group">
+                            <i data-lucide="gift" class="w-6 h-6 text-purple-500 mx-auto mb-3 group-hover:scale-110 transition"></i>
+                            <p class="text-[10px] font-bold uppercase">Codes</p>
+                        </a>
+                    </div>
+
+                    <!-- System Info -->
+                    <div class="glass-card p-8 rounded-[40px] text-center bg-gray-900 text-white border-none">
+                        <i data-lucide="server" class="w-10 h-10 text-gold mx-auto mb-6"></i>
+                        <h5 class="font-bold heading-font text-lg mb-2">Platform Health</h5>
+                        <p class="text-[10px] text-white/50 uppercase tracking-widest mb-6">Stable Connection</p>
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-white/40">Latency</span>
+                                <span class="font-bold text-green-400">12ms</span>
+                            </div>
+                            <div class="flex justify-between text-xs">
+                                <span class="text-white/40">DB Uptime</span>
+                                <span class="font-bold">99.9%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+        lucide.createIcons();
+
+        const supabase = createClient(
+            import.meta.env.VITE_SUPABASE_URL,
+            import.meta.env.VITE_SUPABASE_ANON_KEY
+        );
+
+        let adminUser = null;
+
+        // --- 1. Init & Security ---
+        async function init() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Role Verification
+            const { data: profile } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single();
+            if (!profile || !['admin', 'super_admin', 'moderator'].includes(profile.role)) {
+                await supabase.auth.signOut();
+                window.location.href = 'login.html';
+                return;
+            }
+
+            adminUser = profile;
+            document.getElementById('authGuard').classList.add('hidden');
+            
+            updateAdminUI();
+            fetchStats();
+            loadActivity();
+            setupRealtime();
+        }
+
+        function updateAdminUI() {
+            document.getElementById('adminName').textContent = adminUser.full_name;
+            document.getElementById('adminInitials').textContent = adminUser.full_name.charAt(0);
+            document.getElementById('adminRole').textContent = adminUser.role.replace('_', ' ');
+        }
+
+        // --- 2. Data Fetching ---
+        async function fetchStats() {
+            try {
+                // Parallel count queries for stats
+                const [users, newToday, wallets, deposits, withdrawals, tickets, investments] = await Promise.all([
+                    supabase.from('profiles').select('id', { count: 'exact', head: true }),
+                    supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().split('T')[0]),
+                    supabase.from('wallets').select('balance, invested_balance'),
+                    supabase.from('deposits').select('amount, status').gte('created_at', new Date().toISOString().split('T')[0]),
+                    supabase.from('withdrawals').select('amount, status'),
+                    supabase.from('tickets').select('id', { count: 'exact', head: true }).eq('status', 'Open'),
+                    supabase.from('investments').select('amount').eq('status', 'active')
+                ]);
+
+                // Calculate Totals
+                const totalLiabilities = wallets.data.reduce((acc, curr) => acc + curr.balance, 0);
+                const activeInvest = investments.data.reduce((acc, curr) => acc + curr.amount, 0);
+                const todayDep = deposits.data.filter(d => d.status === 'approved').reduce((acc, curr) => acc + curr.amount, 0);
+                const pendingDepCount = deposits.data.filter(d => d.status === 'pending').length;
+                const pendingWithCount = withdrawals.data.filter(w => w.status === 'pending').length;
+
+                // Update UI
+                document.getElementById('statTotalUsers').textContent = users.count;
+                document.getElementById('statNewUsers').textContent = newToday.count;
+                document.getElementById('statTotalLiability').textContent = `₦${totalLiabilities.toLocaleString()}`;
+                document.getElementById('statActiveInvest').textContent = `₦${activeInvest.toLocaleString()}`;
+                document.getElementById('statPendDep').textContent = pendingDepCount;
+                document.getElementById('statTodayDep').textContent = `₦${todayDep.toLocaleString()}`;
+                document.getElementById('statPendWith').textContent = pendingWithCount;
+                document.getElementById('statOpenTickets').textContent = tickets.count;
+
+                // Update Badges
+                updateBadge('badgePendingDep', pendingDepCount);
+                updateBadge('badgePendingWith', pendingWithCount);
+                updateBadge('badgeUnreadTickets', tickets.count);
+
+                // Alert Logic
+                if (pendingWithCount > 5) {
+                    document.getElementById('alertBanner').classList.remove('hidden');
+                    document.getElementById('alertText').textContent = `High Volume: ${pendingWithCount} pending withdrawals awaiting payout.`;
+                }
+
+            } catch (err) {
+                console.error("Stats Error:", err);
+            }
+        }
+
+        async function loadActivity() {
+            const { data } = await supabase.from('transactions').select('*').order('created_at', { ascending: false }).limit(20);
+            renderActivity(data || []);
+        }
+
+        // --- 3. UI Rendering ---
+        function renderActivity(data) {
+            const feed = document.getElementById('activityFeed');
+            if (data.length === 0) return;
+
+            feed.innerHTML = data.map(item => {
+                const isPositive = ['deposit', 'earning', 'referral', 'gift_code'].includes(item.type);
+                return `
+                    <div class="p-6 flex items-center justify-between hover:bg-gray-50 transition cursor-default">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl ${isPositive ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-500'} flex items-center justify-center">
+                                <i data-lucide="${getIcon(item.type)}" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-800 capitalize">${item.type.replace('_', ' ')}</p>
+                                <p class="text-[9px] text-gray-400 font-medium">${new Date(item.created_at).toLocaleString()}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs font-bold ${isPositive ? 'text-green-600' : 'text-gray-900'}">${isPositive ? '+' : '-'} ₦${item.amount.toLocaleString()}</p>
+                            <span class="text-[8px] uppercase font-bold px-2 py-0.5 rounded ${item.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${item.status}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        // --- 4. System Logic ---
+        function setupRealtime() {
+            // Watch all relevant tables for changes
+            const channels = ['transactions', 'deposits', 'withdrawals', 'profiles', 'tickets'];
+            
+            channels.forEach(table => {
+                supabase.channel(`${table}-changes`)
+                    .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
+                        fetchStats();
+                        loadActivity();
+                    })
+                    .subscribe();
+            });
+        }
+
+        function updateBadge(id, count) {
+            const el = document.getElementById(id);
+            if (count > 0) {
+                el.textContent = count;
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
+        function getIcon(type) {
+            const map = { deposit: 'arrow-down-left', withdrawal: 'arrow-up-right', investment: 'gem', earning: 'zap', referral: 'users', gift_code: 'gift', welcome_bonus: 'award' };
+            return map[type] || 'circle';
+        }
+
+        window.refreshStats = () => {
+            fetchStats();
+            loadActivity();
+        };
+
+        // Navigation
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        document.getElementById('mobileMenuBtn').onclick = () => { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.add('opacity-100'), 10); };
+        document.getElementById('closeSidebar').onclick = overlay.onclick = () => { sidebar.classList.add('-translate-x-full'); overlay.classList.remove('opacity-100'); setTimeout(() => overlay.classList.add('hidden'), 400); };
+        document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+
+        init();
+    </script>
+</body>
+</html>
