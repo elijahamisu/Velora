@@ -3,177 +3,361 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deposit Verification | VELORA Admin</title>
+    <title>Deposits | VELORA Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --gold: #D4AF37;
-            --gold-dark: #B8860B;
-            --luxury-white: #FBFAFA;
+            --ink: #0C0E13;
+            --ink-soft: #171A22;
+            --paper: #F6F4EF;
+            --paper-card: #FFFFFF;
+            --gold: #B7935B;
+            --gold-deep: #8F6E3E;
+            --gold-light: #E7D9BC;
+            --line: rgba(183, 147, 91, 0.16);
+            --ink-text: #14161C;
+            --muted: #7A7E88;
         }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #F4F5F7;
-            color: #1a1a1a;
-            -webkit-tap-highlight-color: transparent;
+            background-color: var(--paper);
+            color: var(--ink-text);
+            overflow-x: hidden;
         }
-        .heading-font { font-family: 'Playfair Display', serif; }
-        .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%); }
+        .heading-font { font-family: 'Fraunces', serif; font-feature-settings: "ss01"; }
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+        .gold-gradient { background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%); }
         .gold-text {
-            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(212, 175, 55, 0.1);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        .ink-gradient { background: linear-gradient(160deg, var(--ink) 0%, var(--ink-soft) 100%); }
+        .card {
+            background: var(--paper-card);
+            border: 1px solid rgba(20, 22, 28, 0.06);
+            box-shadow: 0 1px 2px rgba(12,14,19,0.03), 0 12px 24px -18px rgba(12,14,19,0.18);
         }
-
-        /* Nav Styles (Shared) */
-        .sidebar-item:hover, .sidebar-active {
-            background: linear-gradient(90deg, rgba(212, 175, 55, 0.08) 0%, transparent 100%);
-            color: var(--gold);
-            border-left: 3px solid var(--gold);
+        .card-gold-edge { border-top: 2px solid var(--gold); }
+        .field {
+            background: #FAF9F6;
+            border: 1px solid rgba(20,22,28,0.08);
+            transition: border-color .18s ease, background .18s ease;
         }
-        .island-nav {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            width: 92%; max-width: 450px; background: rgba(10, 10, 10, 0.92);
-            backdrop-filter: blur(20px); border-radius: 35px; padding: 12px 24px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); z-index: 100;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .island-item { color: rgba(255,255,255,0.5); transition: 0.3s; }
-        .island-item.active { color: var(--gold); transform: translateY(-3px); }
-
-        #sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        #sidebarOverlay { backdrop-filter: blur(6px); transition: opacity 0.4s ease; }
-
-        .status-pending { background: #FEF3C7; color: #92400E; }
-        .status-approved { background: #DCFCE7; color: #15803D; }
-        .status-rejected { background: #FEE2E2; color: #991B1B; }
-
+        .field:focus { outline: none; border-color: var(--gold); background: #fff; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        /* ---------- Sidebar (desktop) ---------- */
+        #sidebar { background: var(--ink); }
+        #sidebar .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+        .sidebar-item {
+            color: rgba(246, 244, 239, 0.55);
+            border-left: 2px solid transparent;
+            transition: color .18s ease, background .18s ease, border-color .18s ease;
+        }
+        .sidebar-item:hover {
+            background: linear-gradient(90deg, rgba(183,147,91,0.12) 0%, transparent 85%);
+            color: var(--gold-light);
+        }
+        .sidebar-active {
+            background: linear-gradient(90deg, rgba(183,147,91,0.16) 0%, transparent 85%);
+            color: var(--gold-light) !important;
+            border-left: 2px solid var(--gold);
+        }
+        .sidebar-item i { width: 17px; height: 17px; }
+
+        /* ---------- Mobile Island Navigation ---------- */
+        #islandNav {
+            background: rgba(12, 14, 19, 0.97);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(183, 147, 91, 0.22);
+            box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(183,147,91,0.05) inset;
+        }
+        .island-item {
+            position: relative; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 2px;
+            padding: 7px 4px; border-radius: 13px;
+            color: rgba(246, 244, 239, 0.4);
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+        .island-item i { width: 16px; height: 16px; }
+        .island-item span { font-size: 8px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+        .island-item.active {
+            color: var(--gold-light);
+            background: linear-gradient(135deg, rgba(183,147,91,0.22) 0%, rgba(143,110,62,0.10) 100%);
+        }
+        .island-item.active i { filter: drop-shadow(0 2px 6px rgba(183,147,91,0.45)); }
+
+        ::selection { background: var(--gold-light); color: var(--ink); }
+        :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+        /* ---------- Mobile Drawer Sidebar ---------- */
+        #drawerOverlay {
+            background: rgba(8, 9, 13, 0.55);
+            backdrop-filter: blur(2px);
+            opacity: 0; pointer-events: none;
+            transition: opacity .28s ease;
+        }
+        #drawerOverlay.open { opacity: 1; pointer-events: auto; }
+        #mobileDrawer {
+            background: var(--ink);
+            width: min(86vw, 320px);
+            transform: translateX(-100%);
+            transition: transform .32s cubic-bezier(.32,.72,0,1);
+            box-shadow: 24px 0 60px -20px rgba(0,0,0,0.5);
+        }
+        #mobileDrawer.open { transform: translateX(0); }
+        #mobileDrawer .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+        .drawer-item {
+            color: rgba(246, 244, 239, 0.6);
+            border-left: 2px solid transparent;
+            transition: color .18s ease, background .18s ease, border-color .18s ease;
+        }
+        .drawer-item:active, .drawer-item:hover {
+            background: linear-gradient(90deg, rgba(183,147,91,0.14) 0%, transparent 85%);
+            color: var(--gold-light);
+        }
+        .drawer-active {
+            background: linear-gradient(90deg, rgba(183,147,91,0.18) 0%, transparent 85%);
+            color: var(--gold-light) !important;
+            border-left: 2px solid var(--gold);
+        }
+        .drawer-item i { width: 18px; height: 18px; }
+        #menuToggle {
+            width: 38px; height: 38px; border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(20,22,28,0.08);
+            color: var(--ink-text);
+            transition: background .18s ease, border-color .18s ease;
+        }
+        #menuToggle:hover { background: rgba(183,147,91,0.08); border-color: rgba(183,147,91,0.3); }
+        #menuToggle i { width: 18px; height: 18px; }
     </style>
 </head>
-<body class="bg-[#F8F9FA]">
+<body class="bg-[var(--paper)]">
 
     <!-- Auth Guard Loader -->
-    <div id="authGuard" class="fixed inset-0 z-[200] bg-white flex items-center justify-center">
-        <div class="text-center">
-            <div class="w-12 h-12 border-4 border-gray-100 border-t-[#D4AF37] rounded-full animate-spin mx-auto mb-4"></div>
-            <p class="heading-font gold-text text-lg tracking-widest uppercase">Admin Terminal</p>
+    <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
+        <div class="text-center" id="loaderContent">
+            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(183,147,91,0.25); border-top-color: var(--gold);"></div>
+            <p class="heading-font gold-text text-2xl tracking-wide">VELORA</p>
+            <p class="text-[10px] uppercase tracking-[0.3em] text-white/30 mt-2">Verifying Admin Access</p>
         </div>
     </div>
 
-    <!-- Mobile Sidebar Overlay -->
-    <div id="sidebarOverlay" class="fixed inset-0 z-[140] bg-black/40 hidden opacity-0"></div>
-
-    <!-- Sidebar -->
-    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-72 bg-white border-r border-gray-100 z-[150] lg:translate-x-0 -translate-x-full">
-        <div class="p-8 h-full flex flex-col">
-            <div class="flex items-center justify-between mb-10">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 gold-gradient rounded-xl flex items-center justify-center text-white font-bold shadow-lg">V</div>
-                    <span class="text-xl font-bold heading-font gold-text tracking-tight">VELORA ADMIN</span>
+    <!-- Navigation Header -->
+    <header class="fixed top-0 right-0 left-0 h-20 bg-[var(--paper)]/85 backdrop-blur-md border-b border-black/[0.06] z-40 lg:left-64">
+        <div class="h-full flex items-center justify-between px-6">
+            <div class="flex items-center gap-3">
+                <button id="menuToggle" class="lg:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="w-7 h-7 gold-gradient rounded-full flex items-center justify-center text-white heading-font text-xs lg:hidden">V</div>
+                <div>
+                    <h2 class="text-lg font-semibold heading-font hidden md:block tracking-tight">Deposit <span class="gold-text italic">Queue</span></h2>
+                    <h2 class="text-base font-semibold heading-font md:hidden">Deposits</h2>
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] hidden md:block">Executive Terminal</p>
                 </div>
-                <button id="closeSidebar" class="lg:hidden text-gray-300"><i data-lucide="x"></i></button>
             </div>
-            <nav class="space-y-1 flex-1">
-                <a href="dashboard.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
-                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-3 border-l border-black/[0.06] pl-6">
+                    <div class="text-right hidden sm:block">
+                        <p id="adminName" class="text-sm font-semibold">Admin</p>
+                        <p id="adminRole" class="text-[9px] gold-text font-bold uppercase tracking-widest">...</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold" id="adminInitials">A</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Menu (Desktop only) -->
+    <aside id="sidebar" class="hidden lg:block fixed top-0 left-0 bottom-0 w-64 z-50">
+        <div class="p-8 h-full flex flex-col">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-9 h-9 rounded-lg border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
+                <h1 class="text-xl heading-font gold-text tracking-tight font-semibold">VELORA ADMIN</h1>
+            </div>
+            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-8 ml-12 -mt-1">Executive Terminal</p>
+            <div class="h-px w-full brand-hair mb-8"></div>
+
+            <nav class="space-y-1 flex-1" id="sidebarNav">
+                <a href="dashboard.html" data-page="dashboard" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
                 </a>
-                <a href="users.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
-                    <i data-lucide="users" class="w-5 h-5"></i> Manage Users
+                <a href="users.html" data-page="users" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="users"></i> Users
                 </a>
-                <a href="deposits.html" class="sidebar-item sidebar-active flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold">
-                    <i data-lucide="arrow-down-circle" class="w-5 h-5"></i> Deposits
+                <a href="deposits.html" data-page="deposits" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-down-circle"></i> Deposits
                 </a>
-                <a href="withdrawals.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
-                    <i data-lucide="arrow-up-circle" class="w-5 h-5"></i> Withdrawals
+                <a href="withdrawals.html" data-page="withdrawals" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-up-circle"></i> Withdrawals
                 </a>
-                <div class="pt-8 mt-8 border-t border-gray-50">
-                    <button id="logoutBtn" class="w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-red-400 hover:bg-red-50">
-                        <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+                <a href="investments.html" data-page="investments" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gem"></i> Investments
+                </a>
+                <a href="plans.html" data-page="plans" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layers"></i> Plans
+                </a>
+                <a href="gift-codes.html" data-page="gift-codes" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gift"></i> Gift Codes
+                </a>
+                <a href="support.html" data-page="support" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="headphones"></i> Support
+                </a>
+
+                <div class="pt-8 mt-8 border-t border-white/[0.06]">
+                    <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
+                        <i data-lucide="log-out" class="w-[17px] h-[17px]"></i> Logout
+                    </button>
+                </div>
+            </nav>
+
+            <div class="pt-6 border-t border-white/[0.06]">
+                <div class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/25">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Restricted Access
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ============ Mobile Drawer Sidebar ============ -->
+    <div id="drawerOverlay" class="lg:hidden fixed inset-0 z-[60]"></div>
+    <aside id="mobileDrawer" class="lg:hidden fixed top-0 left-0 bottom-0 z-[70] overflow-y-auto">
+        <div class="p-7 min-h-full flex flex-col">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
+                    <h1 class="text-lg heading-font gold-text tracking-tight font-semibold">VELORA ADMIN</h1>
+                </div>
+                <button id="drawerClose" aria-label="Close menu" class="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-[var(--gold-light)] hover:bg-white/5 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-6 ml-12 -mt-1">Executive Terminal</p>
+            <div class="h-px w-full brand-hair mb-6"></div>
+
+            <div class="flex items-center gap-3 p-3 mb-6 rounded-2xl bg-white/[0.04] border border-white/10">
+                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold shrink-0" id="drawerInitials">A</div>
+                <div class="min-w-0">
+                    <p id="drawerName" class="text-sm font-semibold text-white truncate">Admin</p>
+                    <p id="drawerRole" class="text-[10px] text-[var(--gold-light)] font-bold tracking-widest uppercase truncate">...</p>
+                </div>
+            </div>
+
+            <nav class="space-y-1 flex-1" id="drawerNav">
+                <a href="dashboard.html" data-page="dashboard" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="users.html" data-page="users" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="users"></i> Users
+                </a>
+                <a href="deposits.html" data-page="deposits" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-down-circle"></i> Deposits
+                </a>
+                <a href="withdrawals.html" data-page="withdrawals" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-up-circle"></i> Withdrawals
+                </a>
+                <a href="investments.html" data-page="investments" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gem"></i> Investments
+                </a>
+                <a href="plans.html" data-page="plans" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layers"></i> Plans
+                </a>
+                <a href="gift-codes.html" data-page="gift-codes" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gift"></i> Gift Codes
+                </a>
+                <a href="support.html" data-page="support" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="headphones"></i> Support
+                </a>
+
+                <div class="pt-6 mt-6 border-t border-white/[0.06]">
+                    <button id="drawerLogoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
+                        <i data-lucide="log-out" class="w-[18px] h-[18px]"></i> Logout
                     </button>
                 </div>
             </nav>
         </div>
     </aside>
 
-    <!-- Top Navbar -->
-    <header class="fixed top-0 right-0 left-0 h-20 bg-white/80 backdrop-blur-md border-b border-gray-50 z-40 lg:left-72">
-        <div class="h-full flex items-center justify-between px-6 lg:px-10">
-            <div class="flex items-center gap-4">
-                <button id="mobileMenuBtn" class="lg:hidden p-2 text-gray-400"><i data-lucide="menu"></i></button>
-                <h2 class="text-xl font-bold heading-font hidden md:block">Deposit <span class="gold-text">Queue</span></h2>
-            </div>
-            <div class="flex items-center gap-4">
-                <div class="px-4 py-2 bg-gold/10 text-gold rounded-full text-[10px] font-bold uppercase tracking-widest">
-                    <span id="pendingCount">0</span> Pending
-                </div>
-                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white font-bold" id="adminInitials">A</div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Mobile Island Nav -->
-    <div class="island-nav lg:hidden">
-        <a href="dashboard.html" class="island-item"><i data-lucide="layout-dashboard"></i></a>
-        <a href="users.html" class="island-item"><i data-lucide="users"></i></a>
-        <a href="deposits.html" class="island-item active"><i data-lucide="arrow-down-circle"></i></a>
-        <a href="withdrawals.html" class="island-item"><i data-lucide="arrow-up-circle"></i></a>
-        <button id="mobileMenuBtn2" class="island-item"><i data-lucide="menu"></i></button>
-    </div>
+    <!-- ============ Mobile Island Navigation ============ -->
+    <nav id="islandNav" class="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-[22px] flex items-center gap-1 px-2 py-1.5 w-[92%] max-w-sm">
+        <a href="dashboard.html" data-page="dashboard" class="island-item flex-1">
+            <i data-lucide="layout-dashboard"></i><span>Home</span>
+        </a>
+        <a href="users.html" data-page="users" class="island-item flex-1">
+            <i data-lucide="users"></i><span>Users</span>
+        </a>
+        <a href="deposits.html" data-page="deposits" class="island-item flex-1">
+            <i data-lucide="arrow-down-circle"></i><span>Deposits</span>
+        </a>
+        <a href="withdrawals.html" data-page="withdrawals" class="island-item flex-1">
+            <i data-lucide="arrow-up-circle"></i><span>Payouts</span>
+        </a>
+        <a href="support.html" data-page="support" class="island-item flex-1">
+            <i data-lucide="headphones"></i><span>Support</span>
+        </a>
+    </nav>
 
     <!-- Main Content -->
-    <main class="lg:ml-72 pt-28 px-6 pb-36">
-        <div class="max-w-[1600px] mx-auto">
-            
-            <!-- Filters Bar -->
-            <div class="glass-card rounded-[32px] p-6 mb-8 flex flex-col lg:flex-row gap-4 items-center">
-                <div class="relative w-full lg:flex-1">
-                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300"></i>
-                    <input type="text" id="depositSearch" placeholder="Search Ref, Name, or Amount..." 
-                        class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:outline-none focus:border-gold transition">
+    <main class="lg:ml-64 pt-28 px-6 pb-24 lg:pb-12">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6 mb-10">
+                <div class="card p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Pending</p>
+                    <h3 id="statPending" class="text-2xl heading-font font-semibold mono text-amber-600">0</h3>
                 </div>
-                <div class="flex gap-2 w-full lg:w-auto">
-                    <select id="statusFilter" class="flex-1 lg:w-40 px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-xs font-bold uppercase outline-none focus:border-gold">
-                        <option value="all">All Deposits</option>
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
-                    <button onclick="exportData()" class="p-3 bg-white border border-gray-100 rounded-2xl text-gold"><i data-lucide="download" class="w-5 h-5"></i></button>
-                    <button onclick="refreshData()" class="p-3 bg-white border border-gray-100 rounded-2xl text-gold"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
+                <div class="card p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Approved</p>
+                    <h3 id="statApproved" class="text-2xl heading-font font-semibold mono text-emerald-600">0</h3>
                 </div>
+                <div class="card p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Rejected</p>
+                    <h3 id="statRejected" class="text-2xl heading-font font-semibold mono text-red-500">0</h3>
+                </div>
+                <div class="card card-gold-edge p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--gold-deep)] uppercase font-bold tracking-widest mb-1">Total Approved Value</p>
+                    <h3 id="statTotalValue" class="text-2xl heading-font font-semibold gold-text mono">₦0</h3>
+                </div>
+            </div>
+
+            <!-- Filter -->
+            <div class="card rounded-[24px] p-4 mb-6 flex flex-wrap items-center gap-3">
+                <span class="text-xs font-bold text-[var(--muted)] uppercase tracking-wide ml-2">Filter:</span>
+                <select id="statusFilter" class="field px-4 py-2 rounded-xl text-sm font-semibold">
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="all">All</option>
+                </select>
             </div>
 
             <!-- Deposits Table -->
-            <div class="glass-card rounded-[40px] overflow-hidden">
+            <div class="card rounded-[32px] overflow-hidden">
+                <div class="p-6 md:p-8 border-b border-black/[0.05] flex justify-between items-center">
+                    <h4 class="text-lg font-semibold heading-font">Deposit Requests</h4>
+                    <span class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[9px] font-bold uppercase tracking-widest">Realtime Sync</span>
+                </div>
                 <div class="overflow-x-auto no-scrollbar">
                     <table class="w-full text-left whitespace-nowrap">
-                        <thead class="bg-gray-50/50 border-b border-gray-100">
+                        <thead class="bg-black/[0.02] border-b border-black/[0.05]">
                             <tr>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Investor</th>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Amount & Ref</th>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Receipt</th>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Date</th>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Action</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Client</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Amount</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Reference</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Date</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase text-right">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="depositTableBody" class="divide-y divide-gray-50">
-                            <tr>
-                                <td colspan="6" class="px-8 py-20 text-center">
-                                    <div class="w-10 h-10 border-2 border-gold/20 border-t-gold rounded-full animate-spin mx-auto mb-4"></div>
-                                    <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Syncing with Kuda Ledger...</p>
-                                </td>
-                            </tr>
+                        <tbody id="depositsBody" class="divide-y divide-black/[0.05]">
+                            <tr><td colspan="5" class="p-12 text-center text-[var(--muted)] text-xs italic">Loading deposit requests...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -181,56 +365,6 @@
 
         </div>
     </main>
-
-    <!-- Deposit Detail Modal -->
-    <div id="depositModal" class="fixed inset-0 z-[200] bg-black/60 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-2xl rounded-[40px] overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                <div>
-                    <h4 id="modalRef" class="text-xl font-bold heading-font">Verify Deposit</h4>
-                    <p id="modalUser" class="text-xs text-gray-400">...</p>
-                </div>
-                <button onclick="closeModal()" class="p-2 text-gray-400 hover:text-gold transition"><i data-lucide="x"></i></button>
-            </div>
-            
-            <div class="flex-1 overflow-y-auto p-8 no-scrollbar space-y-8">
-                <!-- Receipt Preview -->
-                <div class="bg-gray-100 rounded-3xl overflow-hidden border border-gray-200 aspect-video relative group">
-                    <img id="modalReceipt" src="" alt="Payment Receipt" class="w-full h-full object-contain">
-                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                        <a id="modalReceiptLink" href="#" target="_blank" class="px-6 py-2 bg-white rounded-full text-xs font-bold uppercase">Open Original</a>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="p-4 bg-gray-50 rounded-2xl">
-                        <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">Expected Amount</p>
-                        <p id="modalAmount" class="text-lg font-bold">₦0</p>
-                    </div>
-                    <div class="p-4 bg-gray-50 rounded-2xl">
-                        <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">Kuda Reference</p>
-                        <p id="modalRefText" class="text-sm font-mono font-bold">---</p>
-                    </div>
-                </div>
-
-                <div class="space-y-4">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block ml-1">Internal Admin Notes</label>
-                    <textarea id="adminNotes" rows="3" placeholder="Add verification details or rejection reason..." 
-                        class="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:outline-none focus:border-gold transition"></textarea>
-                </div>
-
-                <!-- Control Buttons -->
-                <div id="modalActions" class="grid grid-cols-2 gap-4">
-                    <button onclick="processDeposit('rejected')" class="py-4 bg-red-50 text-red-600 rounded-2xl font-bold text-sm uppercase hover:bg-red-100 transition">Reject Payment</button>
-                    <button onclick="processDeposit('approved')" class="py-4 gold-gradient text-white rounded-2xl font-bold text-sm uppercase shadow-lg shadow-gold/20 hover:scale-[1.02] transition">Approve & Credit</button>
-                </div>
-                
-                <div id="processedInfo" class="hidden p-4 bg-gray-50 border border-gray-100 rounded-2xl text-center">
-                    <p class="text-xs font-bold text-gray-400 uppercase">Processed by <span id="processedAdmin" class="text-gray-800"></span></p>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
@@ -242,233 +376,200 @@
             import.meta.env.VITE_SUPABASE_ANON_KEY
         );
 
-        let allDeposits = [];
-        let selectedDeposit = null;
-        let adminProfile = null;
+        // --- 0. Active nav state (sidebar + mobile island + drawer) ---
+        function setActiveNav() {
+            const current = (window.location.pathname.split('/').pop() || 'dashboard.html').replace('.html', '') || 'dashboard';
+            document.querySelectorAll('#sidebarNav a[data-page]').forEach(a => {
+                a.classList.toggle('sidebar-active', a.dataset.page === current);
+            });
+            document.querySelectorAll('#islandNav a[data-page]').forEach(a => {
+                a.classList.toggle('active', a.dataset.page === current);
+            });
+            document.querySelectorAll('#drawerNav a[data-page]').forEach(a => {
+                a.classList.toggle('drawer-active', a.dataset.page === current);
+            });
+        }
 
-        // --- 1. Init & Security ---
+        // --- 0b. Mobile drawer open/close ---
+        // FIX: the previous version referenced `document.getElementById('sidebarOverlay')`
+        // which did not exist in the markup, producing `overlay === null` and then
+        // crashing on `overlay.onclick = ...` before init() ever ran. These are all
+        // now real elements that exist in the DOM above.
+        const drawer = document.getElementById('mobileDrawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+        const drawerClose = document.getElementById('drawerClose');
+
+        function openDrawer() {
+            drawer.classList.add('open');
+            drawerOverlay.classList.add('open');
+            menuToggle.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeDrawer() {
+            drawer.classList.remove('open');
+            drawerOverlay.classList.remove('open');
+            menuToggle.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+        menuToggle.addEventListener('click', openDrawer);
+        drawerClose.addEventListener('click', closeDrawer);
+        drawerOverlay.addEventListener('click', closeDrawer);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+        document.querySelectorAll('#drawerNav a[data-page]').forEach(a => a.addEventListener('click', closeDrawer));
+
+        // --- 1. Init and Robust Security ---
         async function init() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                window.location.href = 'login.html';
-                return;
-            }
+            try {
+                const { data: { session }, error: authError } = await supabase.auth.getSession();
+                if (authError || !session) throw new Error("No valid session found.");
 
-            const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-            if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-                window.location.href = '../login.html';
-                return;
-            }
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('role, full_name')
+                    .eq('id', session.user.id)
+                    .single();
 
-            adminProfile = profile;
-            document.getElementById('adminInitials').textContent = profile.full_name.charAt(0);
-            document.getElementById('authGuard').classList.add('hidden');
-            
-            fetchDeposits();
-            setupRealtime();
+                if (profileError || !profile || !['admin', 'super_admin'].includes(profile.role)) {
+                    await supabase.auth.signOut();
+                    window.location.href = 'login.html?error=unauthorized';
+                    return;
+                }
+
+                // Success
+                document.getElementById('adminName').textContent = profile.full_name;
+                document.getElementById('adminInitials').textContent = profile.full_name.charAt(0);
+                document.getElementById('drawerName').textContent = profile.full_name;
+                document.getElementById('drawerInitials').textContent = profile.full_name.charAt(0);
+                // FIX: role label is now set from the actual profile role
+                // instead of a hardcoded "Authorized Personnel" string.
+                const roleLabel = profile.role === 'super_admin' ? 'Super Admin' : 'Administrator';
+                document.getElementById('adminRole').textContent = roleLabel;
+                document.getElementById('drawerRole').textContent = roleLabel;
+                document.getElementById('authGuard').classList.add('hidden');
+
+                loadStats();
+                loadDeposits();
+                setupRealtime();
+
+            } catch (err) {
+                console.error("Security Halt:", err);
+                document.getElementById('loaderContent').innerHTML = `
+                    <p class="text-red-400 font-semibold mb-4">Access Denied or Connection Failure</p>
+                    <a href="login.html" class="px-6 py-2 gold-gradient text-white rounded-xl text-sm font-bold">Return to Login</a>
+                `;
+            }
         }
 
         // --- 2. Data Fetching ---
-        async function fetchDeposits() {
-            try {
-                const { data, error } = await supabase
-                    .from('deposits')
-                    .select('*, profiles(full_name, email, phone)')
-                    .order('created_at', { ascending: false });
+        let currentFilter = 'pending';
 
+        async function loadStats() {
+            try {
+                const { data } = await supabase.from('deposits').select('amount, status');
+                const rows = data || [];
+                document.getElementById('statPending').textContent = rows.filter(r => r.status === 'pending').length;
+                document.getElementById('statApproved').textContent = rows.filter(r => r.status === 'approved').length;
+                document.getElementById('statRejected').textContent = rows.filter(r => r.status === 'rejected').length;
+                const totalValue = rows.filter(r => r.status === 'approved').reduce((acc, r) => acc + Number(r.amount || 0), 0);
+                document.getElementById('statTotalValue').textContent = `₦${totalValue.toLocaleString()}`;
+            } catch (err) { console.error("Stats fail:", err); }
+        }
+
+        async function loadDeposits() {
+            try {
+                let query = supabase.from('deposits').select('*, profiles(full_name)').order('created_at', { ascending: false });
+                if (currentFilter !== 'all') query = query.eq('status', currentFilter);
+                const { data, error } = await query;
                 if (error) throw error;
-                allDeposits = data;
-                renderTable();
-                updatePendingBadge();
+                renderDeposits(data || []);
             } catch (err) {
-                console.error("Fetch Error:", err);
+                console.error('Deposits fetch error:', err);
+                document.getElementById('depositsBody').innerHTML = `<tr><td colspan="5" class="p-12 text-center text-red-400 text-xs italic">Could not load deposits — check console</td></tr>`;
             }
         }
 
-        function updatePendingBadge() {
-            const pending = allDeposits.filter(d => d.status === 'pending').length;
-            const badge = document.getElementById('pendingCount');
-            badge.textContent = pending;
-        }
-
-        // --- 3. UI Rendering ---
-        function renderTable() {
-            const search = document.getElementById('depositSearch').value.toLowerCase();
-            const status = document.getElementById('statusFilter').value;
-            const container = document.getElementById('depositTableBody');
-
-            const filtered = allDeposits.filter(d => {
-                const userName = d.profiles?.full_name?.toLowerCase() || '';
-                const ref = d.reference?.toLowerCase() || '';
-                const matchesSearch = userName.includes(search) || ref.includes(search) || d.amount.toString().includes(search);
-                const matchesStatus = status === 'all' || d.status === status;
-                return matchesSearch && matchesStatus;
-            });
-
-            if (filtered.length === 0) {
-                container.innerHTML = `<tr><td colspan="6" class="px-8 py-20 text-center text-gray-400 text-xs font-bold uppercase tracking-widest">No deposits found in queue</td></tr>`;
+        function renderDeposits(rows) {
+            const body = document.getElementById('depositsBody');
+            if (rows.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-[var(--muted)] text-xs italic">No deposits match this filter.</td></tr>`;
                 return;
             }
 
-            container.innerHTML = filtered.map(d => `
-                <tr class="hover:bg-gray-50 transition cursor-default">
-                    <td class="px-8 py-6">
-                        <p class="text-sm font-bold text-gray-800">${d.profiles?.full_name || 'Unknown'}</p>
-                        <p class="text-[10px] text-gray-400 font-medium">${d.profiles?.email || 'N/A'}</p>
-                    </td>
-                    <td class="px-8 py-6">
-                        <p class="text-sm font-bold text-gray-800">₦${d.amount.toLocaleString()}</p>
-                        <p class="text-[10px] text-gold font-mono font-bold">${d.reference}</p>
-                    </td>
-                    <td class="px-8 py-6">
-                        ${d.receipt_url ? `
-                            <div class="w-10 h-10 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                <img src="${d.receipt_url}" class="w-full h-full object-cover">
+            body.innerHTML = rows.map(d => `
+                <tr class="hover:bg-black/[0.015] transition">
+                    <td class="px-8 py-5 text-sm font-semibold text-[var(--ink-text)]">${d.profiles?.full_name || 'Unknown'}</td>
+                    <td class="px-8 py-5 text-sm font-semibold mono">₦${Number(d.amount).toLocaleString()}</td>
+                    <td class="px-8 py-5 text-xs mono text-[var(--muted)]">${d.reference || '—'}</td>
+                    <td class="px-8 py-5 text-xs text-[var(--muted)] mono">${new Date(d.created_at).toLocaleDateString()}</td>
+                    <td class="px-8 py-5 text-right">
+                        ${d.status === 'pending' ? `
+                            <div class="flex items-center justify-end gap-2">
+                                <button onclick="approveDeposit('${d.id}', ${d.amount}, '${d.user_id}')" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-bold uppercase hover:bg-emerald-100 transition">Approve</button>
+                                <button onclick="rejectDeposit('${d.id}')" class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold uppercase hover:bg-red-100 transition">Reject</button>
                             </div>
-                        ` : `<span class="text-[10px] text-gray-300 italic font-medium">No Receipt</span>`}
-                    </td>
-                    <td class="px-8 py-6 text-xs text-gray-400 font-medium">
-                        ${new Date(d.created_at).toLocaleDateString()}
-                    </td>
-                    <td class="px-8 py-6">
-                        <span class="text-[9px] font-bold uppercase px-3 py-1 rounded-full status-${d.status}">
-                            ${d.status}
-                        </span>
-                    </td>
-                    <td class="px-8 py-6 text-right">
-                        <button onclick="viewDeposit('${d.id}')" class="px-4 py-2 bg-gray-900 text-white text-[10px] font-bold rounded-xl hover:bg-gold transition uppercase">Review</button>
+                        ` : `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full ${d.status === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}">${d.status}</span>`}
                     </td>
                 </tr>
             `).join('');
-            lucide.createIcons();
         }
 
-        // --- 4. Admin Actions ---
-        window.viewDeposit = (id) => {
-            selectedDeposit = allDeposits.find(d => d.id === id);
-            if (!selectedDeposit) return;
-
-            document.getElementById('modalRef').textContent = `Deposit Verification`;
-            document.getElementById('modalUser').textContent = `${selectedDeposit.profiles.full_name} • ${selectedDeposit.profiles.phone}`;
-            document.getElementById('modalAmount').textContent = `₦${selectedDeposit.amount.toLocaleString()}`;
-            document.getElementById('modalRefText').textContent = selectedDeposit.reference;
-            document.getElementById('modalReceipt').src = selectedDeposit.receipt_url || 'https://via.placeholder.com/400x225?text=No+Receipt+Provided';
-            document.getElementById('modalReceiptLink').href = selectedDeposit.receipt_url || '#';
-            document.getElementById('adminNotes').value = selectedDeposit.admin_notes || '';
-
-            if (selectedDeposit.status !== 'pending') {
-                document.getElementById('modalActions').classList.add('hidden');
-                document.getElementById('processedInfo').classList.remove('hidden');
-                document.getElementById('processedAdmin').textContent = selectedDeposit.admin_name || 'Administrator';
-            } else {
-                document.getElementById('modalActions').classList.remove('hidden');
-                document.getElementById('processedInfo').classList.add('hidden');
-            }
-
-            document.getElementById('depositModal').classList.remove('hidden');
-        };
-
-        window.processDeposit = async (newStatus) => {
-            if (!confirm(`Are you sure you want to ${newStatus.toUpperCase()} this deposit?`)) return;
-            
-            const notes = document.getElementById('adminNotes').value;
-            const depositId = selectedDeposit.id;
-            const userId = selectedDeposit.user_id;
-            const amount = selectedDeposit.amount;
-
+        // --- 3. Actions ---
+        window.approveDeposit = async (id, amount, userId) => {
+            if (!confirm(`Approve deposit of ₦${Number(amount).toLocaleString()}?`)) return;
             try {
-                // 1. Double check status to prevent race conditions
-                const { data: current } = await supabase.from('deposits').select('status').eq('id', depositId).single();
-                if (current.status !== 'pending') throw new Error("Deposit already processed.");
-
-                // 2. Update Deposit Status
-                const { error: depErr } = await supabase
-                    .from('deposits')
-                    .update({ 
-                        status: newStatus, 
-                        admin_notes: notes, 
-                        admin_id: adminProfile.id,
-                        admin_name: adminProfile.full_name,
-                        approved_at: newStatus === 'approved' ? new Date() : null
-                    })
-                    .eq('id', depositId);
-                
+                const { error: depErr } = await supabase.from('deposits').update({ status: 'approved' }).eq('id', id);
                 if (depErr) throw depErr;
 
-                if (newStatus === 'approved') {
-                    // 3. CREDIT WALLET (Fetch current then update)
-                    const { data: wallet } = await supabase.from('wallets').select('balance').eq('user_id', userId).single();
-                    const newBalance = (wallet?.balance || 0) + amount;
+                // Credit wallet — read-modify-write; for production, prefer an
+                // atomic RPC/increment to avoid a race with concurrent updates.
+                const { data: wallet } = await supabase.from('wallets').select('available_balance').eq('user_id', userId).single();
+                const newBalance = Number(wallet?.available_balance || 0) + Number(amount);
+                await supabase.from('wallets').update({ available_balance: newBalance }).eq('user_id', userId);
 
-                    await supabase.from('wallets').update({ balance: newBalance }).eq('user_id', userId);
+                await supabase.from('transactions').update({ status: 'completed' }).eq('user_id', userId).eq('type', 'deposit').eq('amount', amount).eq('status', 'pending');
 
-                    // 4. Update Pending Transaction to Completed
-                    await supabase.from('transactions')
-                        .update({ status: 'completed' })
-                        .eq('user_id', userId)
-                        .eq('reference', selectedDeposit.reference);
+                await supabase.from('notifications').insert([{
+                    user_id: userId,
+                    title: 'Deposit Approved',
+                    message: `Your deposit of ₦${Number(amount).toLocaleString()} has been approved and credited to your wallet.`
+                }]);
 
-                    // 5. Notify User
-                    await supabase.from('notifications').insert([{
-                        user_id: userId,
-                        title: 'Deposit Approved',
-                        message: `Your deposit of ₦${amount.toLocaleString()} has been verified and credited.`,
-                        category: 'deposit'
-                    }]);
-                } else {
-                    // REJECTED Flow
-                    await supabase.from('transactions')
-                        .update({ status: 'rejected' })
-                        .eq('user_id', userId)
-                        .eq('reference', selectedDeposit.reference);
-
-                    await supabase.from('notifications').insert([{
-                        user_id: userId,
-                        title: 'Deposit Rejected',
-                        message: `Your deposit of ₦${amount.toLocaleString()} was not approved. Reason: ${notes || 'Verification failed.'}`,
-                        category: 'deposit'
-                    }]);
-                }
-
-                alert(`Deposit ${newStatus} successfully.`);
-                closeModal();
-                fetchDeposits();
-
+                loadStats();
+                loadDeposits();
             } catch (err) {
                 alert(err.message);
             }
         };
 
-        // --- 5. System Logic ---
+        window.rejectDeposit = async (id) => {
+            if (!confirm('Reject this deposit request?')) return;
+            try {
+                await supabase.from('deposits').update({ status: 'rejected' }).eq('id', id);
+                loadStats();
+                loadDeposits();
+            } catch (err) {
+                alert(err.message);
+            }
+        };
+
+        document.getElementById('statusFilter').addEventListener('change', (e) => {
+            currentFilter = e.target.value;
+            loadDeposits();
+        });
+
         function setupRealtime() {
-            supabase.channel('admin-deposits-sync')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'deposits' }, () => {
-                    fetchDeposits(); // Load new requests instantly
-                })
-                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'deposits' }, () => {
-                    fetchDeposits(); // Sync status changes
-                })
-                .subscribe();
+            supabase.channel('deposits-sync')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'deposits' }, () => {
+                    loadStats();
+                    loadDeposits();
+                }).subscribe();
         }
 
-        window.closeModal = () => document.getElementById('depositModal').classList.add('hidden');
-        window.refreshData = () => fetchDeposits();
-        
-        document.getElementById('depositSearch').addEventListener('input', renderTable);
-        document.getElementById('statusFilter').addEventListener('change', renderTable);
-
-        // Sidebar/Nav Controls
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const toggleSidebar = (state) => {
-            if (state) { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.add('opacity-100'), 10); }
-            else { sidebar.classList.add('-translate-x-full'); overlay.classList.remove('opacity-100'); setTimeout(() => overlay.classList.add('hidden'), 400); }
-        };
-        document.getElementById('mobileMenuBtn').onclick = () => toggleSidebar(true);
-        document.getElementById('mobileMenuBtn2').onclick = () => toggleSidebar(true);
-        document.getElementById('closeSidebar').onclick = overlay.onclick = () => toggleSidebar(false);
         document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+        document.getElementById('drawerLogoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
 
+        setActiveNav();
         init();
     </script>
 </body>
