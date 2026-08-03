@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invest | VELORA — Private Wealth</title>
+    <title>Investments | VELORA Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -29,7 +29,6 @@
         }
         .heading-font { font-family: 'Fraunces', serif; font-feature-settings: "ss01"; }
         .mono { font-family: 'IBM Plex Mono', monospace; }
-
         .gold-gradient { background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%); }
         .gold-text {
             background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%);
@@ -37,24 +36,19 @@
             -webkit-text-fill-color: transparent;
         }
         .ink-gradient { background: linear-gradient(160deg, var(--ink) 0%, var(--ink-soft) 100%); }
-
         .card {
             background: var(--paper-card);
             border: 1px solid rgba(20, 22, 28, 0.06);
             box-shadow: 0 1px 2px rgba(12,14,19,0.03), 0 12px 24px -18px rgba(12,14,19,0.18);
         }
         .card-gold-edge { border-top: 2px solid var(--gold); }
-
         .field {
             background: #FAF9F6;
             border: 1px solid rgba(20,22,28,0.08);
             transition: border-color .18s ease, background .18s ease;
         }
         .field:focus { outline: none; border-color: var(--gold); background: #fff; }
-
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
-            -webkit-appearance: none; margin: 0;
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
 
         /* ---------- Sidebar (desktop) ---------- */
         #sidebar { background: var(--ink); }
@@ -84,24 +78,14 @@
             box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(183,147,91,0.05) inset;
         }
         .island-item {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-            padding: 7px 4px;
-            border-radius: 13px;
+            position: relative; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 2px;
+            padding: 7px 4px; border-radius: 13px;
             color: rgba(246, 244, 239, 0.4);
             transition: color 0.2s ease, background 0.2s ease;
         }
         .island-item i { width: 16px; height: 16px; }
-        .island-item span {
-            font-size: 8px;
-            font-weight: 700;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-        }
+        .island-item span { font-size: 8px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
         .island-item.active {
             color: var(--gold-light);
             background: linear-gradient(135deg, rgba(183,147,91,0.22) 0%, rgba(143,110,62,0.10) 100%);
@@ -115,12 +99,10 @@
         #drawerOverlay {
             background: rgba(8, 9, 13, 0.55);
             backdrop-filter: blur(2px);
-            opacity: 0;
-            pointer-events: none;
+            opacity: 0; pointer-events: none;
             transition: opacity .28s ease;
         }
         #drawerOverlay.open { opacity: 1; pointer-events: auto; }
-
         #mobileDrawer {
             background: var(--ink);
             width: min(86vw, 320px);
@@ -130,14 +112,12 @@
         }
         #mobileDrawer.open { transform: translateX(0); }
         #mobileDrawer .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
-
         .drawer-item {
             color: rgba(246, 244, 239, 0.6);
             border-left: 2px solid transparent;
             transition: color .18s ease, background .18s ease, border-color .18s ease;
         }
-        .drawer-item:active,
-        .drawer-item:hover {
+        .drawer-item:active, .drawer-item:hover {
             background: linear-gradient(90deg, rgba(183,147,91,0.14) 0%, transparent 85%);
             color: var(--gold-light);
         }
@@ -147,10 +127,8 @@
             border-left: 2px solid var(--gold);
         }
         .drawer-item i { width: 18px; height: 18px; }
-
         #menuToggle {
-            width: 38px; height: 38px;
-            border-radius: 11px;
+            width: 38px; height: 38px; border-radius: 11px;
             display: flex; align-items: center; justify-content: center;
             border: 1px solid rgba(20,22,28,0.08);
             color: var(--ink-text);
@@ -164,10 +142,10 @@
 
     <!-- Auth Guard Loader -->
     <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
-        <div class="text-center">
+        <div class="text-center" id="loaderContent">
             <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(183,147,91,0.25); border-top-color: var(--gold);"></div>
             <p class="heading-font gold-text text-2xl tracking-wide">VELORA</p>
-            <p class="text-[10px] uppercase tracking-[0.3em] text-white/30 mt-2">Verifying Access</p>
+            <p class="text-[10px] uppercase tracking-[0.3em] text-white/30 mt-2">Verifying Admin Access</p>
         </div>
     </div>
 
@@ -180,22 +158,18 @@
                 </button>
                 <div class="w-7 h-7 gold-gradient rounded-full flex items-center justify-center text-white heading-font text-xs lg:hidden">V</div>
                 <div>
-                    <h2 class="text-lg font-semibold heading-font hidden md:block tracking-tight">Investment <span class="gold-text italic">Center</span></h2>
-                    <h2 class="text-base font-semibold heading-font md:hidden">Investment <span class="gold-text italic">Center</span></h2>
-                    <p class="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] hidden md:block">Grow Your Capital</p>
+                    <h2 class="text-lg font-semibold heading-font hidden md:block tracking-tight">Active <span class="gold-text italic">Assets</span></h2>
+                    <h2 class="text-base font-semibold heading-font md:hidden">Investments</h2>
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] hidden md:block">Executive Terminal</p>
                 </div>
             </div>
-
             <div class="flex items-center gap-6">
-                <div class="hidden sm:flex items-center gap-2 bg-black/[0.03] px-4 py-2 rounded-full border border-black/[0.06]">
-                    <i data-lucide="wallet" class="w-4 h-4 text-[var(--gold-deep)]"></i>
-                    <span id="topBarBalance" class="text-xs font-bold mono">₦0.00</span>
-                </div>
-                <div class="relative cursor-pointer group">
-                    <i data-lucide="bell" class="text-[var(--muted)] group-hover:text-[var(--gold)] transition w-5 h-5"></i>
-                </div>
-                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold">
-                    <span id="userInitials">V</span>
+                <div class="flex items-center gap-3 border-l border-black/[0.06] pl-6">
+                    <div class="text-right hidden sm:block">
+                        <p id="adminName" class="text-sm font-semibold">Admin</p>
+                        <p id="adminRole" class="text-[9px] gold-text font-bold uppercase tracking-widest">...</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold" id="adminInitials">A</div>
                 </div>
             </div>
         </div>
@@ -205,45 +179,39 @@
     <aside id="sidebar" class="hidden lg:block fixed top-0 left-0 bottom-0 w-64 z-50">
         <div class="p-8 h-full flex flex-col">
             <div class="flex items-center gap-3 mb-2">
-                <div class="w-9 h-9 rounded-full border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
-                <h1 class="text-2xl heading-font gold-text tracking-tight font-semibold">VELORA</h1>
+                <div class="w-9 h-9 rounded-lg border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
+                <h1 class="text-xl heading-font gold-text tracking-tight font-semibold">VELORA ADMIN</h1>
             </div>
-            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-8 ml-12 -mt-1">Private Wealth</p>
+            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-8 ml-12 -mt-1">Executive Terminal</p>
             <div class="h-px w-full brand-hair mb-8"></div>
 
             <nav class="space-y-1 flex-1" id="sidebarNav">
                 <a href="dashboard.html" data-page="dashboard" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
                     <i data-lucide="layout-dashboard"></i> Dashboard
                 </a>
-                <a href="invest.html" data-page="invest" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="gem"></i> Invest
+                <a href="users.html" data-page="users" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="users"></i> Users
                 </a>
-                <a href="deposit.html" data-page="deposit" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="arrow-down-circle"></i> Deposit
+                <a href="deposits.html" data-page="deposits" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-down-circle"></i> Deposits
                 </a>
-                <a href="withdraw.html" data-page="withdraw" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="arrow-up-circle"></i> Withdraw
+                <a href="withdrawals.html" data-page="withdrawals" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-up-circle"></i> Withdrawals
                 </a>
-                <a href="wallet.html" data-page="wallet" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="wallet"></i> Wallet
+                <a href="investments.html" data-page="investments" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gem"></i> Investments
                 </a>
-                <a href="transactions.html" data-page="transactions" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="history"></i> Transactions
+                <a href="plans.html" data-page="plans" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layers"></i> Plans
                 </a>
-                <a href="referral.html" data-page="referral" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="users"></i> Referral
+                <a href="gift-codes.html" data-page="gift-codes" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gift"></i> Gift Codes
                 </a>
-                <a href="gift.html" data-page="gift" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="gift"></i> Gift Code
+                <a href="support.html" data-page="support" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="headphones"></i> Support
                 </a>
 
-                <div class="pt-8 mt-8 border-t border-white/[0.06] space-y-1">
-                    <a href="profile.html" data-page="profile" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                        <i data-lucide="user"></i> Profile
-                    </a>
-                    <a href="support.html" data-page="support" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                        <i data-lucide="help-circle"></i> Support
-                    </a>
+                <div class="pt-8 mt-8 border-t border-white/[0.06]">
                     <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
                         <i data-lucide="log-out" class="w-[17px] h-[17px]"></i> Logout
                     </button>
@@ -252,7 +220,7 @@
 
             <div class="pt-6 border-t border-white/[0.06]">
                 <div class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/25">
-                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Secured Session
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Restricted Access
                 </div>
             </div>
         </div>
@@ -264,24 +232,21 @@
         <div class="p-7 min-h-full flex flex-col">
             <div class="flex items-center justify-between mb-1">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
-                    <h1 class="text-xl heading-font gold-text tracking-tight font-semibold">VELORA</h1>
+                    <div class="w-9 h-9 rounded-lg border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
+                    <h1 class="text-lg heading-font gold-text tracking-tight font-semibold">VELORA ADMIN</h1>
                 </div>
                 <button id="drawerClose" aria-label="Close menu" class="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-[var(--gold-light)] hover:bg-white/5 transition">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-6 ml-12 -mt-1">Private Wealth</p>
+            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-6 ml-12 -mt-1">Executive Terminal</p>
             <div class="h-px w-full brand-hair mb-6"></div>
 
-            <!-- Account chip -->
             <div class="flex items-center gap-3 p-3 mb-6 rounded-2xl bg-white/[0.04] border border-white/10">
-                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold shrink-0">
-                    <span id="drawerInitials">V</span>
-                </div>
+                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold shrink-0" id="drawerInitials">A</div>
                 <div class="min-w-0">
-                    <p id="drawerBalance" class="text-sm font-semibold text-white truncate">₦0.00</p>
-                    <p class="text-[10px] text-[var(--gold-light)] font-bold tracking-widest uppercase mono truncate">Wallet Balance</p>
+                    <p id="drawerName" class="text-sm font-semibold text-white truncate">Admin</p>
+                    <p id="drawerRole" class="text-[10px] text-[var(--gold-light)] font-bold tracking-widest uppercase truncate">...</p>
                 </div>
             </div>
 
@@ -289,157 +254,111 @@
                 <a href="dashboard.html" data-page="dashboard" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
                     <i data-lucide="layout-dashboard"></i> Dashboard
                 </a>
-                <a href="invest.html" data-page="invest" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="gem"></i> Invest
+                <a href="users.html" data-page="users" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="users"></i> Users
                 </a>
-                <a href="deposit.html" data-page="deposit" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="arrow-down-circle"></i> Deposit
+                <a href="deposits.html" data-page="deposits" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-down-circle"></i> Deposits
                 </a>
-                <a href="withdraw.html" data-page="withdraw" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="arrow-up-circle"></i> Withdraw
+                <a href="withdrawals.html" data-page="withdrawals" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-up-circle"></i> Withdrawals
                 </a>
-                <a href="wallet.html" data-page="wallet" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="wallet"></i> Wallet
+                <a href="investments.html" data-page="investments" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gem"></i> Investments
                 </a>
-                <a href="transactions.html" data-page="transactions" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="history"></i> Transactions
+                <a href="plans.html" data-page="plans" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layers"></i> Plans
                 </a>
-                <a href="referral.html" data-page="referral" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="users"></i> Referral
+                <a href="gift-codes.html" data-page="gift-codes" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gift"></i> Gift Codes
                 </a>
-                <a href="gift.html" data-page="gift" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="gift"></i> Gift Code
+                <a href="support.html" data-page="support" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="headphones"></i> Support
                 </a>
 
-                <div class="pt-6 mt-6 border-t border-white/[0.06] space-y-1">
-                    <a href="profile.html" data-page="profile" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                        <i data-lucide="user"></i> Profile
-                    </a>
-                    <a href="support.html" data-page="support" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                        <i data-lucide="help-circle"></i> Support
-                    </a>
+                <div class="pt-6 mt-6 border-t border-white/[0.06]">
                     <button id="drawerLogoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
                         <i data-lucide="log-out" class="w-[18px] h-[18px]"></i> Logout
                     </button>
                 </div>
             </nav>
-
-            <div class="pt-6 mt-6 border-t border-white/[0.06]">
-                <div class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/25">
-                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Secured Session
-                </div>
-            </div>
         </div>
     </aside>
 
     <!-- ============ Mobile Island Navigation ============ -->
     <nav id="islandNav" class="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-[22px] flex items-center gap-1 px-2 py-1.5 w-[92%] max-w-sm">
         <a href="dashboard.html" data-page="dashboard" class="island-item flex-1">
-            <i data-lucide="layout-dashboard"></i>
-            <span>Home</span>
+            <i data-lucide="layout-dashboard"></i><span>Home</span>
         </a>
-        <a href="invest.html" data-page="invest" class="island-item flex-1">
-            <i data-lucide="gem"></i>
-            <span>Plans</span>
+        <a href="users.html" data-page="users" class="island-item flex-1">
+            <i data-lucide="users"></i><span>Users</span>
         </a>
-        <a href="wallet.html" data-page="wallet" class="island-item flex-1">
-            <i data-lucide="wallet"></i>
-            <span>Wallet</span>
+        <a href="deposits.html" data-page="deposits" class="island-item flex-1">
+            <i data-lucide="arrow-down-circle"></i><span>Deposits</span>
         </a>
-        <a href="referral.html" data-page="referral" class="island-item flex-1">
-            <i data-lucide="users"></i>
-            <span>Referrals</span>
+        <a href="withdrawals.html" data-page="withdrawals" class="island-item flex-1">
+            <i data-lucide="arrow-up-circle"></i><span>Payouts</span>
         </a>
-        <a href="profile.html" data-page="profile" class="island-item flex-1">
-            <i data-lucide="user"></i>
-            <span>Profile</span>
+        <a href="support.html" data-page="support" class="island-item flex-1">
+            <i data-lucide="headphones"></i><span>Support</span>
         </a>
     </nav>
 
     <!-- Main Content -->
     <main class="lg:ml-64 pt-28 px-6 pb-24 lg:pb-12">
-        <div class="max-w-5xl mx-auto">
+        <div class="max-w-7xl mx-auto">
 
-            <!-- ===== Wallet Balance Bar ===== -->
-            <div class="ink-gradient rounded-[24px] p-5 md:p-6 mb-6 flex items-center justify-between relative overflow-hidden">
-                <div class="absolute -top-10 -right-10 w-40 h-40 rounded-full" style="background: radial-gradient(circle, rgba(183,147,91,0.16), transparent 70%);"></div>
-                <div class="relative">
-                    <p class="text-[10px] uppercase tracking-[0.15em] text-white/40 font-semibold mb-1">Wallet Balance</p>
-                    <h3 id="walletBalance" class="text-2xl md:text-3xl heading-font font-semibold text-white mono">₦0.00</h3>
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6 mb-10">
+                <div class="card p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Active Investments</p>
+                    <h3 id="statActiveCount" class="text-2xl heading-font font-semibold mono">0</h3>
                 </div>
-                <a href="deposit.html" class="relative text-sm font-bold text-[var(--gold-light)] hover:text-[var(--gold)] transition flex items-center gap-1.5">
-                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Deposit
-                </a>
-            </div>
-
-            <!-- Compact secondary stats -->
-            <div class="grid grid-cols-2 gap-4 mb-10">
-                <div class="card card-gold-edge p-5 rounded-2xl">
-                    <p class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Active Assets</p>
-                    <h3 id="activeInvestment" class="text-lg heading-font font-semibold gold-text mono">₦0.00</h3>
+                <div class="card p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Capital Deployed</p>
+                    <h3 id="statCapital" class="text-2xl heading-font font-semibold mono">₦0</h3>
                 </div>
-                <div class="card p-5 rounded-2xl">
-                    <p class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Daily Accrual</p>
-                    <h3 id="dailyEarnings" class="text-lg heading-font font-semibold text-emerald-600 mono">₦0.00</h3>
+                <div class="card p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Projected Daily Payout</p>
+                    <h3 id="statDailyPayout" class="text-2xl heading-font font-semibold mono text-amber-600">₦0</h3>
+                </div>
+                <div class="card card-gold-edge p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--gold-deep)] uppercase font-bold tracking-widest mb-1">Total Ever Invested</p>
+                    <h3 id="statTotalEver" class="text-2xl heading-font font-semibold gold-text mono">₦0</h3>
                 </div>
             </div>
 
-            <div class="grid lg:grid-cols-5 gap-8">
-                <!-- Available Plans -->
-                <div class="lg:col-span-3">
-                    <h4 class="text-xl font-semibold heading-font mb-5">Available Plans</h4>
-                    <div id="plansList" class="space-y-6">
-                        <!-- Plan cards are rendered here by JS -->
-                    </div>
-                </div>
-
-                <!-- Guidance / Info -->
-                <div class="lg:col-span-2 space-y-6">
-                    <div class="card p-8 rounded-[32px]">
-                        <h5 class="font-semibold heading-font mb-4 flex items-center gap-2">
-                            <i data-lucide="info" class="w-4 h-4 text-[var(--gold-deep)]"></i> Investment Rules
-                        </h5>
-                        <ul class="space-y-4 text-sm text-[var(--muted)]">
-                            <li class="flex items-start gap-3">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[var(--gold)] mt-1.5 shrink-0"></span>
-                                Daily earnings are processed automatically every midnight.
-                            </li>
-                            <li class="flex items-start gap-3">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[var(--gold)] mt-1.5 shrink-0"></span>
-                                Capital is locked within the active assets to generate yield.
-                            </li>
-                            <li class="flex items-start gap-3">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[var(--gold)] mt-1.5 shrink-0"></span>
-                                You can have multiple active investments simultaneously.
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+            <!-- Filter -->
+            <div class="card rounded-[24px] p-4 mb-6 flex flex-wrap items-center gap-3">
+                <span class="text-xs font-bold text-[var(--muted)] uppercase tracking-wide ml-2">Filter:</span>
+                <select id="statusFilter" class="field px-4 py-2 rounded-xl text-sm font-semibold">
+                    <option value="all">All</option>
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                </select>
             </div>
 
-            <!-- History Section -->
-            <div class="mt-12">
-                <h4 class="text-lg font-semibold heading-font mb-6 flex items-center gap-2 italic">
-                    <i data-lucide="history" class="w-5 h-5 text-[var(--muted)] not-italic"></i> Investment History
-                </h4>
-                <div class="card rounded-[32px] overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead>
-                                <tr class="bg-black/[0.02] border-b border-black/[0.05]">
-                                    <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Amount</th>
-                                    <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Started</th>
-                                    <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Status</th>
-                                    <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest text-right">Daily Yield</th>
-                                </tr>
-                            </thead>
-                            <tbody id="historyTable" class="divide-y divide-black/[0.05]">
-                                <tr>
-                                    <td colspan="4" class="px-8 py-10 text-center text-[var(--muted)] text-sm">Loading history...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+            <!-- Investments Table -->
+            <div class="card rounded-[32px] overflow-hidden">
+                <div class="p-6 md:p-8 border-b border-black/[0.05] flex justify-between items-center">
+                    <h4 class="text-lg font-semibold heading-font">Investment Ledger</h4>
+                    <span class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[9px] font-bold uppercase tracking-widest">Realtime Sync</span>
+                </div>
+                <div class="overflow-x-auto no-scrollbar">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-black/[0.02] border-b border-black/[0.05]">
+                            <tr>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Client</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Capital</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Daily Yield</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Started</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="investmentsBody" class="divide-y divide-black/[0.05]">
+                            <tr><td colspan="5" class="p-12 text-center text-[var(--muted)] text-xs italic">Loading investment ledger...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -471,6 +390,10 @@
         }
 
         // --- 0b. Mobile drawer open/close ---
+        // FIX: the previous version referenced `document.getElementById('sidebarOverlay')`
+        // which did not exist in the markup, producing `overlay === null` and then
+        // crashing on `overlay.onclick = ...` before init() ever ran. These are all
+        // now real elements that exist in the DOM above.
         const drawer = document.getElementById('mobileDrawer');
         const drawerOverlay = document.getElementById('drawerOverlay');
         const menuToggle = document.getElementById('menuToggle');
@@ -494,284 +417,121 @@
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
         document.querySelectorAll('#drawerNav a[data-page]').forEach(a => a.addEventListener('click', closeDrawer));
 
-        let user = null;
-        let currentBalance = 0;
-
-        // --- Plan catalogue ---
-        // Plans are now loaded from the `investment_plans` table (see
-        // investment_plans_schema.sql) instead of being hardcoded here, so
-        // admins can add/edit/enable/disable plans from the admin panel
-        // without touching this file. Only plans with is_active = true are
-        // shown to clients; existing investments are unaffected by later
-        // plan changes since `investments` stores its own amount and
-        // daily_roi_pct at the time of investment, not a live reference
-        // to the plan row.
-        let PLANS = [];
-
-        async function loadPlans() {
+        // --- 1. Init and Robust Security ---
+        async function init() {
             try {
-                const { data, error } = await supabase
-                    .from('investment_plans')
-                    .select('*')
-                    .eq('is_active', true)
-                    .order('sort_order', { ascending: true });
+                const { data: { session }, error: authError } = await supabase.auth.getSession();
+                if (authError || !session) throw new Error("No valid session found.");
 
-                if (error) throw error;
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('role, full_name')
+                    .eq('id', session.user.id)
+                    .single();
 
-                PLANS = (data || []).map(p => ({
-                    id: p.id,
-                    name: p.name,
-                    dailyRoiPct: Number(p.daily_roi_pct),
-                    minInvest: Number(p.price),
-                    durationDays: p.duration_days,
-                    popular: !!p.is_popular
-                }));
+                if (profileError || !profile || !['admin', 'super_admin'].includes(profile.role)) {
+                    await supabase.auth.signOut();
+                    window.location.href = 'login.html?error=unauthorized';
+                    return;
+                }
+
+                // Success
+                document.getElementById('adminName').textContent = profile.full_name;
+                document.getElementById('adminInitials').textContent = profile.full_name.charAt(0);
+                document.getElementById('drawerName').textContent = profile.full_name;
+                document.getElementById('drawerInitials').textContent = profile.full_name.charAt(0);
+                // FIX: role label is now set from the actual profile role
+                // instead of a hardcoded "Authorized Personnel" string.
+                const roleLabel = profile.role === 'super_admin' ? 'Super Admin' : 'Administrator';
+                document.getElementById('adminRole').textContent = roleLabel;
+                document.getElementById('drawerRole').textContent = roleLabel;
+                document.getElementById('authGuard').classList.add('hidden');
+
+                loadStats();
+                loadInvestments();
+                setupRealtime();
+
             } catch (err) {
-                console.error('Plans fetch error:', err);
-                PLANS = [];
-            }
-            renderPlans();
-        }
-
-        // --- 1. Auth Guard ---
-        async function checkAuth() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                window.location.href = 'login.html';
-                return;
-            }
-            user = session.user;
-            document.getElementById('authGuard').classList.add('hidden');
-            loadPlans();
-            loadData();
-        }
-
-        // --- 2. Load Data ---
-        async function loadData() {
-            try {
-                const [walletRes, profileRes, investRes, summaryRes] = await Promise.all([
-                    supabase.from('wallets').select('*').eq('user_id', user.id).single(),
-                    supabase.from('profiles').select('*').eq('id', user.id).single(),
-                    supabase.from('investments').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
-                    supabase.from('earnings').select('*').eq('user_id', user.id).single()
-                ]);
-
-                if (walletRes.data) {
-                    currentBalance = walletRes.data.balance;
-                    document.getElementById('walletBalance').textContent = `₦${currentBalance.toLocaleString()}`;
-                    document.getElementById('topBarBalance').textContent = `₦${currentBalance.toLocaleString()}`;
-                    document.getElementById('drawerBalance').textContent = `₦${currentBalance.toLocaleString()}`;
-                }
-
-                if (profileRes.data) {
-                    document.getElementById('userInitials').textContent = profileRes.data.full_name.charAt(0);
-                    document.getElementById('drawerInitials').textContent = profileRes.data.full_name.charAt(0);
-                }
-
-                if (summaryRes.data) {
-                    document.getElementById('activeInvestment').textContent = `₦${summaryRes.data.active_investment.toLocaleString()}`;
-                    document.getElementById('dailyEarnings').textContent = `₦${summaryRes.data.today_earnings.toLocaleString()}`;
-                }
-
-                updateHistoryTable(investRes.data || []);
-            } catch (err) {
-                console.error("Fetch Error:", err);
-            }
-        }
-
-        // --- 3. Render Plan Cards ---
-        function renderPlans() {
-            const container = document.getElementById('plansList');
-
-            if (PLANS.length === 0) {
-                container.innerHTML = `
-                    <div class="card p-10 rounded-[28px] text-center">
-                        <i data-lucide="inbox" class="w-8 h-8 text-[var(--muted)] mx-auto mb-3"></i>
-                        <p class="text-sm font-semibold text-[var(--ink-text)]">No investment plans available right now</p>
-                        <p class="text-xs text-[var(--muted)] mt-1">Please check back shortly.</p>
-                    </div>
+                console.error("Security Halt:", err);
+                document.getElementById('loaderContent').innerHTML = `
+                    <p class="text-red-400 font-semibold mb-4">Access Denied or Connection Failure</p>
+                    <a href="login.html" class="px-6 py-2 gold-gradient text-white rounded-xl text-sm font-bold">Return to Login</a>
                 `;
-                lucide.createIcons();
+            }
+        }
+
+        // --- 2. Data Fetching ---
+        let currentFilter = 'all';
+
+        async function loadStats() {
+            try {
+                const { data } = await supabase.from('investments').select('amount, daily_roi_pct, status');
+                const rows = data || [];
+                const active = rows.filter(r => r.status === 'active');
+                document.getElementById('statActiveCount').textContent = active.length;
+
+                const capital = active.reduce((acc, r) => acc + Number(r.amount || 0), 0);
+                document.getElementById('statCapital').textContent = `₦${capital.toLocaleString()}`;
+
+                const dailyPayout = active.reduce((acc, r) => acc + Number(r.amount || 0) * (Number(r.daily_roi_pct || 0) / 100), 0);
+                document.getElementById('statDailyPayout').textContent = `₦${dailyPayout.toLocaleString()}`;
+
+                const totalEver = rows.reduce((acc, r) => acc + Number(r.amount || 0), 0);
+                document.getElementById('statTotalEver').textContent = `₦${totalEver.toLocaleString()}`;
+            } catch (err) { console.error("Stats fail:", err); }
+        }
+
+        async function loadInvestments() {
+            try {
+                let query = supabase.from('investments').select('*, profiles(full_name)').order('created_at', { ascending: false });
+                if (currentFilter !== 'all') query = query.eq('status', currentFilter);
+                const { data, error } = await query;
+                if (error) throw error;
+                renderInvestments(data || []);
+            } catch (err) {
+                console.error('Investments fetch error:', err);
+                document.getElementById('investmentsBody').innerHTML = `<tr><td colspan="5" class="p-12 text-center text-red-400 text-xs italic">Could not load investment ledger — check console</td></tr>`;
+            }
+        }
+
+        function renderInvestments(rows) {
+            const body = document.getElementById('investmentsBody');
+            if (rows.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-[var(--muted)] text-xs italic">No investments match this filter.</td></tr>`;
                 return;
             }
 
-            container.innerHTML = PLANS.map(plan => `
-                <div class="card p-6 md:p-8 rounded-[28px] relative overflow-hidden" data-plan-id="${plan.id}">
-                    <div class="flex items-start justify-between gap-4 mb-1">
-                        <div>
-                            <h3 class="text-xl md:text-2xl heading-font font-semibold gold-text">${plan.name}</h3>
-                            <p class="text-emerald-600 font-semibold text-sm mt-1">${plan.dailyRoiPct}% Daily Profit</p>
-                        </div>
-                        ${plan.popular ? `<span class="shrink-0 text-[10px] font-bold px-3 py-1.5 rounded-full bg-[rgba(183,147,91,0.1)] text-[var(--gold-deep)] uppercase tracking-wide">Popular</span>` : ''}
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 mt-6 mb-6">
-                        <div>
-                            <p class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Min Invest</p>
-                            <p class="text-base font-semibold mono">₦${plan.minInvest.toLocaleString()}</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Duration</p>
-                            <p class="text-base font-semibold">${plan.durationDays} Days</p>
-                        </div>
-                    </div>
-
-                    <button type="button" class="plan-toggle-btn w-full py-4 gold-gradient text-white font-bold rounded-2xl hover:-translate-y-0.5 transition-all" style="box-shadow: 0 20px 40px -20px rgba(143,110,62,0.5);">
-                        Invest Now
-                    </button>
-
-                    <!-- Collapsible amount entry, revealed on "Invest Now" -->
-                    <div class="plan-form hidden mt-6 pt-6 border-t border-black/[0.06] space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-widest mb-2 ml-1">Investment Amount (₦)</label>
-                            <input type="number" class="plan-amount field w-full px-5 py-4 rounded-2xl text-lg font-semibold mono" value="${plan.minInvest}" min="${plan.minInvest}">
-                        </div>
-                        <div class="bg-black/[0.02] rounded-2xl p-5 border border-black/[0.05] space-y-3">
-                            <div class="flex justify-between text-sm">
-                                <span class="text-[var(--muted)]">Expected Daily ROI</span>
-                                <span class="font-bold text-emerald-600 mono plan-preview-roi">₦${Math.round(plan.minInvest * plan.dailyRoiPct / 100).toLocaleString()}</span>
-                            </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-[var(--muted)]">New Wallet Balance</span>
-                                <span class="font-bold mono plan-preview-balance">₦0.00</span>
-                            </div>
-                        </div>
-                        <button type="button" class="plan-confirm-btn w-full py-4 bg-[var(--ink)] text-white font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-[var(--ink-soft)] transition">
-                            <span>Confirm Investment</span>
-                            <div class="plan-btn-loader w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin hidden"></div>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-
-            attachPlanHandlers();
-        }
-
-        // --- 4. Plan Card Interactions ---
-        function attachPlanHandlers() {
-            document.querySelectorAll('#plansList [data-plan-id]').forEach(card => {
-                const planId = card.dataset.planId;
-                const plan = PLANS.find(p => p.id === planId);
-                const toggleBtn = card.querySelector('.plan-toggle-btn');
-                const form = card.querySelector('.plan-form');
-                const amountInput = card.querySelector('.plan-amount');
-                const previewRoi = card.querySelector('.plan-preview-roi');
-                const previewBalance = card.querySelector('.plan-preview-balance');
-                const confirmBtn = card.querySelector('.plan-confirm-btn');
-
-                const updatePreview = () => {
-                    const amt = parseFloat(amountInput.value) || 0;
-                    previewRoi.textContent = `₦${Math.round(amt * plan.dailyRoiPct / 100).toLocaleString()}`;
-                    previewBalance.textContent = `₦${Math.max(currentBalance - amt, 0).toLocaleString()}`;
-                };
-
-                toggleBtn.addEventListener('click', () => {
-                    const isHidden = form.classList.contains('hidden');
-                    form.classList.toggle('hidden');
-                    toggleBtn.textContent = isHidden ? 'Hide' : 'Invest Now';
-                    if (isHidden) {
-                        updatePreview();
-                        amountInput.focus();
-                    }
-                });
-
-                amountInput.addEventListener('input', updatePreview);
-
-                confirmBtn.addEventListener('click', async () => {
-                    const amount = parseFloat(amountInput.value);
-
-                    if (amount < plan.minInvest) {
-                        alert(`Minimum investment for ${plan.name} is ₦${plan.minInvest.toLocaleString()}`);
-                        return;
-                    }
-                    if (amount > currentBalance) {
-                        alert('Insufficient wallet balance.');
-                        return;
-                    }
-
-                    setPlanLoading(confirmBtn, true);
-
-                    try {
-                        // In production, use a Database RPC to ensure Atomicity (Transaction)
-                        // 1. Deduct Balance
-                        const { error: walletErr } = await supabase
-                            .from('wallets')
-                            .update({ balance: currentBalance - amount })
-                            .eq('user_id', user.id);
-
-                        if (walletErr) throw walletErr;
-
-                        // 2. Create Investment Record
-                        const { error: investErr } = await supabase
-                            .from('investments')
-                            .insert([{
-                                user_id: user.id,
-                                amount: amount,
-                                daily_roi_pct: plan.dailyRoiPct,
-                                status: 'active'
-                            }]);
-
-                        if (investErr) throw investErr;
-
-                        // 3. Create Transaction Record
-                        await supabase.from('transactions').insert([{
-                            user_id: user.id,
-                            amount: amount,
-                            type: 'investment',
-                            status: 'completed',
-                            description: `Committed ₦${amount} to the ${plan.name}`
-                        }]);
-
-                        alert('Investment Successful!');
-                        window.location.href = 'dashboard.html';
-
-                    } catch (err) {
-                        alert(err.message);
-                        setPlanLoading(confirmBtn, false);
-                    }
-                });
-            });
-        }
-
-        function setPlanLoading(btn, state) {
-            const loader = btn.querySelector('.plan-btn-loader');
-            btn.disabled = state;
-            loader.classList.toggle('hidden', !state);
-            btn.querySelector('span').textContent = state ? 'Processing...' : 'Confirm Investment';
-        }
-
-        function updateHistoryTable(data) {
-            const tbody = document.getElementById('historyTable');
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="px-8 py-10 text-center text-[var(--muted)] text-xs uppercase tracking-widest font-bold">No investments found</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = data.map(row => `
-                <tr class="hover:bg-black/[0.015] transition cursor-default">
-                    <td class="px-8 py-6 font-semibold text-[var(--ink-text)] mono">₦${row.amount.toLocaleString()}</td>
-                    <td class="px-8 py-6 text-xs text-[var(--muted)] font-medium mono">${new Date(row.created_at).toLocaleDateString()}</td>
-                    <td class="px-8 py-6">
-                        <span class="text-[9px] uppercase font-bold px-3 py-1 rounded-full ${row.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-black/5 text-[var(--ink-text)]'}">
-                            ${row.status}
-                        </span>
+            body.innerHTML = rows.map(inv => `
+                <tr class="hover:bg-black/[0.015] transition">
+                    <td class="px-8 py-5 text-sm font-semibold text-[var(--ink-text)]">${inv.profiles?.full_name || 'Unknown'}</td>
+                    <td class="px-8 py-5 text-sm font-semibold mono">₦${Number(inv.amount).toLocaleString()}</td>
+                    <td class="px-8 py-5 text-sm font-semibold mono text-emerald-600">₦${(Number(inv.amount) * (Number(inv.daily_roi_pct || 0) / 100)).toLocaleString()}</td>
+                    <td class="px-8 py-5 text-xs text-[var(--muted)] mono">${new Date(inv.created_at).toLocaleDateString()}</td>
+                    <td class="px-8 py-5 text-right">
+                        <span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full ${inv.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-black/5 text-[var(--ink-text)]'}">${inv.status}</span>
                     </td>
-                    <td class="px-8 py-6 text-right font-bold text-emerald-600 mono">₦${(row.amount * (row.daily_roi_pct/100)).toLocaleString()}</td>
                 </tr>
             `).join('');
         }
 
-        document.getElementById('logoutBtn').onclick = async () => {
-            await supabase.auth.signOut();
-            window.location.href = 'login.html';
-        };
-        document.getElementById('drawerLogoutBtn').onclick = async () => {
-            await supabase.auth.signOut();
-            window.location.href = 'login.html';
-        };
+        document.getElementById('statusFilter').addEventListener('change', (e) => {
+            currentFilter = e.target.value;
+            loadInvestments();
+        });
+
+        function setupRealtime() {
+            supabase.channel('investments-sync')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'investments' }, () => {
+                    loadStats();
+                    loadInvestments();
+                }).subscribe();
+        }
+
+        document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+        document.getElementById('drawerLogoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
 
         setActiveNav();
-        checkAuth();
+        init();
     </script>
 </body>
 </html>
