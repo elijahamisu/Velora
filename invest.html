@@ -498,14 +498,40 @@
         let currentBalance = 0;
 
         // --- Plan catalogue ---
-        // NOTE: these are placeholder plan figures modeled on the reference design
-        // (Starter / Professional), plus an added "Elite" tier for a 3-plan spread.
-        // Adjust names, percentages, minimums and durations to match your actual offer.
-        const PLANS = [
-            { id: 'starter', name: 'Starter Plan', dailyRoiPct: 5, minInvest: 5000, durationDays: 30, popular: true },
-            { id: 'professional', name: 'Professional Plan', dailyRoiPct: 8, minInvest: 50000, durationDays: 45, popular: true },
-            { id: 'elite', name: 'Elite Plan', dailyRoiPct: 12, minInvest: 150000, durationDays: 60, popular: false }
-        ];
+        // Plans are now loaded from the `investment_plans` table (see
+        // investment_plans_schema.sql) instead of being hardcoded here, so
+        // admins can add/edit/enable/disable plans from the admin panel
+        // without touching this file. Only plans with is_active = true are
+        // shown to clients; existing investments are unaffected by later
+        // plan changes since `investments` stores its own amount and
+        // daily_roi_pct at the time of investment, not a live reference
+        // to the plan row.
+        let PLANS = [];
+
+        async function loadPlans() {
+            try {
+                const { data, error } = await supabase
+                    .from('investment_plans')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('sort_order', { ascending: true });
+
+                if (error) throw error;
+
+                PLANS = (data || []).map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    dailyRoiPct: Number(p.daily_roi_pct),
+                    minInvest: Number(p.price),
+                    durationDays: p.duration_days,
+                    popular: !!p.is_popular
+                }));
+            } catch (err) {
+                console.error('Plans fetch error:', err);
+                PLANS = [];
+            }
+            renderPlans();
+        }
 
         // --- 1. Auth Guard ---
         async function checkAuth() {
@@ -516,7 +542,7 @@
             }
             user = session.user;
             document.getElementById('authGuard').classList.add('hidden');
-            renderPlans();
+            loadPlans();
             loadData();
         }
 
@@ -556,6 +582,19 @@
         // --- 3. Render Plan Cards ---
         function renderPlans() {
             const container = document.getElementById('plansList');
+
+            if (PLANS.length === 0) {
+                container.innerHTML = `
+                    <div class="card p-10 rounded-[28px] text-center">
+                        <i data-lucide="inbox" class="w-8 h-8 text-[var(--muted)] mx-auto mb-3"></i>
+                        <p class="text-sm font-semibold text-[var(--ink-text)]">No investment plans available right now</p>
+                        <p class="text-xs text-[var(--muted)] mt-1">Please check back shortly.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
             container.innerHTML = PLANS.map(plan => `
                 <div class="card p-6 md:p-8 rounded-[28px] relative overflow-hidden" data-plan-id="${plan.id}">
                     <div class="flex items-start justify-between gap-4 mb-1">
