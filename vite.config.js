@@ -26,13 +26,15 @@ export default defineConfig({
          profile: resolve(__dirname, 'profile.html'),
          support: resolve(__dirname, 'support.html'),
          terms: resolve(__dirname, 'terms.html'),
-         admin_login: resolve(__dirname, 'admin/login.html'), 
+         
+         //admin panel 
+        admin_login: resolve(__dirname, 'admin/login.html'), 
          admin_dashboard: resolve(__dirname, 'admin/dashboard.html'), 
          admin_users: resolve(__dirname, 'admin/users.html'),
          admin_deposits: resolve(__dirname, 'admin/deposits.html'), 
          admin_withdrawals: resolve(__dirname, 'admin/withdrawals.html'),
          admin_investments: resolve(__dirname, 'admin/investments.html'),
-         admin_giftcode: resolve(__dirname, 'admin/gift-code.html'),
+         admin_giftCodes: resolve(__dirname, 'gift-codes.html'),
          admin_support: resolve(__dirname, 'admin/support.html'),
          admin_plans: resolve(__dirname, 'admin/plans.html'),
       },
