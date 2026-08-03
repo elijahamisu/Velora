@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Queue | VELORA Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --ink: #0C0E13;
+            --ink-soft: #171A22;
+            --paper: #F6F4EF;
+            --paper-card: #FFFFFF;
+            --gold: #B7935B;
+            --gold-deep: #8F6E3E;
+            --gold-light: #E7D9BC;
+            --line: rgba(183, 147, 91, 0.16);
+            --ink-text: #14161C;
+            --muted: #7A7E88;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--paper);
+            color: var(--ink-text);
+            overflow-x: hidden;
+        }
+        .heading-font { font-family: 'Fraunces', serif; font-feature-settings: "ss01"; }
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+        .gold-gradient { background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%); }
+        .gold-text {
+            background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .ink-gradient { background: linear-gradient(160deg, var(--ink) 0%, var(--ink-soft) 100%); }
+        .card {
+            background: var(--paper-card);
+            border: 1px solid rgba(20, 22, 28, 0.06);
+            box-shadow: 0 1px 2px rgba(12,14,19,0.03), 0 12px 24px -18px rgba(12,14,19,0.18);
+        }
+        .card-gold-edge { border-top: 2px solid var(--gold); }
+        .field {
+            background: #FAF9F6;
+            border: 1px solid rgba(20,22,28,0.08);
+            transition: border-color .18s ease, background .18s ease;
+        }
+        .field:focus { outline: none; border-color: var(--gold); background: #fff; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        /* ---------- Sidebar (desktop) ---------- */
+        #sidebar { background: var(--ink); }
+        #sidebar .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+        .sidebar-item {
+            color: rgba(246, 244, 239, 0.55);
+            border-left: 2px solid transparent;
+            transition: color .18s ease, background .18s ease, border-color .18s ease;
+        }
+        .sidebar-item:hover {
+            background: linear-gradient(90deg, rgba(183,147,91,0.12) 0%, transparent 85%);
+            color: var(--gold-light);
+        }
+        .sidebar-active {
+            background: linear-gradient(90deg, rgba(183,147,91,0.16) 0%, transparent 85%);
+            color: var(--gold-light) !important;
+            border-left: 2px solid var(--gold);
+        }
+        .sidebar-item i { width: 17px; height: 17px; }
+
+        /* ---------- Mobile Island Navigation ---------- */
+        #islandNav {
+            background: rgba(12, 14, 19, 0.97);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(183, 147, 91, 0.22);
+            box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(183,147,91,0.05) inset;
+        }
+        .island-item {
+            position: relative; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 2px;
+            padding: 7px 4px; border-radius: 13px;
+            color: rgba(246, 244, 239, 0.4);
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+        .island-item i { width: 16px; height: 16px; }
+        .island-item span { font-size: 8px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+        .island-item.active {
+            color: var(--gold-light);
+            background: linear-gradient(135deg, rgba(183,147,91,0.22) 0%, rgba(143,110,62,0.10) 100%);
+        }
+        .island-item.active i { filter: drop-shadow(0 2px 6px rgba(183,147,91,0.45)); }
+
+        ::selection { background: var(--gold-light); color: var(--ink); }
+        :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+        /* ---------- Mobile Drawer Sidebar ---------- */
+        #drawerOverlay {
+            background: rgba(8, 9, 13, 0.55);
+            backdrop-filter: blur(2px);
+            opacity: 0; pointer-events: none;
+            transition: opacity .28s ease;
+        }
+        #drawerOverlay.open { opacity: 1; pointer-events: auto; }
+        #mobileDrawer {
+            background: var(--ink);
+            width: min(86vw, 320px);
+            transform: translateX(-100%);
+            transition: transform .32s cubic-bezier(.32,.72,0,1);
+            box-shadow: 24px 0 60px -20px rgba(0,0,0,0.5);
+        }
+        #mobileDrawer.open { transform: translateX(0); }
+        #mobileDrawer .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+        .drawer-item {
+            color: rgba(246, 244, 239, 0.6);
+            border-left: 2px solid transparent;
+            transition: color .18s ease, background .18s ease, border-color .18s ease;
+        }
+        .drawer-item:active, .drawer-item:hover {
+            background: linear-gradient(90deg, rgba(183,147,91,0.14) 0%, transparent 85%);
+            color: var(--gold-light);
+        }
+        .drawer-active {
+            background: linear-gradient(90deg, rgba(183,147,91,0.18) 0%, transparent 85%);
+            color: var(--gold-light) !important;
+            border-left: 2px solid var(--gold);
+        }
+        .drawer-item i { width: 18px; height: 18px; }
+        #menuToggle {
+            width: 38px; height: 38px; border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(20,22,28,0.08);
+            color: var(--ink-text);
+            transition: background .18s ease, border-color .18s ease;
+        }
+        #menuToggle:hover { background: rgba(183,147,91,0.08); border-color: rgba(183,147,91,0.3); }
+        #menuToggle i { width: 18px; height: 18px; }
+    </style>
+</head>
+<body class="bg-[var(--paper)]">
+
+    <!-- Auth Guard Loader -->
+    <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
+        <div class="text-center" id="loaderContent">
+            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(183,147,91,0.25); border-top-color: var(--gold);"></div>
+            <p class="heading-font gold-text text-2xl tracking-wide">VELORA</p>
+            <p class="text-[10px] uppercase tracking-[0.3em] text-white/30 mt-2">Verifying Admin Access</p>
+        </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="fixed top-0 right-0 left-0 h-20 bg-[var(--paper)]/85 backdrop-blur-md border-b border-black/[0.06] z-40 lg:left-64">
+        <div class="h-full flex items-center justify-between px-6">
+            <div class="flex items-center gap-3">
+                <button id="menuToggle" class="lg:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="w-7 h-7 gold-gradient rounded-full flex items-center justify-center text-white heading-font text-xs lg:hidden">V</div>
+                <div>
+                    <h2 class="text-lg font-semibold heading-font hidden md:block tracking-tight">Concierge <span class="gold-text italic">Queue</span></h2>
+                    <h2 class="text-base font-semibold heading-font md:hidden">Support</h2>
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] hidden md:block">Executive Terminal</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-3 border-l border-black/[0.06] pl-6">
+                    <div class="text-right hidden sm:block">
+                        <p id="adminName" class="text-sm font-semibold">Admin</p>
+                        <p id="adminRole" class="text-[9px] gold-text font-bold uppercase tracking-widest">...</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold" id="adminInitials">A</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Menu (Desktop only) -->
+    <aside id="sidebar" class="hidden lg:block fixed top-0 left-0 bottom-0 w-64 z-50">
+        <div class="p-8 h-full flex flex-col">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-9 h-9 rounded-lg border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
+                <h1 class="text-xl heading-font gold-text tracking-tight font-semibold">VELORA ADMIN</h1>
+            </div>
+            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-8 ml-12 -mt-1">Executive Terminal</p>
+            <div class="h-px w-full brand-hair mb-8"></div>
+
+            <nav class="space-y-1 flex-1" id="sidebarNav">
+                <a href="dashboard.html" data-page="dashboard" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="users.html" data-page="users" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="users"></i> Users
+                </a>
+                <a href="deposits.html" data-page="deposits" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-down-circle"></i> Deposits
+                </a>
+                <a href="withdrawals.html" data-page="withdrawals" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-up-circle"></i> Withdrawals
+                </a>
+                <a href="investments.html" data-page="investments" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gem"></i> Investments
+                </a>
+                <a href="plans.html" data-page="plans" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layers"></i> Plans
+                </a>
+                <a href="gift-codes.html" data-page="gift-codes" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gift"></i> Gift Codes
+                </a>
+                <a href="support.html" data-page="support" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="headphones"></i> Support
+                </a>
+
+                <div class="pt-8 mt-8 border-t border-white/[0.06]">
+                    <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
+                        <i data-lucide="log-out" class="w-[17px] h-[17px]"></i> Logout
+                    </button>
+                </div>
+            </nav>
+
+            <div class="pt-6 border-t border-white/[0.06]">
+                <div class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/25">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Restricted Access
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ============ Mobile Drawer Sidebar ============ -->
+    <div id="drawerOverlay" class="lg:hidden fixed inset-0 z-[60]"></div>
+    <aside id="mobileDrawer" class="lg:hidden fixed top-0 left-0 bottom-0 z-[70] overflow-y-auto">
+        <div class="p-7 min-h-full flex flex-col">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
+                    <h1 class="text-lg heading-font gold-text tracking-tight font-semibold">VELORA ADMIN</h1>
+                </div>
+                <button id="drawerClose" aria-label="Close menu" class="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-[var(--gold-light)] hover:bg-white/5 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-6 ml-12 -mt-1">Executive Terminal</p>
+            <div class="h-px w-full brand-hair mb-6"></div>
+
+            <div class="flex items-center gap-3 p-3 mb-6 rounded-2xl bg-white/[0.04] border border-white/10">
+                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold shrink-0" id="drawerInitials">A</div>
+                <div class="min-w-0">
+                    <p id="drawerName" class="text-sm font-semibold text-white truncate">Admin</p>
+                    <p id="drawerRole" class="text-[10px] text-[var(--gold-light)] font-bold tracking-widest uppercase truncate">...</p>
+                </div>
+            </div>
+
+            <nav class="space-y-1 flex-1" id="drawerNav">
+                <a href="dashboard.html" data-page="dashboard" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="users.html" data-page="users" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="users"></i> Users
+                </a>
+                <a href="deposits.html" data-page="deposits" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-down-circle"></i> Deposits
+                </a>
+                <a href="withdrawals.html" data-page="withdrawals" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-up-circle"></i> Withdrawals
+                </a>
+                <a href="investments.html" data-page="investments" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gem"></i> Investments
+                </a>
+                <a href="plans.html" data-page="plans" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layers"></i> Plans
+                </a>
+                <a href="gift-codes.html" data-page="gift-codes" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gift"></i> Gift Codes
+                </a>
+                <a href="support.html" data-page="support" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="headphones"></i> Support
+                </a>
+
+                <div class="pt-6 mt-6 border-t border-white/[0.06]">
+                    <button id="drawerLogoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
+                        <i data-lucide="log-out" class="w-[18px] h-[18px]"></i> Logout
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- ============ Mobile Island Navigation ============ -->
+    <nav id="islandNav" class="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-[22px] flex items-center gap-1 px-2 py-1.5 w-[92%] max-w-sm">
+        <a href="dashboard.html" data-page="dashboard" class="island-item flex-1">
+            <i data-lucide="layout-dashboard"></i><span>Home</span>
+        </a>
+        <a href="users.html" data-page="users" class="island-item flex-1">
+            <i data-lucide="users"></i><span>Users</span>
+        </a>
+        <a href="deposits.html" data-page="deposits" class="island-item flex-1">
+            <i data-lucide="arrow-down-circle"></i><span>Deposits</span>
+        </a>
+        <a href="withdrawals.html" data-page="withdrawals" class="island-item flex-1">
+            <i data-lucide="arrow-up-circle"></i><span>Payouts</span>
+        </a>
+        <a href="support.html" data-page="support" class="island-item flex-1">
+            <i data-lucide="headphones"></i><span>Support</span>
+        </a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 pt-28 px-6 pb-24 lg:pb-12">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6 mb-10">
+                <div class="card p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Open</p>
+                    <h3 id="statOpen" class="text-2xl heading-font font-semibold mono text-blue-600">0</h3>
+                </div>
+                <div class="card p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Answered</p>
+                    <h3 id="statAnswered" class="text-2xl heading-font font-semibold mono text-emerald-600">0</h3>
+                </div>
+                <div class="card p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Closed</p>
+                    <h3 id="statClosed" class="text-2xl heading-font font-semibold mono">0</h3>
+                </div>
+                <div class="card card-gold-edge p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--gold-deep)] uppercase font-bold tracking-widest mb-1">Total Inquiries</p>
+                    <h3 id="statTotal" class="text-2xl heading-font font-semibold gold-text mono">0</h3>
+                </div>
+            </div>
+
+            <!-- Filter -->
+            <div class="card rounded-[24px] p-4 mb-6 flex flex-wrap items-center gap-3">
+                <span class="text-xs font-bold text-[var(--muted)] uppercase tracking-wide ml-2">Filter:</span>
+                <select id="statusFilter" class="field px-4 py-2 rounded-xl text-sm font-semibold">
+                    <option value="all">All</option>
+                    <option value="Open">Open</option>
+                    <option value="Answered">Answered</option>
+                    <option value="Closed">Closed</option>
+                </select>
+            </div>
+
+            <!-- Tickets Table -->
+            <div class="card rounded-[32px] overflow-hidden">
+                <div class="p-6 md:p-8 border-b border-black/[0.05] flex justify-between items-center">
+                    <h4 class="text-lg font-semibold heading-font">Support Tickets</h4>
+                    <span class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[9px] font-bold uppercase tracking-widest">Realtime Sync</span>
+                </div>
+                <div class="overflow-x-auto no-scrollbar">
+                    <table class="w-full text-left whitespace-nowrap">
+                        <thead class="bg-black/[0.02] border-b border-black/[0.05]">
+                            <tr>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Client</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Subject</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Category</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Date</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ticketsBody" class="divide-y divide-black/[0.05]">
+                            <tr><td colspan="5" class="p-12 text-center text-[var(--muted)] text-xs italic">Loading support queue...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Ticket Reply Modal -->
+    <div id="ticketModal" class="fixed inset-0 z-[160] bg-black/60 backdrop-blur-md hidden flex items-center justify-center p-6">
+        <div class="bg-[var(--paper-card)] w-full max-w-2xl rounded-[32px] overflow-hidden flex flex-col max-h-[85vh]">
+            <div class="p-8 border-b border-black/[0.05] flex justify-between items-center bg-black/[0.015]">
+                <div>
+                    <h4 id="modalSubject" class="text-xl font-semibold heading-font">Ticket Details</h4>
+                    <p id="modalRef" class="text-[10px] mono text-[var(--muted)] uppercase">Ref: #...</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <select id="modalStatus" class="field px-3 py-2 rounded-xl text-xs font-bold">
+                        <option value="Open">Open</option>
+                        <option value="Answered">Answered</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                    <button id="closeModal" class="p-2 text-[var(--muted)] hover:text-[var(--gold-deep)] transition"><i data-lucide="x"></i></button>
+                </div>
+            </div>
+            <div id="chatContainer" class="flex-1 overflow-y-auto p-8 space-y-6 no-scrollbar"></div>
+            <div class="p-6 border-t border-black/[0.05] bg-[var(--paper-card)]">
+                <form id="replyForm" class="flex gap-3">
+                    <input type="text" id="replyMessage" placeholder="Type your reply..." required class="field flex-1 px-5 py-3 rounded-2xl text-sm">
+                    <button type="submit" class="p-3 gold-gradient text-white rounded-2xl" style="box-shadow: 0 12px 24px -12px rgba(143,110,62,0.5);"><i data-lucide="send" class="w-5 h-5"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+        lucide.createIcons();
+
+        const supabase = createClient(
+            import.meta.env.VITE_SUPABASE_URL,
+            import.meta.env.VITE_SUPABASE_ANON_KEY
+        );
+
+        // --- 0. Active nav state (sidebar + mobile island + drawer) ---
+        function setActiveNav() {
+            const current = (window.location.pathname.split('/').pop() || 'dashboard.html').replace('.html', '') || 'dashboard';
+            document.querySelectorAll('#sidebarNav a[data-page]').forEach(a => {
+                a.classList.toggle('sidebar-active', a.dataset.page === current);
+            });
+            document.querySelectorAll('#islandNav a[data-page]').forEach(a => {
+                a.classList.toggle('active', a.dataset.page === current);
+            });
+            document.querySelectorAll('#drawerNav a[data-page]').forEach(a => {
+                a.classList.toggle('drawer-active', a.dataset.page === current);
+            });
+        }
+
+        // --- 0b. Mobile drawer open/close ---
+        // FIX: the previous version referenced `document.getElementById('sidebarOverlay')`
+        // which did not exist in the markup, producing `overlay === null` and then
+        // crashing on `overlay.onclick = ...` before init() ever ran. These are all
+        // now real elements that exist in the DOM above.
+        const drawer = document.getElementById('mobileDrawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+        const drawerClose = document.getElementById('drawerClose');
+
+        function openDrawer() {
+            drawer.classList.add('open');
+            drawerOverlay.classList.add('open');
+            menuToggle.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeDrawer() {
+            drawer.classList.remove('open');
+            drawerOverlay.classList.remove('open');
+            menuToggle.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+        menuToggle.addEventListener('click', openDrawer);
+        drawerClose.addEventListener('click', closeDrawer);
+        drawerOverlay.addEventListener('click', closeDrawer);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+        document.querySelectorAll('#drawerNav a[data-page]').forEach(a => a.addEventListener('click', closeDrawer));
+
+        // --- 1. Init and Robust Security ---
+        async function init() {
+            try {
+                const { data: { session }, error: authError } = await supabase.auth.getSession();
+                if (authError || !session) throw new Error("No valid session found.");
+
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('role, full_name')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (profileError || !profile || !['admin', 'super_admin'].includes(profile.role)) {
+                    await supabase.auth.signOut();
+                    window.location.href = 'login.html?error=unauthorized';
+                    return;
+                }
+
+                // Success
+                document.getElementById('adminName').textContent = profile.full_name;
+                document.getElementById('adminInitials').textContent = profile.full_name.charAt(0);
+                document.getElementById('drawerName').textContent = profile.full_name;
+                document.getElementById('drawerInitials').textContent = profile.full_name.charAt(0);
+                // FIX: role label is now set from the actual profile role
+                // instead of a hardcoded "Authorized Personnel" string.
+                const roleLabel = profile.role === 'super_admin' ? 'Super Admin' : 'Administrator';
+                document.getElementById('adminRole').textContent = roleLabel;
+                document.getElementById('drawerRole').textContent = roleLabel;
+                // Capture the admin's own id so reply bubbles render on the
+                // right side of the ticket chat, same convention as the
+                // user-facing support page.
+                adminUserId = session.user.id;
+
+                document.getElementById('authGuard').classList.add('hidden');
+
+                loadStats();
+                loadTickets();
+                setupRealtime();
+
+            } catch (err) {
+                console.error("Security Halt:", err);
+                document.getElementById('loaderContent').innerHTML = `
+                    <p class="text-red-400 font-semibold mb-4">Access Denied or Connection Failure</p>
+                    <a href="login.html" class="px-6 py-2 gold-gradient text-white rounded-xl text-sm font-bold">Return to Login</a>
+                `;
+            }
+        }
+
+        // --- 2. Data Fetching ---
+        let currentFilter = 'all';
+        let activeTicketId = null;
+        let adminUserId = null;
+
+        async function loadStats() {
+            try {
+                const { data } = await supabase.from('tickets').select('status');
+                const rows = data || [];
+                document.getElementById('statOpen').textContent = rows.filter(r => r.status === 'Open').length;
+                document.getElementById('statAnswered').textContent = rows.filter(r => r.status === 'Answered').length;
+                document.getElementById('statClosed').textContent = rows.filter(r => r.status === 'Closed').length;
+                document.getElementById('statTotal').textContent = rows.length;
+            } catch (err) { console.error("Stats fail:", err); }
+        }
+
+        async function loadTickets() {
+            try {
+                let query = supabase.from('tickets').select('*, profiles(full_name)').order('created_at', { ascending: false });
+                if (currentFilter !== 'all') query = query.eq('status', currentFilter);
+                const { data, error } = await query;
+                if (error) throw error;
+                renderTickets(data || []);
+            } catch (err) {
+                console.error('Tickets fetch error:', err);
+                document.getElementById('ticketsBody').innerHTML = `<tr><td colspan="5" class="p-12 text-center text-red-400 text-xs italic">Could not load support queue — check console</td></tr>`;
+            }
+        }
+
+        function renderTickets(rows) {
+            const body = document.getElementById('ticketsBody');
+            if (rows.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-[var(--muted)] text-xs italic">No tickets match this filter.</td></tr>`;
+                return;
+            }
+            const statusStyle = { Open: 'bg-blue-50 text-blue-700', Answered: 'bg-emerald-50 text-emerald-700', Closed: 'bg-black/5 text-[var(--ink-text)]' };
+
+            body.innerHTML = rows.map(t => `
+                <tr onclick="openTicket('${t.id}')" class="hover:bg-black/[0.015] transition cursor-pointer">
+                    <td class="px-8 py-5 text-sm font-semibold text-[var(--ink-text)]">${t.profiles?.full_name || 'Unknown'}</td>
+                    <td class="px-8 py-5 text-sm text-[var(--ink-text)]">${t.subject}</td>
+                    <td class="px-8 py-5 text-xs text-[var(--muted)]">${t.category || 'General'}</td>
+                    <td class="px-8 py-5 text-xs text-[var(--muted)] mono">${new Date(t.created_at).toLocaleDateString()}</td>
+                    <td class="px-8 py-5 text-right">
+                        <span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full ${statusStyle[t.status] || 'bg-black/5 text-[var(--ink-text)]'}">${t.status}</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // --- 3. Ticket Modal ---
+        window.openTicket = async (id) => {
+            activeTicketId = id;
+            const { data: ticket } = await supabase.from('tickets').select('*').eq('id', id).single();
+            const { data: messages } = await supabase.from('ticket_messages').select('*').eq('ticket_id', id).order('created_at', { ascending: true });
+
+            document.getElementById('modalSubject').textContent = ticket.subject;
+            document.getElementById('modalRef').textContent = `Ref: #${ticket.id.split('-')[0].toUpperCase()}`;
+            document.getElementById('modalStatus').value = ticket.status;
+
+            renderMessages(messages || []);
+            document.getElementById('ticketModal').classList.remove('hidden');
+            scrollToBottom();
+        };
+
+        function renderMessages(messages) {
+            const container = document.getElementById('chatContainer');
+            container.innerHTML = messages.map(m => `
+                <div class="flex ${m.user_id === adminUserId ? 'justify-end' : 'justify-start'}">
+                    <div class="max-w-[80%] p-4 rounded-3xl text-sm ${m.user_id === adminUserId ? 'gold-gradient text-white rounded-br-none' : 'bg-black/[0.04] text-[var(--ink-text)] rounded-bl-none'}">
+                        <p>${m.message}</p>
+                        <p class="text-[8px] mt-1 opacity-60">${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('replyForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const msgInput = document.getElementById('replyMessage');
+            const message = msgInput.value;
+
+            const { error } = await supabase.from('ticket_messages').insert([{ ticket_id: activeTicketId, user_id: adminUserId, message }]);
+            if (!error) {
+                msgInput.value = '';
+                await supabase.from('tickets').update({ status: 'Answered' }).eq('id', activeTicketId);
+                document.getElementById('modalStatus').value = 'Answered';
+                loadStats();
+                loadTickets();
+            }
+        };
+
+        document.getElementById('modalStatus').addEventListener('change', async (e) => {
+            await supabase.from('tickets').update({ status: e.target.value }).eq('id', activeTicketId);
+            loadStats();
+            loadTickets();
+        });
+
+        document.getElementById('closeModal').onclick = () => {
+            document.getElementById('ticketModal').classList.add('hidden');
+            activeTicketId = null;
+        };
+
+        function scrollToBottom() {
+            const chat = document.getElementById('chatContainer');
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        document.getElementById('statusFilter').addEventListener('change', (e) => {
+            currentFilter = e.target.value;
+            loadTickets();
+        });
+
+        function setupRealtime() {
+            supabase.channel('admin-support-sync')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'tickets' }, () => {
+                    loadStats();
+                    loadTickets();
+                })
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ticket_messages' }, (payload) => {
+                    if (payload.new.ticket_id === activeTicketId) {
+                        supabase.from('ticket_messages').select('*').eq('ticket_id', activeTicketId).order('created_at', { ascending: true })
+                            .then(({ data }) => { renderMessages(data || []); scrollToBottom(); });
+                    }
+                })
+                .subscribe();
+        }
+
+        document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+        document.getElementById('drawerLogoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+
+        setActiveNav();
+        init();
+    </script>
+</body>
+</html>
