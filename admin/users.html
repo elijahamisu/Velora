@@ -3,176 +3,356 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Investor Management | VELORA Admin</title>
+    <title>Users | VELORA Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --gold: #D4AF37;
-            --gold-dark: #B8860B;
-            --luxury-white: #FBFAFA;
+            --ink: #0C0E13;
+            --ink-soft: #171A22;
+            --paper: #F6F4EF;
+            --paper-card: #FFFFFF;
+            --gold: #B7935B;
+            --gold-deep: #8F6E3E;
+            --gold-light: #E7D9BC;
+            --line: rgba(183, 147, 91, 0.16);
+            --ink-text: #14161C;
+            --muted: #7A7E88;
         }
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #F4F5F7;
-            color: #1a1a1a;
-            -webkit-tap-highlight-color: transparent;
+            background-color: var(--paper);
+            color: var(--ink-text);
+            overflow-x: hidden;
         }
-        .heading-font { font-family: 'Playfair Display', serif; }
-        .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%); }
+        .heading-font { font-family: 'Fraunces', serif; font-feature-settings: "ss01"; }
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+        .gold-gradient { background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%); }
         .gold-text {
-            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(212, 175, 55, 0.1);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        .ink-gradient { background: linear-gradient(160deg, var(--ink) 0%, var(--ink-soft) 100%); }
+        .card {
+            background: var(--paper-card);
+            border: 1px solid rgba(20, 22, 28, 0.06);
+            box-shadow: 0 1px 2px rgba(12,14,19,0.03), 0 12px 24px -18px rgba(12,14,19,0.18);
         }
-
-        /* Desktop Sidebar */
-        .sidebar-item:hover, .sidebar-active {
-            background: linear-gradient(90deg, rgba(212, 175, 55, 0.08) 0%, transparent 100%);
-            color: var(--gold);
-            border-left: 3px solid var(--gold);
+        .card-gold-edge { border-top: 2px solid var(--gold); }
+        .field {
+            background: #FAF9F6;
+            border: 1px solid rgba(20,22,28,0.08);
+            transition: border-color .18s ease, background .18s ease;
         }
+        .field:focus { outline: none; border-color: var(--gold); background: #fff; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
 
-        /* Mobile Island Nav */
-        .island-nav {
-            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-            width: 92%; max-width: 450px; background: rgba(10, 10, 10, 0.92);
-            backdrop-filter: blur(20px); border-radius: 35px; padding: 12px 24px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4); z-index: 100;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* ---------- Sidebar (desktop) ---------- */
+        #sidebar { background: var(--ink); }
+        #sidebar .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+        .sidebar-item {
+            color: rgba(246, 244, 239, 0.55);
+            border-left: 2px solid transparent;
+            transition: color .18s ease, background .18s ease, border-color .18s ease;
         }
-        .island-item { color: rgba(255,255,255,0.5); transition: 0.3s; }
-        .island-item.active { color: var(--gold); transform: translateY(-3px); }
+        .sidebar-item:hover {
+            background: linear-gradient(90deg, rgba(183,147,91,0.12) 0%, transparent 85%);
+            color: var(--gold-light);
+        }
+        .sidebar-active {
+            background: linear-gradient(90deg, rgba(183,147,91,0.16) 0%, transparent 85%);
+            color: var(--gold-light) !important;
+            border-left: 2px solid var(--gold);
+        }
+        .sidebar-item i { width: 17px; height: 17px; }
 
-        #sidebar { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        #sidebarOverlay { backdrop-filter: blur(6px); transition: opacity 0.4s ease; }
+        /* ---------- Mobile Island Navigation ---------- */
+        #islandNav {
+            background: rgba(12, 14, 19, 0.97);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(183, 147, 91, 0.22);
+            box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(183,147,91,0.05) inset;
+        }
+        .island-item {
+            position: relative; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 2px;
+            padding: 7px 4px; border-radius: 13px;
+            color: rgba(246, 244, 239, 0.4);
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+        .island-item i { width: 16px; height: 16px; }
+        .island-item span { font-size: 8px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+        .island-item.active {
+            color: var(--gold-light);
+            background: linear-gradient(135deg, rgba(183,147,91,0.22) 0%, rgba(143,110,62,0.10) 100%);
+        }
+        .island-item.active i { filter: drop-shadow(0 2px 6px rgba(183,147,91,0.45)); }
 
-        /* Custom UI */
-        .user-status-active { background: #DCFCE7; color: #15803D; }
-        .user-status-locked { background: #FEF2F2; color: #B91C1C; }
-        .user-status-suspended { background: #FFF7ED; color: #C2410C; }
+        ::selection { background: var(--gold-light); color: var(--ink); }
+        :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
-        .modal-body::-webkit-scrollbar { width: 4px; }
-        .modal-body::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; }
+        /* ---------- Mobile Drawer Sidebar ---------- */
+        #drawerOverlay {
+            background: rgba(8, 9, 13, 0.55);
+            backdrop-filter: blur(2px);
+            opacity: 0; pointer-events: none;
+            transition: opacity .28s ease;
+        }
+        #drawerOverlay.open { opacity: 1; pointer-events: auto; }
+        #mobileDrawer {
+            background: var(--ink);
+            width: min(86vw, 320px);
+            transform: translateX(-100%);
+            transition: transform .32s cubic-bezier(.32,.72,0,1);
+            box-shadow: 24px 0 60px -20px rgba(0,0,0,0.5);
+        }
+        #mobileDrawer.open { transform: translateX(0); }
+        #mobileDrawer .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+        .drawer-item {
+            color: rgba(246, 244, 239, 0.6);
+            border-left: 2px solid transparent;
+            transition: color .18s ease, background .18s ease, border-color .18s ease;
+        }
+        .drawer-item:active, .drawer-item:hover {
+            background: linear-gradient(90deg, rgba(183,147,91,0.14) 0%, transparent 85%);
+            color: var(--gold-light);
+        }
+        .drawer-active {
+            background: linear-gradient(90deg, rgba(183,147,91,0.18) 0%, transparent 85%);
+            color: var(--gold-light) !important;
+            border-left: 2px solid var(--gold);
+        }
+        .drawer-item i { width: 18px; height: 18px; }
+        #menuToggle {
+            width: 38px; height: 38px; border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(20,22,28,0.08);
+            color: var(--ink-text);
+            transition: background .18s ease, border-color .18s ease;
+        }
+        #menuToggle:hover { background: rgba(183,147,91,0.08); border-color: rgba(183,147,91,0.3); }
+        #menuToggle i { width: 18px; height: 18px; }
     </style>
 </head>
-<body class="bg-[#F8F9FA]">
+<body class="bg-[var(--paper)]">
 
     <!-- Auth Guard Loader -->
-    <div id="authGuard" class="fixed inset-0 z-[200] bg-white flex items-center justify-center">
-        <div class="text-center">
-            <div class="w-12 h-12 border-4 border-gray-100 border-t-[#D4AF37] rounded-full animate-spin mx-auto mb-4"></div>
-            <p class="heading-font gold-text text-lg tracking-widest uppercase">Admin Terminal</p>
+    <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
+        <div class="text-center" id="loaderContent">
+            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(183,147,91,0.25); border-top-color: var(--gold);"></div>
+            <p class="heading-font gold-text text-2xl tracking-wide">VELORA</p>
+            <p class="text-[10px] uppercase tracking-[0.3em] text-white/30 mt-2">Verifying Admin Access</p>
         </div>
     </div>
 
-    <!-- Mobile Sidebar Overlay -->
-    <div id="sidebarOverlay" class="fixed inset-0 z-[140] bg-black/40 hidden opacity-0"></div>
-
-    <!-- Sidebar -->
-    <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-72 bg-white border-r border-gray-100 z-[150] lg:translate-x-0 -translate-x-full">
-        <div class="p-8 h-full flex flex-col">
-            <div class="flex items-center justify-between mb-10">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 gold-gradient rounded-xl flex items-center justify-center text-white font-bold shadow-lg">V</div>
-                    <span class="text-xl font-bold heading-font gold-text tracking-tight">VELORA ADMIN</span>
+    <!-- Navigation Header -->
+    <header class="fixed top-0 right-0 left-0 h-20 bg-[var(--paper)]/85 backdrop-blur-md border-b border-black/[0.06] z-40 lg:left-64">
+        <div class="h-full flex items-center justify-between px-6">
+            <div class="flex items-center gap-3">
+                <button id="menuToggle" class="lg:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="w-7 h-7 gold-gradient rounded-full flex items-center justify-center text-white heading-font text-xs lg:hidden">V</div>
+                <div>
+                    <h2 class="text-lg font-semibold heading-font hidden md:block tracking-tight">Client <span class="gold-text italic">Registry</span></h2>
+                    <h2 class="text-base font-semibold heading-font md:hidden">Users</h2>
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] hidden md:block">Executive Terminal</p>
                 </div>
-                <button id="closeSidebar" class="lg:hidden text-gray-400"><i data-lucide="x"></i></button>
             </div>
-            <nav class="space-y-1 flex-1">
-                <a href="dashboard.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
-                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-3 border-l border-black/[0.06] pl-6">
+                    <div class="text-right hidden sm:block">
+                        <p id="adminName" class="text-sm font-semibold">Admin</p>
+                        <p id="adminRole" class="text-[9px] gold-text font-bold uppercase tracking-widest">...</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold" id="adminInitials">A</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Menu (Desktop only) -->
+    <aside id="sidebar" class="hidden lg:block fixed top-0 left-0 bottom-0 w-64 z-50">
+        <div class="p-8 h-full flex flex-col">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-9 h-9 rounded-lg border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
+                <h1 class="text-xl heading-font gold-text tracking-tight font-semibold">VELORA ADMIN</h1>
+            </div>
+            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-8 ml-12 -mt-1">Executive Terminal</p>
+            <div class="h-px w-full brand-hair mb-8"></div>
+
+            <nav class="space-y-1 flex-1" id="sidebarNav">
+                <a href="dashboard.html" data-page="dashboard" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
                 </a>
-                <a href="users.html" class="sidebar-item sidebar-active flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold">
-                    <i data-lucide="users" class="w-5 h-5"></i> Manage Users
+                <a href="users.html" data-page="users" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="users"></i> Users
                 </a>
-                <a href="deposits.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
-                    <i data-lucide="arrow-down-circle" class="w-5 h-5"></i> Deposits
+                <a href="deposits.html" data-page="deposits" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-down-circle"></i> Deposits
                 </a>
-                <a href="withdrawals.html" class="sidebar-item flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-gray-500">
-                    <i data-lucide="arrow-up-circle" class="w-5 h-5"></i> Withdrawals
+                <a href="withdrawals.html" data-page="withdrawals" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-up-circle"></i> Withdrawals
                 </a>
-                <div class="pt-8 mt-8 border-t border-gray-50">
-                    <button id="logoutBtn" class="w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition text-sm font-semibold text-red-400 hover:bg-red-50">
-                        <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+                <a href="investments.html" data-page="investments" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gem"></i> Investments
+                </a>
+                <a href="plans.html" data-page="plans" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layers"></i> Plans
+                </a>
+                <a href="gift-codes.html" data-page="gift-codes" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gift"></i> Gift Codes
+                </a>
+                <a href="support.html" data-page="support" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="headphones"></i> Support
+                </a>
+
+                <div class="pt-8 mt-8 border-t border-white/[0.06]">
+                    <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
+                        <i data-lucide="log-out" class="w-[17px] h-[17px]"></i> Logout
+                    </button>
+                </div>
+            </nav>
+
+            <div class="pt-6 border-t border-white/[0.06]">
+                <div class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/25">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Restricted Access
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ============ Mobile Drawer Sidebar ============ -->
+    <div id="drawerOverlay" class="lg:hidden fixed inset-0 z-[60]"></div>
+    <aside id="mobileDrawer" class="lg:hidden fixed top-0 left-0 bottom-0 z-[70] overflow-y-auto">
+        <div class="p-7 min-h-full flex flex-col">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
+                    <h1 class="text-lg heading-font gold-text tracking-tight font-semibold">VELORA ADMIN</h1>
+                </div>
+                <button id="drawerClose" aria-label="Close menu" class="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-[var(--gold-light)] hover:bg-white/5 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-6 ml-12 -mt-1">Executive Terminal</p>
+            <div class="h-px w-full brand-hair mb-6"></div>
+
+            <div class="flex items-center gap-3 p-3 mb-6 rounded-2xl bg-white/[0.04] border border-white/10">
+                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold shrink-0" id="drawerInitials">A</div>
+                <div class="min-w-0">
+                    <p id="drawerName" class="text-sm font-semibold text-white truncate">Admin</p>
+                    <p id="drawerRole" class="text-[10px] text-[var(--gold-light)] font-bold tracking-widest uppercase truncate">...</p>
+                </div>
+            </div>
+
+            <nav class="space-y-1 flex-1" id="drawerNav">
+                <a href="dashboard.html" data-page="dashboard" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="users.html" data-page="users" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="users"></i> Users
+                </a>
+                <a href="deposits.html" data-page="deposits" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-down-circle"></i> Deposits
+                </a>
+                <a href="withdrawals.html" data-page="withdrawals" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-up-circle"></i> Withdrawals
+                </a>
+                <a href="investments.html" data-page="investments" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gem"></i> Investments
+                </a>
+                <a href="plans.html" data-page="plans" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layers"></i> Plans
+                </a>
+                <a href="gift-codes.html" data-page="gift-codes" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gift"></i> Gift Codes
+                </a>
+                <a href="support.html" data-page="support" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="headphones"></i> Support
+                </a>
+
+                <div class="pt-6 mt-6 border-t border-white/[0.06]">
+                    <button id="drawerLogoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
+                        <i data-lucide="log-out" class="w-[18px] h-[18px]"></i> Logout
                     </button>
                 </div>
             </nav>
         </div>
     </aside>
 
-    <!-- Top Navbar -->
-    <header class="fixed top-0 right-0 left-0 h-20 bg-white/80 backdrop-blur-md border-b border-gray-50 z-40 lg:left-72">
-        <div class="h-full flex items-center justify-between px-6 lg:px-10">
-            <div class="flex items-center gap-4">
-                <button id="mobileMenuBtn" class="lg:hidden p-2 text-gray-400"><i data-lucide="menu"></i></button>
-                <h2 class="text-xl font-bold heading-font hidden md:block">Investor <span class="gold-text">Registry</span></h2>
-            </div>
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white font-bold" id="adminInitials">A</div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Mobile Island Nav -->
-    <div class="island-nav lg:hidden">
-        <a href="dashboard.html" class="island-item"><i data-lucide="layout-dashboard"></i></a>
-        <a href="users.html" class="island-item active"><i data-lucide="users"></i></a>
-        <a href="deposits.html" class="island-item"><i data-lucide="arrow-down-circle"></i></a>
-        <a href="withdrawals.html" class="island-item"><i data-lucide="arrow-up-circle"></i></a>
-        <button id="mobileMenuBtn" class="island-item"><i data-lucide="menu"></i></button>
-    </div>
+    <!-- ============ Mobile Island Navigation ============ -->
+    <nav id="islandNav" class="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-[22px] flex items-center gap-1 px-2 py-1.5 w-[92%] max-w-sm">
+        <a href="dashboard.html" data-page="dashboard" class="island-item flex-1">
+            <i data-lucide="layout-dashboard"></i><span>Home</span>
+        </a>
+        <a href="users.html" data-page="users" class="island-item flex-1">
+            <i data-lucide="users"></i><span>Users</span>
+        </a>
+        <a href="deposits.html" data-page="deposits" class="island-item flex-1">
+            <i data-lucide="arrow-down-circle"></i><span>Deposits</span>
+        </a>
+        <a href="withdrawals.html" data-page="withdrawals" class="island-item flex-1">
+            <i data-lucide="arrow-up-circle"></i><span>Payouts</span>
+        </a>
+        <a href="support.html" data-page="support" class="island-item flex-1">
+            <i data-lucide="headphones"></i><span>Support</span>
+        </a>
+    </nav>
 
     <!-- Main Content -->
-    <main class="lg:ml-72 pt-28 px-6 pb-36">
-        <div class="max-w-[1600px] mx-auto">
-            
-            <!-- Filters Bar -->
-            <div class="glass-card rounded-[32px] p-6 mb-8 flex flex-col lg:flex-row gap-4 items-center">
-                <div class="relative w-full lg:flex-1">
-                    <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300"></i>
-                    <input type="text" id="userSearch" placeholder="Search Name, Email, Phone or ID..." 
-                        class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:outline-none focus:border-gold transition">
+    <main class="lg:ml-64 pt-28 px-6 pb-24 lg:pb-12">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6 mb-10">
+                <div class="card p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Total Users</p>
+                    <h3 id="statTotalUsers" class="text-2xl heading-font font-semibold mono">0</h3>
                 </div>
-                <div class="flex gap-2 w-full lg:w-auto">
-                    <select id="statusFilter" class="flex-1 lg:w-40 px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl text-xs font-bold uppercase outline-none focus:border-gold">
-                        <option value="all">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="locked">Locked</option>
-                        <option value="suspended">Suspended</option>
-                    </select>
-                    <button onclick="refreshData()" class="p-3 bg-white border border-gray-100 rounded-2xl text-gold"><i data-lucide="refresh-cw" class="w-5 h-5"></i></button>
+                <div class="card p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Verified Clients</p>
+                    <h3 id="statVerified" class="text-2xl heading-font font-semibold mono">0</h3>
                 </div>
+                <div class="card p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">New This Week</p>
+                    <h3 id="statNewWeek" class="text-2xl heading-font font-semibold mono">0</h3>
+                </div>
+                <div class="card card-gold-edge p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--gold-deep)] uppercase font-bold tracking-widest mb-1">Total Wallet Value</p>
+                    <h3 id="statWalletValue" class="text-2xl heading-font font-semibold gold-text mono">₦0</h3>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="card rounded-[24px] p-4 mb-6 flex items-center gap-3">
+                <i data-lucide="search" class="w-4 h-4 text-[var(--muted)] ml-2"></i>
+                <input type="text" id="searchInput" placeholder="Search by name, phone, or referral code..." class="field flex-1 border-0 bg-transparent px-2 py-2 text-sm focus:ring-0">
             </div>
 
             <!-- Users Table -->
-            <div class="glass-card rounded-[40px] overflow-hidden">
+            <div class="card rounded-[32px] overflow-hidden">
+                <div class="p-6 md:p-8 border-b border-black/[0.05] flex justify-between items-center">
+                    <h4 class="text-lg font-semibold heading-font">Client Registry</h4>
+                    <span class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[9px] font-bold uppercase tracking-widest">Realtime Sync</span>
+                </div>
                 <div class="overflow-x-auto no-scrollbar">
                     <table class="w-full text-left whitespace-nowrap">
-                        <thead class="bg-gray-50/50 border-b border-gray-100">
+                        <thead class="bg-black/[0.02] border-b border-black/[0.05]">
                             <tr>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Investor</th>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Financials</th>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Stats</th>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Identity</th>
-                                <th class="px-8 py-5 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Client</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Referral Code</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Wallet Balance</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Joined</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase text-right">Role</th>
                             </tr>
                         </thead>
-                        <tbody id="userTableBody" class="divide-y divide-gray-50">
-                            <tr>
-                                <td colspan="5" class="px-8 py-20 text-center">
-                                    <div class="w-10 h-10 border-2 border-gold/20 border-t-gold rounded-full animate-spin mx-auto mb-4"></div>
-                                    <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Decrypting User Data...</p>
-                                </td>
-                            </tr>
+                        <tbody id="usersBody" class="divide-y divide-black/[0.05]">
+                            <tr><td colspan="5" class="p-12 text-center text-[var(--muted)] text-xs italic">Loading client registry...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -180,69 +360,6 @@
 
         </div>
     </main>
-
-    <!-- User Detail Modal -->
-    <div id="userModal" class="fixed inset-0 z-[200] bg-black/60 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-4xl rounded-[40px] overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-full gold-gradient flex items-center justify-center text-white text-xl font-bold" id="modalInitials">?</div>
-                    <div>
-                        <h4 id="modalName" class="text-xl font-bold heading-font">...</h4>
-                        <p id="modalEmail" class="text-xs text-gray-400">...</p>
-                    </div>
-                </div>
-                <button onclick="closeModal()" class="p-2 text-gray-400 hover:text-gold transition"><i data-lucide="x"></i></button>
-            </div>
-            
-            <div class="flex-1 overflow-y-auto p-8 modal-body space-y-10">
-                <!-- Action Row -->
-                <div class="flex flex-wrap gap-3 p-4 bg-gray-50 rounded-3xl border border-gray-100">
-                    <button id="lockUnlockBtn" class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase transition"></button>
-                    <button id="creditDebitBtn" onclick="openBalanceAdjust()" class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase bg-gold text-white">Adjust Balance</button>
-                    <button onclick="sendUserNotif()" class="px-6 py-2.5 rounded-xl text-xs font-bold uppercase bg-gray-800 text-white">Send Message</button>
-                </div>
-
-                <div class="grid md:grid-cols-3 gap-8">
-                    <!-- Wallet Column -->
-                    <div class="space-y-6">
-                        <h5 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b pb-2">Financial Ledger</h5>
-                        <div class="space-y-4">
-                            <div><p class="text-[10px] text-gray-400 font-bold uppercase">Wallet Balance</p><p id="modalBalance" class="text-lg font-bold">₦0</p></div>
-                            <div><p class="text-[10px] text-gray-400 font-bold uppercase">Invested Capital</p><p id="modalInvest" class="text-lg font-bold">₦0</p></div>
-                            <div><p class="text-[10px] text-gray-400 font-bold uppercase">Total Earnings</p><p id="modalEarnings" class="text-lg font-bold text-green-600">₦0</p></div>
-                        </div>
-                    </div>
-                    <!-- Activity Column -->
-                    <div class="space-y-6">
-                        <h5 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b pb-2">Platform Activity</h5>
-                        <div class="space-y-4">
-                            <div><p class="text-[10px] text-gray-400 font-bold uppercase">Total Deposits</p><p id="modalTotDep" class="text-sm font-bold">₦0</p></div>
-                            <div><p class="text-[10px] text-gray-400 font-bold uppercase">Total Withdrawals</p><p id="modalTotWith" class="text-sm font-bold">₦0</p></div>
-                            <div><p class="text-[10px] text-gray-400 font-bold uppercase">Referral Code</p><p id="modalRefCode" class="text-sm font-mono gold-text font-bold">---</p></div>
-                        </div>
-                    </div>
-                    <!-- Metadata Column -->
-                    <div class="space-y-6">
-                        <h5 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b pb-2">Registration Detail</h5>
-                        <div class="space-y-4">
-                            <div><p class="text-[10px] text-gray-400 font-bold uppercase">Member Since</p><p id="modalJoined" class="text-sm font-bold">...</p></div>
-                            <div><p class="text-[10px] text-gray-400 font-bold uppercase">Phone Number</p><p id="modalPhone" class="text-sm font-bold">...</p></div>
-                            <div><p class="text-[10px] text-gray-400 font-bold uppercase">User Unique ID</p><p id="modalId" class="text-[9px] text-gray-400 font-mono break-all">...</p></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Ledger Snippet -->
-                <div class="space-y-4">
-                    <h5 class="text-xs font-bold text-gray-400 uppercase tracking-widest border-b pb-2">Recent User Ledger</h5>
-                    <div id="modalTransHistory" class="space-y-2">
-                        <p class="text-xs text-gray-400 italic">Retrieving private records...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
@@ -254,212 +371,192 @@
             import.meta.env.VITE_SUPABASE_ANON_KEY
         );
 
-        let allUsers = [];
-        let selectedUser = null;
+        // --- 0. Active nav state (sidebar + mobile island + drawer) ---
+        function setActiveNav() {
+            const current = (window.location.pathname.split('/').pop() || 'dashboard.html').replace('.html', '') || 'dashboard';
+            document.querySelectorAll('#sidebarNav a[data-page]').forEach(a => {
+                a.classList.toggle('sidebar-active', a.dataset.page === current);
+            });
+            document.querySelectorAll('#islandNav a[data-page]').forEach(a => {
+                a.classList.toggle('active', a.dataset.page === current);
+            });
+            document.querySelectorAll('#drawerNav a[data-page]').forEach(a => {
+                a.classList.toggle('drawer-active', a.dataset.page === current);
+            });
+        }
 
-        // --- 1. Init & Security ---
+        // --- 0b. Mobile drawer open/close ---
+        // FIX: the previous version referenced `document.getElementById('sidebarOverlay')`
+        // which did not exist in the markup, producing `overlay === null` and then
+        // crashing on `overlay.onclick = ...` before init() ever ran. These are all
+        // now real elements that exist in the DOM above.
+        const drawer = document.getElementById('mobileDrawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+        const drawerClose = document.getElementById('drawerClose');
+
+        function openDrawer() {
+            drawer.classList.add('open');
+            drawerOverlay.classList.add('open');
+            menuToggle.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeDrawer() {
+            drawer.classList.remove('open');
+            drawerOverlay.classList.remove('open');
+            menuToggle.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+        menuToggle.addEventListener('click', openDrawer);
+        drawerClose.addEventListener('click', closeDrawer);
+        drawerOverlay.addEventListener('click', closeDrawer);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+        document.querySelectorAll('#drawerNav a[data-page]').forEach(a => a.addEventListener('click', closeDrawer));
+
+        // --- 1. Init and Robust Security ---
         async function init() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                window.location.href = 'login.html';
-                return;
-            }
+            try {
+                const { data: { session }, error: authError } = await supabase.auth.getSession();
+                if (authError || !session) throw new Error("No valid session found.");
 
-            const { data: profile } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single();
-            if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-                window.location.href = '../login.html';
-                return;
-            }
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('role, full_name')
+                    .eq('id', session.user.id)
+                    .single();
 
-            document.getElementById('adminInitials').textContent = profile.full_name.charAt(0);
-            document.getElementById('authGuard').classList.add('hidden');
-            
-            fetchUsers();
-            setupRealtime();
+                if (profileError || !profile || !['admin', 'super_admin'].includes(profile.role)) {
+                    await supabase.auth.signOut();
+                    window.location.href = 'login.html?error=unauthorized';
+                    return;
+                }
+
+                // Success
+                document.getElementById('adminName').textContent = profile.full_name;
+                document.getElementById('adminInitials').textContent = profile.full_name.charAt(0);
+                document.getElementById('drawerName').textContent = profile.full_name;
+                document.getElementById('drawerInitials').textContent = profile.full_name.charAt(0);
+                // FIX: role label is now set from the actual profile role
+                // instead of a hardcoded "Authorized Personnel" string.
+                const roleLabel = profile.role === 'super_admin' ? 'Super Admin' : 'Administrator';
+                document.getElementById('adminRole').textContent = roleLabel;
+                document.getElementById('drawerRole').textContent = roleLabel;
+                document.getElementById('authGuard').classList.add('hidden');
+
+                loadStats();
+                loadUsers();
+                setupRealtime();
+
+            } catch (err) {
+                console.error("Security Halt:", err);
+                document.getElementById('loaderContent').innerHTML = `
+                    <p class="text-red-400 font-semibold mb-4">Access Denied or Connection Failure</p>
+                    <a href="login.html" class="px-6 py-2 gold-gradient text-white rounded-xl text-sm font-bold">Return to Login</a>
+                `;
+            }
         }
 
         // --- 2. Data Fetching ---
-        async function fetchUsers() {
+        let allUsers = [];
+
+        async function loadStats() {
             try {
-                // Fetch Profiles + Wallets + Earnings
+                const [users, wallets] = await Promise.all([
+                    supabase.from('profiles').select('id, role, created_at'),
+                    supabase.from('wallets').select('available_balance, investment_balance')
+                ]);
+
+                const userData = users.data || [];
+                const walletData = wallets.data || [];
+
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                const newThisWeek = userData.filter(u => new Date(u.created_at) >= weekAgo).length;
+                const verified = userData.filter(u => u.role !== 'unverified').length;
+                const totalWalletValue = walletData.reduce((acc, w) => acc + Number(w.available_balance || 0) + Number(w.investment_balance || 0), 0);
+
+                document.getElementById('statTotalUsers').textContent = userData.length;
+                document.getElementById('statVerified').textContent = verified;
+                document.getElementById('statNewWeek').textContent = newThisWeek;
+                document.getElementById('statWalletValue').textContent = `₦${totalWalletValue.toLocaleString()}`;
+
+            } catch (err) { console.error("Stats fail:", err); }
+        }
+
+        async function loadUsers() {
+            try {
                 const { data: profiles, error } = await supabase
                     .from('profiles')
-                    .select('*, wallets(*), earnings(*)')
+                    .select('*, wallets(available_balance)')
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
-                allUsers = profiles;
-                renderTable();
+                allUsers = profiles || [];
+                renderUsers(allUsers);
             } catch (err) {
-                console.error("Fetch Error:", err);
+                console.error('Users fetch error:', err);
+                document.getElementById('usersBody').innerHTML = `<tr><td colspan="5" class="p-12 text-center text-red-400 text-xs italic">Could not load client registry — check console</td></tr>`;
             }
         }
 
-        // --- 3. UI Rendering ---
-        function renderTable() {
-            const search = document.getElementById('userSearch').value.toLowerCase();
-            const status = document.getElementById('statusFilter').value;
-            const container = document.getElementById('userTableBody');
-
-            const filtered = allUsers.filter(u => {
-                const matchesSearch = u.full_name.toLowerCase().includes(search) || u.email.toLowerCase().includes(search) || u.id.includes(search);
-                const matchesStatus = status === 'all' || u.status === status;
-                return matchesSearch && matchesStatus;
-            });
-
-            if (filtered.length === 0) {
-                container.innerHTML = `<tr><td colspan="5" class="px-8 py-20 text-center text-gray-400 text-xs font-bold uppercase tracking-widest">No matching investors found</td></tr>`;
+        function renderUsers(list) {
+            const body = document.getElementById('usersBody');
+            if (list.length === 0) {
+                body.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-[var(--muted)] text-xs italic">No matching clients found.</td></tr>`;
                 return;
             }
 
-            container.innerHTML = filtered.map(u => {
-                const wallet = u.wallets?.[0] || { balance: 0, invested_balance: 0 };
-                const earn = u.earnings?.[0] || { total_earnings: 0 };
+            body.innerHTML = list.map(u => {
+                const balance = u.wallets?.[0]?.available_balance ?? u.wallets?.available_balance ?? 0;
+                const isAdmin = ['admin', 'super_admin'].includes(u.role);
                 return `
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="px-8 py-6">
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white font-bold">${u.full_name.charAt(0)}</div>
+                    <tr class="hover:bg-black/[0.015] transition">
+                        <td class="px-8 py-5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold text-sm">${(u.full_name || '?').charAt(0).toUpperCase()}</div>
                                 <div>
-                                    <p class="text-sm font-bold text-gray-800">${u.full_name}</p>
-                                    <p class="text-[10px] text-gray-400 font-medium">${u.email}</p>
+                                    <p class="text-sm font-semibold text-[var(--ink-text)]">${u.full_name || 'Unnamed'}</p>
+                                    <p class="text-[10px] text-[var(--muted)] mono">${u.phone || u.email || '—'}</p>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-8 py-6">
-                            <p class="text-xs font-bold text-gray-800">₦${wallet.balance.toLocaleString()}</p>
-                            <p class="text-[9px] text-gold uppercase font-bold tracking-widest">Invest: ₦${wallet.invested_balance.toLocaleString()}</p>
-                        </td>
-                        <td class="px-8 py-6">
-                            <p class="text-xs font-bold text-green-600">₦${earn.total_earnings.toLocaleString()}</p>
-                            <p class="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Total Profits</p>
-                        </td>
-                        <td class="px-8 py-6">
-                            <span class="text-[9px] font-bold uppercase px-3 py-1 rounded-full user-status-${u.status || 'active'}">
-                                ${u.status || 'active'}
-                            </span>
-                            <p class="text-[9px] text-gray-400 mt-1 font-mono">${u.referral_code}</p>
-                        </td>
-                        <td class="px-8 py-6 text-right">
-                            <button onclick="viewUser('${u.id}')" class="px-4 py-2 bg-gray-900 text-white text-[10px] font-bold rounded-xl hover:bg-gold transition uppercase">Inspect</button>
+                        <td class="px-8 py-5 text-xs mono text-[var(--muted)]">${u.referral_code || '—'}</td>
+                        <td class="px-8 py-5 text-sm font-semibold mono">₦${Number(balance).toLocaleString()}</td>
+                        <td class="px-8 py-5 text-xs text-[var(--muted)] mono">${new Date(u.created_at).toLocaleDateString()}</td>
+                        <td class="px-8 py-5 text-right">
+                            <span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full ${isAdmin ? 'bg-[rgba(183,147,91,0.12)] text-[var(--gold-deep)]' : 'bg-black/5 text-[var(--ink-text)]'}">${u.role || 'client'}</span>
                         </td>
                     </tr>
                 `;
             }).join('');
-            lucide.createIcons();
         }
 
-        // --- 4. User Actions ---
-        window.viewUser = async (id) => {
-            selectedUser = allUsers.find(u => u.id === id);
-            if (!selectedUser) return;
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase();
+            const filtered = allUsers.filter(u =>
+                (u.full_name || '').toLowerCase().includes(q) ||
+                (u.phone || '').toLowerCase().includes(q) ||
+                (u.referral_code || '').toLowerCase().includes(q)
+            );
+            renderUsers(filtered);
+        });
 
-            const w = selectedUser.wallets?.[0] || { balance: 0, invested_balance: 0 };
-            const e = selectedUser.earnings?.[0] || { total_earnings: 0 };
-
-            document.getElementById('modalName').textContent = selectedUser.full_name;
-            document.getElementById('modalEmail').textContent = selectedUser.email;
-            document.getElementById('modalInitials').textContent = selectedUser.full_name.charAt(0);
-            document.getElementById('modalBalance').textContent = `₦${w.balance.toLocaleString()}`;
-            document.getElementById('modalInvest').textContent = `₦${w.invested_balance.toLocaleString()}`;
-            document.getElementById('modalEarnings').textContent = `₦${e.total_earnings.toLocaleString()}`;
-            document.getElementById('modalRefCode').textContent = selectedUser.referral_code;
-            document.getElementById('modalPhone').textContent = selectedUser.phone;
-            document.getElementById('modalJoined').textContent = new Date(selectedUser.created_at).toLocaleDateString();
-            document.getElementById('modalId').textContent = selectedUser.id;
-
-            // Status Toggle Button
-            const lockBtn = document.getElementById('lockUnlockBtn');
-            const isLocked = selectedUser.status === 'locked';
-            lockBtn.textContent = isLocked ? 'Unlock Investor' : 'Lock Account';
-            lockBtn.className = isLocked ? 'px-6 py-2.5 rounded-xl text-xs font-bold uppercase transition bg-green-100 text-green-700' : 'px-6 py-2.5 rounded-xl text-xs font-bold uppercase transition bg-red-100 text-red-700';
-            lockBtn.onclick = () => toggleLock(selectedUser.id, selectedUser.status);
-
-            // Fetch User Transactions
-            const { data: trans } = await supabase.from('transactions').select('*').eq('user_id', id).order('created_at', { ascending: false }).limit(5);
-            document.getElementById('modalTransHistory').innerHTML = trans.map(t => `
-                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl border border-gray-100 text-[10px]">
-                    <span class="font-bold text-gray-500 uppercase">${t.type}</span>
-                    <span class="font-bold ${['deposit', 'earning', 'referral'].includes(t.type) ? 'text-green-600' : 'text-gray-800'}">₦${t.amount.toLocaleString()}</span>
-                    <span class="text-gray-400 font-mono">${new Date(t.created_at).toLocaleDateString()}</span>
-                </div>
-            `).join('') || '<p class="text-xs text-gray-400 italic">No ledger entries found.</p>';
-
-            document.getElementById('userModal').classList.remove('hidden');
-        };
-
-        window.toggleLock = async (id, status) => {
-            const newStatus = status === 'locked' ? 'active' : 'locked';
-            if (!confirm(`Are you sure you want to ${newStatus === 'locked' ? 'LOCK' : 'UNLOCK'} this user?`)) return;
-
-            const { error } = await supabase.from('profiles').update({ status: newStatus }).eq('id', id);
-            if (!error) {
-                alert(`User account ${newStatus}.`);
-                closeModal();
-            }
-        };
-
-        window.openBalanceAdjust = async () => {
-            const amt = prompt("Enter amount to adjust (Use negative for Debit, positive for Credit):");
-            if (!amt || isNaN(amt)) return;
-            
-            const adjustment = parseFloat(amt);
-            const w = selectedUser.wallets?.[0];
-            const newBalance = w.balance + adjustment;
-
-            if (newBalance < 0) return alert("Operation failed: Insufficient user funds for this debit.");
-
-            if (confirm(`Final Confirmation: ${adjustment > 0 ? 'CREDIT' : 'DEBIT'} user ₦${Math.abs(adjustment).toLocaleString()}?`)) {
-                // 1. Update Wallet
-                const { error: wErr } = await supabase.from('wallets').update({ balance: newBalance }).eq('user_id', selectedUser.id);
-                // 2. Log Transaction
-                const { error: tErr } = await supabase.from('transactions').insert([{
-                    user_id: selectedUser.id,
-                    amount: Math.abs(adjustment),
-                    type: adjustment > 0 ? 'deposit' : 'withdrawal',
-                    status: 'completed',
-                    description: `Admin Adjustment: ${adjustment > 0 ? 'Credit' : 'Debit'}`
-                }]);
-
-                if (!wErr && !tErr) alert("Balance adjusted successfully.");
-                closeModal();
-            }
-        };
-
-        window.sendUserNotif = async () => {
-            const msg = prompt("Enter notification message for this user:");
-            if (!msg) return;
-
-            const { error } = await supabase.from('notifications').insert([{
-                user_id: selectedUser.id,
-                title: 'Admin Message',
-                message: msg
-            }]);
-
-            if (!error) alert("Notification sent successfully.");
-        };
-
-        // --- 5. System Logic ---
         function setupRealtime() {
-            supabase.channel('admin-users-sync')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, fetchUsers)
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'wallets' }, fetchUsers)
-                .subscribe();
+            supabase.channel('users-sync')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+                    loadStats();
+                    loadUsers();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'wallets' }, () => {
+                    loadStats();
+                    loadUsers();
+                }).subscribe();
         }
 
-        window.closeModal = () => document.getElementById('userModal').classList.add('hidden');
-        window.refreshData = () => fetchUsers();
-
-        document.getElementById('userSearch').addEventListener('input', renderTable);
-        document.getElementById('statusFilter').addEventListener('change', renderTable);
-        
-        // Navigation Logic
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        document.getElementById('mobileMenuBtn').onclick = () => { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); setTimeout(() => overlay.classList.add('opacity-100'), 10); };
-        document.getElementById('closeSidebar').onclick = overlay.onclick = () => { sidebar.classList.add('-translate-x-full'); overlay.classList.remove('opacity-100'); setTimeout(() => overlay.classList.add('hidden'), 400); };
         document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+        document.getElementById('drawerLogoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
 
+        setActiveNav();
         init();
     </script>
 </body>
