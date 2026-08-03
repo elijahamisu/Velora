@@ -433,6 +433,15 @@
             import.meta.env.VITE_SUPABASE_ANON_KEY
         );
 
+        // Helper: coerce to a safe number so nulls/undefined never render as NaN
+        function toNum(val) {
+            const n = Number(val);
+            return Number.isFinite(n) ? n : 0;
+        }
+        function naira(val) {
+            return `₦${toNum(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
         // --- 0. Active nav state (sidebar + mobile island + drawer) ---
         function setActiveNav() {
             const current = (window.location.pathname.split('/').pop() || 'dashboard.html').replace('.html', '') || 'dashboard';
@@ -496,11 +505,14 @@
                     supabase.from('transactions').select('*').eq('user_id', user.id).eq('type', 'gift_code').order('created_at', { ascending: false })
                 ]);
 
-                if (walletRes.data) {
-                    wallet = walletRes.data;
-                    document.getElementById('topBalance').textContent = `₦${wallet.balance.toLocaleString()}`;
-                    document.getElementById('drawerBalance').textContent = `₦${wallet.balance.toLocaleString()}`;
+                if (walletRes.error) {
+                    console.error('Wallet fetch error:', walletRes.error.message);
                 }
+
+                wallet = walletRes.data || {};
+                // NOTE: actual column name is available_balance, not "balance"
+                document.getElementById('topBalance').textContent = naira(wallet.available_balance);
+                document.getElementById('drawerBalance').textContent = naira(wallet.available_balance);
 
                 renderHistory(historyRes.data || []);
             } catch (err) {
@@ -515,7 +527,7 @@
             const totalValue = document.getElementById('totalGiftValue');
 
             totalCount.textContent = `${data.length} Code${data.length === 1 ? '' : 's'}`;
-            totalValue.textContent = `₦${data.reduce((acc, curr) => acc + curr.amount, 0).toLocaleString()}`;
+            totalValue.textContent = naira(data.reduce((acc, curr) => acc + toNum(curr.amount), 0));
 
             if (data.length === 0) return;
 
@@ -525,7 +537,7 @@
                         <p class="text-sm mono font-bold text-[var(--ink-text)] tracking-tighter uppercase">${item.reference || 'VEL-GIFT'}</p>
                     </td>
                     <td class="px-8 py-6">
-                        <p class="text-sm font-semibold mono text-emerald-600">+ ₦${item.amount.toLocaleString()}</p>
+                        <p class="text-sm font-semibold mono text-emerald-600">+ ${naira(item.amount)}</p>
                     </td>
                     <td class="px-8 py-6 text-xs text-[var(--muted)] font-medium mono">
                         ${new Date(item.created_at).toLocaleDateString()}
@@ -581,16 +593,22 @@
                 // (In production, use a Database RPC/Function for atomicity)
 
                 // A. Record redemption
-                await supabase.from('gift_redemptions').insert([{ user_id: user.id, gift_code_id: gift.id }]);
+                const redemptionRes = await supabase.from('gift_redemptions').insert([{ user_id: user.id, gift_code_id: gift.id }]);
+                if (redemptionRes.error) throw new Error(`Could not record redemption: ${redemptionRes.error.message}`);
 
                 // B. Increment usage count
-                await supabase.from('gift_codes').update({ current_usage: gift.current_usage + 1 }).eq('id', gift.id);
+                const usageRes = await supabase.from('gift_codes').update({ current_usage: gift.current_usage + 1 }).eq('id', gift.id);
+                if (usageRes.error) throw new Error(`Could not update code usage: ${usageRes.error.message}`);
 
-                // C. Credit Wallet
-                await supabase.from('wallets').update({ balance: wallet.balance + gift.amount }).eq('user_id', user.id);
+                // C. Credit Wallet — column is available_balance, not balance
+                const currentBalance = toNum(wallet.available_balance);
+                const creditRes = await supabase.from('wallets')
+                    .update({ available_balance: currentBalance + toNum(gift.amount) })
+                    .eq('user_id', user.id);
+                if (creditRes.error) throw new Error(`Could not credit wallet: ${creditRes.error.message}`);
 
                 // D. Log Transaction
-                await supabase.from('transactions').insert([{
+                const txRes = await supabase.from('transactions').insert([{
                     user_id: user.id,
                     amount: gift.amount,
                     type: 'gift_code',
@@ -598,15 +616,17 @@
                     reference: code,
                     description: `Redeemed Gift Reward: ${code}`
                 }]);
+                if (txRes.error) console.error('Transaction log error:', txRes.error.message);
 
                 // E. Create Notification
-                await supabase.from('notifications').insert([{
+                const notifRes = await supabase.from('notifications').insert([{
                     user_id: user.id,
                     title: 'Gift Reward Credited!',
-                    message: `Successfully redeemed code ${code}. ₦${gift.amount.toLocaleString()} added to your wallet.`
+                    message: `Successfully redeemed code ${code}. ${naira(gift.amount)} added to your wallet.`
                 }]);
+                if (notifRes.error) console.error('Notification error:', notifRes.error.message);
 
-                showStatus(`Success! ₦${gift.amount.toLocaleString()} has been credited.`, 'success');
+                showStatus(`Success! ${naira(gift.amount)} has been credited.`, 'success');
                 document.getElementById('giftForm').reset();
                 loadData();
 
