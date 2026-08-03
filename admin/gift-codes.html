@@ -334,7 +334,12 @@
                 <form id="createCodeForm" class="grid md:grid-cols-5 gap-4 items-end">
                     <div class="md:col-span-1">
                         <label class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest block mb-2">Code</label>
-                        <input type="text" id="newCode" placeholder="VEL-XXXX" required class="field w-full px-4 py-3 rounded-xl text-sm mono uppercase">
+                        <div class="relative">
+                            <input type="text" id="newCode" placeholder="VEL-XXXX" required class="field w-full pl-4 pr-11 py-3 rounded-xl text-sm mono uppercase">
+                            <button type="button" id="generateCodeBtn" title="Generate random code" class="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center text-[var(--gold-deep)] hover:bg-[rgba(183,147,91,0.1)] transition">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            </button>
+                        </div>
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest block mb-2">Amount (₦)</label>
@@ -467,6 +472,11 @@
                 loadCodes();
                 setupRealtime();
 
+                // Prefill the code field with a ready-to-use random code
+                // once existing codes are loaded, so the admin isn't
+                // greeted with an empty required field.
+                document.getElementById('newCode').value = generateCode();
+
             } catch (err) {
                 console.error("Security Halt:", err);
                 document.getElementById('loaderContent').innerHTML = `
@@ -477,6 +487,27 @@
         }
 
         // --- 2. Data Fetching ---
+        let existingCodes = [];
+
+        // --- Code Generator ---
+        // Format: VEL-XXXX-XXXX using unambiguous uppercase letters/digits
+        // (no 0/O/1/I) so codes are easy to read aloud or type by hand.
+        function generateCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            const segment = () => Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+            let code;
+            let attempts = 0;
+            do {
+                code = `VEL-${segment()}-${segment()}`;
+                attempts++;
+            } while (existingCodes.includes(code) && attempts < 10);
+            return code;
+        }
+
+        document.getElementById('generateCodeBtn').onclick = () => {
+            document.getElementById('newCode').value = generateCode();
+        };
+
         async function loadStats() {
             try {
                 const [codesRes, redemptionsRes] = await Promise.all([
@@ -496,6 +527,7 @@
             try {
                 const { data, error } = await supabase.from('gift_codes').select('*').order('created_at', { ascending: false });
                 if (error) throw error;
+                existingCodes = (data || []).map(c => c.code);
                 renderCodes(data || []);
             } catch (err) {
                 console.error('Codes fetch error:', err);
@@ -550,6 +582,7 @@
                 if (error) throw error;
 
                 document.getElementById('createCodeForm').reset();
+                document.getElementById('newCode').value = generateCode();
                 loadStats();
                 loadCodes();
             } catch (err) {
