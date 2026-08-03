@@ -446,6 +446,53 @@
         </div>
     </main>
 
+    <!-- ============ Investment Confirmation Modal ============ -->
+    <div id="investModalOverlay" class="hidden fixed inset-0 z-[90] flex items-center justify-center p-6" style="background: rgba(8,9,13,0.6); backdrop-filter: blur(2px);">
+        <div class="card rounded-[28px] max-w-md w-full p-8 relative">
+            <button id="investModalClose" aria-label="Close" class="absolute top-5 right-5 text-[var(--muted)] hover:text-[var(--ink-text)] transition">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5" style="background: rgba(183,147,91,0.1);">
+                <i data-lucide="gem" class="w-7 h-7 text-[var(--gold-deep)]"></i>
+            </div>
+
+            <h3 id="investModalPlanName" class="text-xl heading-font font-semibold mb-1">Plan Name</h3>
+            <p id="investModalRoi" class="text-emerald-600 font-semibold text-sm mb-6">0% Daily Profit</p>
+
+            <div class="bg-black/[0.02] rounded-2xl p-5 border border-black/[0.05] space-y-3 mb-6">
+                <div class="flex justify-between text-sm">
+                    <span class="text-[var(--muted)]">Investment Amount</span>
+                    <span id="investModalAmount" class="font-bold mono">₦0.00</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-[var(--muted)]">Expected Daily ROI</span>
+                    <span id="investModalDailyRoi" class="font-bold text-emerald-600 mono">₦0.00</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-[var(--muted)]">Duration</span>
+                    <span id="investModalDuration" class="font-bold mono">0 Days</span>
+                </div>
+                <div class="flex justify-between text-sm border-t border-black/[0.05] pt-3">
+                    <span class="text-[var(--muted)]">Wallet Balance After</span>
+                    <span id="investModalNewBalance" class="font-bold mono">₦0.00</span>
+                </div>
+            </div>
+
+            <div id="investModalError" class="hidden mb-4 p-3 rounded-xl text-xs font-bold uppercase tracking-wider bg-red-50 text-red-600 border border-red-100"></div>
+
+            <div class="flex gap-3">
+                <button id="investModalCancel" type="button" class="flex-1 py-4 rounded-2xl font-bold text-sm border border-black/10 text-[var(--ink-text)] hover:bg-black/[0.03] transition">
+                    Cancel
+                </button>
+                <button id="investModalConfirm" type="button" class="flex-1 py-4 gold-gradient text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition">
+                    <span>Confirm Investment</span>
+                    <div id="investModalLoader" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin hidden"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
@@ -621,7 +668,7 @@
 
                     <div class="grid grid-cols-2 gap-4 mt-6 mb-6">
                         <div>
-                            <p class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Min Invest</p>
+                            <p class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Investment Amount</p>
                             <p class="text-base font-semibold mono">${naira(plan.minInvest)}</p>
                         </div>
                         <div>
@@ -630,130 +677,122 @@
                         </div>
                     </div>
 
-                    <button type="button" class="plan-toggle-btn w-full py-4 gold-gradient text-white font-bold rounded-2xl hover:-translate-y-0.5 transition-all" style="box-shadow: 0 20px 40px -20px rgba(143,110,62,0.5);">
+                    <button type="button" class="plan-invest-btn w-full py-4 gold-gradient text-white font-bold rounded-2xl hover:-translate-y-0.5 transition-all" style="box-shadow: 0 20px 40px -20px rgba(143,110,62,0.5);">
                         Invest Now
                     </button>
-
-                    <!-- Collapsible amount entry, revealed on "Invest Now" -->
-                    <div class="plan-form hidden mt-6 pt-6 border-t border-black/[0.06] space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-[var(--muted)] uppercase tracking-widest mb-2 ml-1">Investment Amount (₦)</label>
-                            <input type="number" class="plan-amount field w-full px-5 py-4 rounded-2xl text-lg font-semibold mono" value="${plan.minInvest}" min="${plan.minInvest}">
-                        </div>
-                        <div class="bg-black/[0.02] rounded-2xl p-5 border border-black/[0.05] space-y-3">
-                            <div class="flex justify-between text-sm">
-                                <span class="text-[var(--muted)]">Expected Daily ROI</span>
-                                <span class="font-bold text-emerald-600 mono plan-preview-roi">${naira(plan.minInvest * plan.dailyRoiPct / 100)}</span>
-                            </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-[var(--muted)]">New Wallet Balance</span>
-                                <span class="font-bold mono plan-preview-balance">₦0.00</span>
-                            </div>
-                        </div>
-                        <button type="button" class="plan-confirm-btn w-full py-4 bg-[var(--ink)] text-white font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-[var(--ink-soft)] transition">
-                            <span>Confirm Investment</span>
-                            <div class="plan-btn-loader w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin hidden"></div>
-                        </button>
-                    </div>
                 </div>
             `).join('');
 
             attachPlanHandlers();
         }
 
-        // --- 4. Plan Card Interactions ---
+        // --- 4. Plan Card Interactions: tapping "Invest Now" opens the confirmation modal ---
         function attachPlanHandlers() {
             document.querySelectorAll('#plansList [data-plan-id]').forEach(card => {
                 const planId = card.dataset.planId;
                 const plan = PLANS.find(p => p.id === planId);
-                const toggleBtn = card.querySelector('.plan-toggle-btn');
-                const form = card.querySelector('.plan-form');
-                const amountInput = card.querySelector('.plan-amount');
-                const previewRoi = card.querySelector('.plan-preview-roi');
-                const previewBalance = card.querySelector('.plan-preview-balance');
-                const confirmBtn = card.querySelector('.plan-confirm-btn');
+                const investBtn = card.querySelector('.plan-invest-btn');
 
-                const updatePreview = () => {
-                    const amt = toNum(amountInput.value);
-                    previewRoi.textContent = naira(amt * plan.dailyRoiPct / 100);
-                    previewBalance.textContent = naira(Math.max(currentBalance - amt, 0));
-                };
-
-                toggleBtn.addEventListener('click', () => {
-                    const isHidden = form.classList.contains('hidden');
-                    form.classList.toggle('hidden');
-                    toggleBtn.textContent = isHidden ? 'Hide' : 'Invest Now';
-                    if (isHidden) {
-                        updatePreview();
-                        amountInput.focus();
-                    }
-                });
-
-                amountInput.addEventListener('input', updatePreview);
-
-                confirmBtn.addEventListener('click', async () => {
-                    const amount = toNum(amountInput.value);
-
-                    if (amount < plan.minInvest) {
-                        alert(`Minimum investment for ${plan.name} is ${naira(plan.minInvest)}`);
-                        return;
-                    }
-                    if (amount > currentBalance) {
-                        alert('Insufficient wallet balance.');
-                        return;
-                    }
-
-                    setPlanLoading(confirmBtn, true);
-
-                    try {
-                        // In production, use a Database RPC to ensure Atomicity (Transaction)
-                        // 1. Deduct Balance — column is available_balance, not balance
-                        const { error: walletErr } = await supabase
-                            .from('wallets')
-                            .update({ available_balance: currentBalance - amount })
-                            .eq('user_id', user.id);
-
-                        if (walletErr) throw walletErr;
-
-                        // 2. Create Investment Record
-                        const { error: investErr } = await supabase
-                            .from('investments')
-                            .insert([{
-                                user_id: user.id,
-                                amount: amount,
-                                daily_roi_pct: plan.dailyRoiPct,
-                                status: 'active'
-                            }]);
-
-                        if (investErr) throw investErr;
-
-                        // 3. Create Transaction Record
-                        const { error: txErr } = await supabase.from('transactions').insert([{
-                            user_id: user.id,
-                            amount: amount,
-                            type: 'investment',
-                            status: 'completed',
-                            description: `Committed ₦${amount} to the ${plan.name}`
-                        }]);
-                        if (txErr) console.error('Transaction log error:', txErr.message);
-
-                        alert('Investment Successful!');
-                        window.location.href = 'dashboard.html';
-
-                    } catch (err) {
-                        alert(err.message);
-                        setPlanLoading(confirmBtn, false);
-                    }
-                });
+                investBtn.addEventListener('click', () => openInvestModal(plan));
             });
         }
 
-        function setPlanLoading(btn, state) {
-            const loader = btn.querySelector('.plan-btn-loader');
+        // --- 4b. Investment Confirmation Modal ---
+        let selectedPlan = null;
+
+        function openInvestModal(plan) {
+            selectedPlan = plan;
+            const amount = plan.minInvest;
+
+            document.getElementById('investModalPlanName').textContent = plan.name;
+            document.getElementById('investModalRoi').textContent = `${plan.dailyRoiPct}% Daily Profit`;
+            document.getElementById('investModalAmount').textContent = naira(amount);
+            document.getElementById('investModalDailyRoi').textContent = naira(amount * plan.dailyRoiPct / 100);
+            document.getElementById('investModalDuration').textContent = `${plan.durationDays} Days`;
+            document.getElementById('investModalNewBalance').textContent = naira(Math.max(currentBalance - amount, 0));
+
+            const errorBox = document.getElementById('investModalError');
+            errorBox.classList.add('hidden');
+            errorBox.textContent = '';
+
+            document.getElementById('investModalOverlay').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeInvestModal() {
+            document.getElementById('investModalOverlay').classList.add('hidden');
+            selectedPlan = null;
+        }
+
+        function setModalLoading(state) {
+            const btn = document.getElementById('investModalConfirm');
+            const loader = document.getElementById('investModalLoader');
             btn.disabled = state;
             loader.classList.toggle('hidden', !state);
             btn.querySelector('span').textContent = state ? 'Processing...' : 'Confirm Investment';
         }
+
+        document.getElementById('investModalClose').addEventListener('click', closeInvestModal);
+        document.getElementById('investModalCancel').addEventListener('click', closeInvestModal);
+        document.getElementById('investModalOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'investModalOverlay') closeInvestModal();
+        });
+
+        document.getElementById('investModalConfirm').addEventListener('click', async () => {
+            if (!selectedPlan) return;
+            const plan = selectedPlan;
+            const amount = plan.minInvest; // fixed — not user-editable
+            const errorBox = document.getElementById('investModalError');
+            errorBox.classList.add('hidden');
+
+            if (amount > currentBalance) {
+                errorBox.textContent = 'Insufficient wallet balance.';
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            setModalLoading(true);
+
+            try {
+                // In production, use a Database RPC to ensure Atomicity (Transaction)
+                // 1. Deduct Balance — column is available_balance, not balance
+                const { error: walletErr } = await supabase
+                    .from('wallets')
+                    .update({ available_balance: currentBalance - amount })
+                    .eq('user_id', user.id);
+
+                if (walletErr) throw walletErr;
+
+                // 2. Create Investment Record
+                const { error: investErr } = await supabase
+                    .from('investments')
+                    .insert([{
+                        user_id: user.id,
+                        amount: amount,
+                        daily_roi_pct: plan.dailyRoiPct,
+                        status: 'active'
+                    }]);
+
+                if (investErr) throw investErr;
+
+                // 3. Create Transaction Record
+                const { error: txErr } = await supabase.from('transactions').insert([{
+                    user_id: user.id,
+                    amount: amount,
+                    type: 'investment',
+                    status: 'completed',
+                    description: `Committed ₦${amount} to the ${plan.name}`
+                }]);
+                if (txErr) console.error('Transaction log error:', txErr.message);
+
+                window.location.href = 'dashboard.html';
+
+            } catch (err) {
+                errorBox.textContent = err.message;
+                errorBox.classList.remove('hidden');
+                setModalLoading(false);
+            }
+        });
 
         function updateHistoryTable(data) {
             const tbody = document.getElementById('historyTable');
