@@ -34,7 +34,7 @@ export default defineConfig({
          admin_deposits: resolve(__dirname, 'admin/deposits.html'), 
          admin_withdrawals: resolve(__dirname, 'admin/withdrawals.html'),
          admin_investments: resolve(__dirname, 'admin/investments.html'),
-         admin_giftCodes: resolve(__dirname, 'gift-codes.html'),
+         admin_giftCodes: resolve(__dirname, 'admin/gift-codes.html'),
          admin_support: resolve(__dirname, 'admin/support.html'),
          admin_plans: resolve(__dirname, 'admin/plans.html'),
       },
