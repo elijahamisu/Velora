@@ -485,6 +485,16 @@
             import.meta.env.VITE_SUPABASE_ANON_KEY
         );
 
+        // Helper: always coerce to a safe number so a null/undefined/string
+        // value from Supabase can never produce "NaN" on screen.
+        function toNum(val) {
+            const n = Number(val);
+            return Number.isFinite(n) ? n : 0;
+        }
+        function naira(val) {
+            return `₦${toNum(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
         // --- 0. Active nav state (sidebar + mobile island + drawer) ---
         function setActiveNav() {
             const current = (window.location.pathname.split('/').pop() || 'dashboard.html').replace('.html', '') || 'dashboard';
@@ -552,36 +562,52 @@
                     supabase.from('withdrawals').select('amount').eq('user_id', user.id).eq('status', 'pending')
                 ]);
 
-                // Update Balances
-                if (walletRes.data) {
-                    const w = walletRes.data;
-                    document.getElementById('mainBalance').textContent = `₦${(w.balance + (w.invested_balance || 0)).toLocaleString()}`;
-                    document.getElementById('availBalance').textContent = `₦${w.balance.toLocaleString()}`;
-                    document.getElementById('topBarBalance').textContent = `₦${w.balance.toLocaleString()}`;
-                    document.getElementById('drawerBalance').textContent = `₦${w.balance.toLocaleString()}`;
-                    document.getElementById('investBalance').textContent = `₦${(w.invested_balance || 0).toLocaleString()}`;
-                    document.getElementById('refBonus').textContent = `₦${(w.referral_balance || 0).toLocaleString()}`;
-                    document.getElementById('giftBonus').textContent = `₦${(w.gift_balance || 0).toLocaleString()}`;
+                if (walletRes.error) {
+                    console.error('Wallet fetch error:', walletRes.error.message);
+                }
+
+                // Update Balances (defensive: every field is coerced with toNum/naira
+                // so a missing row or null column can never render as "NaN")
+                const w = walletRes.data || {};
+                const balance = toNum(w.balance);
+                const invested = toNum(w.invested_balance);
+                const referral = toNum(w.referral_balance);
+                const gift = toNum(w.gift_balance);
+
+                document.getElementById('mainBalance').textContent = naira(balance + invested);
+                document.getElementById('availBalance').textContent = naira(balance);
+                document.getElementById('topBarBalance').textContent = naira(balance);
+                document.getElementById('drawerBalance').textContent = naira(balance);
+                document.getElementById('investBalance').textContent = naira(invested);
+                document.getElementById('refBonus').textContent = naira(referral);
+                document.getElementById('giftBonus').textContent = naira(gift);
+
+                if (!walletRes.data) {
+                    console.warn('No wallet row found for this user — showing ₦0.00 defaults.');
                 }
 
                 // Update Profile Initials
-                if (profileRes.data) {
+                if (profileRes.data && profileRes.data.full_name) {
                     const initial = profileRes.data.full_name.charAt(0).toUpperCase();
                     document.getElementById('userInitials').textContent = initial;
                     document.getElementById('drawerInitials').textContent = initial;
                 }
 
-                // Update Earnings
+                // Update Earnings (guard against elements that may not exist on this page)
                 if (earningsRes.data) {
                     const e = earningsRes.data;
-                    document.getElementById('todayEarn').textContent = `₦${(e.today_earnings || 0).toLocaleString()}`;
-                    document.getElementById('totalEarn').textContent = `₦${(e.total_earnings || 0).toLocaleString()}`;
+                    const todayEarnEl = document.getElementById('todayEarn');
+                    const totalEarnEl = document.getElementById('totalEarn');
+                    if (todayEarnEl) todayEarnEl.textContent = naira(e.today_earnings);
+                    if (totalEarnEl) totalEarnEl.textContent = naira(e.total_earnings);
                 }
 
-                // Update Pendings
-                const sum = (arr) => arr.reduce((acc, curr) => acc + curr.amount, 0);
-                document.getElementById('pendDep').textContent = `₦${sum(pendDepRes.data || []).toLocaleString()}`;
-                document.getElementById('pendWith').textContent = `₦${sum(pendWithRes.data || []).toLocaleString()}`;
+                // Update Pendings (guard against elements that may not exist on this page)
+                const sum = (arr) => (arr || []).reduce((acc, curr) => acc + toNum(curr.amount), 0);
+                const pendDepEl = document.getElementById('pendDep');
+                const pendWithEl = document.getElementById('pendWith');
+                if (pendDepEl) pendDepEl.textContent = naira(sum(pendDepRes.data));
+                if (pendWithEl) pendWithEl.textContent = naira(sum(pendWithRes.data));
 
                 // Update Transactions
                 renderTransactions(transRes.data || []);
@@ -629,13 +655,13 @@
                                 <i data-lucide="${icons[item.type] || 'circle'}" class="w-6 h-6"></i>
                             </div>
                             <div>
-                                <p class="text-sm font-semibold capitalize">${item.type.replace('_', ' ')}</p>
+                                <p class="text-sm font-semibold capitalize">${(item.type || '').replace('_', ' ')}</p>
                                 <p class="text-[10px] text-[var(--muted)] font-medium mono">${new Date(item.created_at).toLocaleString()}</p>
                             </div>
                         </div>
                         <div class="text-right">
                             <p class="text-sm font-semibold mono ${isGain ? 'text-emerald-600' : 'text-[var(--ink-text)]'}">
-                                ${isGain ? '+' : '-'} ₦${item.amount.toLocaleString()}
+                                ${isGain ? '+' : '-'} ${naira(item.amount)}
                             </p>
                             <span class="text-[9px] font-bold uppercase tracking-tighter px-2 py-0.5 rounded ${item.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
                                 ${item.status}
