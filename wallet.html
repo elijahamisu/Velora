@@ -569,10 +569,10 @@
                 // Update Balances (defensive: every field is coerced with toNum/naira
                 // so a missing row or null column can never render as "NaN")
                 const w = walletRes.data || {};
-                const balance = toNum(w.balance);
-                const invested = toNum(w.invested_balance);
+                const balance = toNum(w.available_balance);
+                const invested = toNum(w.investment_balance);
                 const referral = toNum(w.referral_balance);
-                const gift = toNum(w.gift_balance);
+                const gift = toNum(w.bonus_balance);
 
                 document.getElementById('mainBalance').textContent = naira(balance + invested);
                 document.getElementById('availBalance').textContent = naira(balance);
