@@ -623,13 +623,14 @@
 
                 // Active Assets / Daily Accrual derived from investments directly,
                 // since there is no separate "earnings" table in this schema.
+                // Real columns: amount_invested, daily_earning_amount (not amount/daily_roi_pct).
                 const investments = investRes.data || [];
                 const activeInvestment = investments
                     .filter(inv => !('status' in inv) || inv.status === 'active')
-                    .reduce((sum, inv) => sum + toNum(inv.amount), 0);
+                    .reduce((sum, inv) => sum + toNum(inv.amount_invested), 0);
                 const dailyAccrual = investments
                     .filter(inv => !('status' in inv) || inv.status === 'active')
-                    .reduce((sum, inv) => sum + toNum(inv.amount) * (toNum(inv.daily_roi_pct) / 100), 0);
+                    .reduce((sum, inv) => sum + toNum(inv.daily_earning_amount), 0);
 
                 document.getElementById('activeInvestment').textContent = naira(activeInvestment);
                 document.getElementById('dailyEarnings').textContent = naira(dailyAccrual);
@@ -754,26 +755,41 @@
             setModalLoading(true);
 
             try {
-                // In production, use a Database RPC to ensure Atomicity (Transaction)
-                // 1. Deduct Balance — column is available_balance, not balance
+                // 1. Create Investment Record FIRST — using the real investments
+                //    table columns (plan_id, amount_invested, daily_earning_amount,
+                //    remaining_days), not "amount"/"daily_roi_pct" which don't exist.
+                //    We do this before touching the wallet so that if it fails,
+                //    no money has left the user's balance.
+                const dailyEarningAmount = amount * plan.dailyRoiPct / 100;
+
+                const { data: investData, error: investErr } = await supabase
+                    .from('investments')
+                    .insert([{
+                        user_id: user.id,
+                        plan_id: plan.id,
+                        amount_invested: amount,
+                        daily_earning_amount: dailyEarningAmount,
+                        remaining_days: plan.durationDays,
+                        status: 'active'
+                    }])
+                    .select()
+                    .single();
+
+                if (investErr) throw investErr;
+
+                // 2. Deduct Balance — column is available_balance, not balance.
+                //    If this fails, roll back the investment record we just created
+                //    so the two stay in sync (no debit without a matching investment,
+                //    and no investment without a matching debit).
                 const { error: walletErr } = await supabase
                     .from('wallets')
                     .update({ available_balance: currentBalance - amount })
                     .eq('user_id', user.id);
 
-                if (walletErr) throw walletErr;
-
-                // 2. Create Investment Record
-                const { error: investErr } = await supabase
-                    .from('investments')
-                    .insert([{
-                        user_id: user.id,
-                        amount: amount,
-                        daily_roi_pct: plan.dailyRoiPct,
-                        status: 'active'
-                    }]);
-
-                if (investErr) throw investErr;
+                if (walletErr) {
+                    await supabase.from('investments').delete().eq('id', investData.id);
+                    throw walletErr;
+                }
 
                 // 3. Create Transaction Record
                 const { error: txErr } = await supabase.from('transactions').insert([{
@@ -803,14 +819,14 @@
 
             tbody.innerHTML = data.map(row => `
                 <tr class="hover:bg-black/[0.015] transition cursor-default">
-                    <td class="px-8 py-6 font-semibold text-[var(--ink-text)] mono">${naira(row.amount)}</td>
+                    <td class="px-8 py-6 font-semibold text-[var(--ink-text)] mono">${naira(row.amount_invested)}</td>
                     <td class="px-8 py-6 text-xs text-[var(--muted)] font-medium mono">${new Date(row.created_at).toLocaleDateString()}</td>
                     <td class="px-8 py-6">
                         <span class="text-[9px] uppercase font-bold px-3 py-1 rounded-full ${row.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-black/5 text-[var(--ink-text)]'}">
                             ${row.status}
                         </span>
                     </td>
-                    <td class="px-8 py-6 text-right font-bold text-emerald-600 mono">${naira(toNum(row.amount) * (toNum(row.daily_roi_pct)/100))}</td>
+                    <td class="px-8 py-6 text-right font-bold text-emerald-600 mono">${naira(row.daily_earning_amount)}</td>
                 </tr>
             `).join('');
         }
