@@ -486,7 +486,7 @@
                 </div>
             </div>
 
-            <!-- ===== Main Grid: Performance + Activity | Allocation + Actions ===== -->
+            <!-- ===== Main Grid: Performance + Activity + Active Investments | Allocation + Actions ===== -->
             <div class="grid lg:grid-cols-3 gap-8">
 
                 <!-- Left column -->
@@ -501,6 +501,19 @@
                         <div class="card rounded-[28px] p-6">
                             <svg id="earningsChart" viewBox="0 0 560 180" class="w-full h-40" preserveAspectRatio="none"></svg>
                             <div id="earningsChartLabels" class="flex justify-between mt-3 px-1 text-[10px] text-[var(--muted)] font-semibold mono"></div>
+                        </div>
+                    </div>
+
+                    <!-- Active Investments Overview -->
+                    <div>
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="text-xl font-semibold heading-font italic">Active Investments</h4>
+                            <a href="invest.html" class="text-xs font-bold text-[var(--gold-deep)] hover:text-[var(--gold)] hover:underline uppercase tracking-wide">View Plans</a>
+                        </div>
+                        <div class="card rounded-[28px] overflow-hidden">
+                            <div id="activeInvestmentsList" class="divide-y divide-black/[0.05]">
+                                <div class="p-10 text-center text-[var(--muted)] text-xs uppercase tracking-widest font-bold">Loading investments...</div>
+                            </div>
                         </div>
                     </div>
 
@@ -622,6 +635,15 @@
             import.meta.env.VITE_SUPABASE_ANON_KEY
         );
 
+        // Helper: coerce to a safe number so nulls/undefined never render as NaN
+        function toNum(val) {
+            const n = Number(val);
+            return Number.isFinite(n) ? n : 0;
+        }
+        function naira(val) {
+            return `₦${toNum(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
         // --- 0. Active nav state (sidebar + mobile island), driven by the current file ---
         function setActiveNav() {
             const current = (window.location.pathname.split('/').pop() || 'dashboard.html').replace('.html', '') || 'dashboard';
@@ -678,16 +700,17 @@
         }
 
         // --- 2. Load Dashboard Data ---
-        // NOTE: There is no "earnings" table in the database, so earnings/active
-        // investment figures are derived here from "investments" and "transactions"
-        // instead of a dedicated table. Adjust the column names below if your
-        // investments/transactions tables use different names.
+        // NOTE: "investments" table columns are: user_id, plan_id, amount_invested,
+        // daily_earning_amount, remaining_days, status, last_earning_date, created_at
+        // (there is no plain "amount" or "daily_roi_pct" column). Plan names are
+        // resolved via a separate fetch of "investment_plans" and joined client-side.
         async function loadDashboardData() {
             try {
-                const [profileRes, walletRes, investmentsRes, transRes, notifRes] = await Promise.all([
+                const [profileRes, walletRes, investmentsRes, plansRes, transRes, notifRes] = await Promise.all([
                     supabase.from('profiles').select('*').eq('id', user.id).single(),
                     supabase.from('wallets').select('*').eq('user_id', user.id).single(),
-                    supabase.from('investments').select('*').eq('user_id', user.id),
+                    supabase.from('investments').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+                    supabase.from('investment_plans').select('id, name'),
                     supabase.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
                     supabase.from('notifications').select('*').eq('user_id', user.id).eq('is_read', false),
                 ]);
@@ -695,6 +718,7 @@
                 if (profileRes.error) console.error('Profile load error:', profileRes.error);
                 if (walletRes.error) console.error('Wallet load error:', walletRes.error);
                 if (investmentsRes.error) console.error('Investments load error:', investmentsRes.error);
+                if (plansRes.error) console.error('Investment plans load error:', plansRes.error);
                 if (transRes.error) console.error('Transactions load error:', transRes.error);
                 if (notifRes.error) console.error('Notifications load error:', notifRes.error);
 
@@ -702,9 +726,14 @@
                 if (walletRes.data) updateUIWallet(walletRes.data);
 
                 const investments = investmentsRes.data || [];
+                const plans = plansRes.data || [];
+                const planNameById = {};
+                plans.forEach(p => { planNameById[p.id] = p.name; });
+
                 const transactions = transRes.data || [];
 
                 updateUIEarnings(investments, transactions);
+                updateUIActiveInvestments(investments, planNameById);
 
                 // Use only the 5 most recent transactions for the activity feed
                 updateUIActivity(transactions.slice(0, 5));
@@ -733,56 +762,51 @@
         function updateUIWallet(data) {
             // "wallets" table columns: available_balance, investment_balance,
             // referral_balance, bonus_balance, total_earnings (no plain "balance" column)
-            walletAvailable = Number(data.available_balance || 0);
-            document.getElementById('walletBalance').textContent = `₦${walletAvailable.toLocaleString()}`;
-            document.getElementById('refEarnings').textContent = `₦${(data.referral_balance || 0).toLocaleString()}`;
-
-            // Total Deposits / Withdrawals cards are still placeholders here.
-            // If you later add total_deposits/total_withdrawals columns
-            // (or a stats view), wire them up here, e.g.:
-            // document.getElementById('totalDeposits').textContent = `₦${(data.total_deposits || 0).toLocaleString()}`;
+            walletAvailable = toNum(data.available_balance);
+            document.getElementById('walletBalance').textContent = naira(walletAvailable);
+            document.getElementById('refEarnings').textContent = naira(data.referral_balance);
         }
 
         // Derive Active Investment / Today's Earnings / Total Earnings without
         // a dedicated "earnings" table.
         function updateUIEarnings(investments, transactions) {
-            // Active Investment = sum of amounts on investments with status 'active'
-            // (falls back to summing everything if there's no status column)
+            // Active Investment = sum of amount_invested on investments with status 'active'
+            // (real column is amount_invested, not amount)
             const activeInvestment = investments
                 .filter(inv => !('status' in inv) || inv.status === 'active')
-                .reduce((sum, inv) => sum + Number(inv.amount || 0), 0);
+                .reduce((sum, inv) => sum + toNum(inv.amount_invested), 0);
 
             // Total Earnings = sum of all 'earning' type transactions
             const totalEarnings = transactions
                 .filter(t => t.type === 'earning')
-                .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+                .reduce((sum, t) => sum + toNum(t.amount), 0);
 
             // Today's Earnings = sum of 'earning' type transactions created today
             const startOfToday = new Date();
             startOfToday.setHours(0, 0, 0, 0);
             const todayEarnings = transactions
                 .filter(t => t.type === 'earning' && new Date(t.created_at) >= startOfToday)
-                .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+                .reduce((sum, t) => sum + toNum(t.amount), 0);
 
-            document.getElementById('activeInvestment').textContent = `₦${activeInvestment.toLocaleString()}`;
-            document.getElementById('totalEarnings').textContent = `₦${totalEarnings.toLocaleString()}`;
-            document.getElementById('todayEarnings').textContent = `₦${todayEarnings.toLocaleString()}`;
+            document.getElementById('activeInvestment').textContent = naira(activeInvestment);
+            document.getElementById('totalEarnings').textContent = naira(totalEarnings);
+            document.getElementById('todayEarnings').textContent = naira(todayEarnings);
 
             // Total Deposits / Withdrawals derived from transactions as a fallback
             const totalDeposits = transactions
                 .filter(t => t.type === 'deposit')
-                .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+                .reduce((sum, t) => sum + toNum(t.amount), 0);
             const totalWithdrawals = transactions
                 .filter(t => t.type === 'withdrawal')
-                .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+                .reduce((sum, t) => sum + toNum(t.amount), 0);
 
-            document.getElementById('totalDeposits').textContent = `₦${totalDeposits.toLocaleString()}`;
-            document.getElementById('totalWithdrawals').textContent = `₦${totalWithdrawals.toLocaleString()}`;
+            document.getElementById('totalDeposits').textContent = naira(totalDeposits);
+            document.getElementById('totalWithdrawals').textContent = naira(totalWithdrawals);
 
             // ---- Hero: Total Portfolio Value + today's delta ----
             const totalPortfolio = walletAvailable + activeInvestment;
-            document.getElementById('heroTotalValue').textContent = `₦${totalPortfolio.toLocaleString()}`;
-            document.getElementById('heroDeltaAmount').textContent = `+₦${todayEarnings.toLocaleString()}`;
+            document.getElementById('heroTotalValue').textContent = naira(totalPortfolio);
+            document.getElementById('heroDeltaAmount').textContent = `+${naira(todayEarnings)}`;
 
             // ---- Portfolio Allocation: Wallet vs Active Investment ----
             const allocTotal = totalPortfolio > 0 ? totalPortfolio : 1; // avoid divide-by-zero
@@ -792,8 +816,8 @@
             document.getElementById('allocInvestBar').style.width = `${investPct}%`;
             document.getElementById('allocWalletPct').textContent = `${walletPct}%`;
             document.getElementById('allocInvestPct').textContent = `${investPct}%`;
-            document.getElementById('allocWalletAmt').textContent = `₦${walletAvailable.toLocaleString()}`;
-            document.getElementById('allocInvestAmt').textContent = `₦${activeInvestment.toLocaleString()}`;
+            document.getElementById('allocWalletAmt').textContent = naira(walletAvailable);
+            document.getElementById('allocInvestAmt').textContent = naira(activeInvestment);
 
             // ---- Last 7 days of earnings, for the sparkline + bar chart ----
             const days = [];
@@ -808,12 +832,54 @@
                 next.setDate(next.getDate() + 1);
                 return transactions
                     .filter(t => t.type === 'earning' && new Date(t.created_at) >= day && new Date(t.created_at) < next)
-                    .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+                    .reduce((sum, t) => sum + toNum(t.amount), 0);
             });
             const weekTotal = dayTotals.reduce((a, b) => a + b, 0);
-            document.getElementById('sparklineTotal').textContent = `₦${weekTotal.toLocaleString()}`;
+            document.getElementById('sparklineTotal').textContent = naira(weekTotal);
             renderSparkline(dayTotals);
             renderEarningsChart(dayTotals, days);
+        }
+
+        // ---- Active Investments overview list ----
+        function updateUIActiveInvestments(investments, planNameById) {
+            const container = document.getElementById('activeInvestmentsList');
+            const active = investments.filter(inv => !('status' in inv) || inv.status === 'active');
+
+            if (active.length === 0) {
+                container.innerHTML = `
+                    <div class="p-10 text-center text-[var(--muted)] text-xs uppercase tracking-widest font-bold">
+                        No active investments yet
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = active.map(inv => {
+                const planName = planNameById[inv.plan_id] || 'Investment Plan';
+                const totalDays = (toNum(inv.remaining_days) > 0 && inv.created_at)
+                    ? null // unknown original duration without plan lookup by id-match; show remaining only
+                    : null;
+                return `
+                    <div class="p-6 flex items-center justify-between hover:bg-black/[0.015] transition">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-[var(--gold-deep)]" style="background: rgba(183,147,91,0.08);">
+                                <i data-lucide="gem" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-[var(--ink-text)]">${planName}</p>
+                                <p class="text-[10px] text-[var(--muted)] font-medium mono">
+                                    Started ${new Date(inv.created_at).toLocaleDateString()} · ${toNum(inv.remaining_days)} days left
+                                </p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-semibold mono text-[var(--ink-text)]">${naira(inv.amount_invested)}</p>
+                            <p class="text-[10px] font-bold text-emerald-600 mono">+${naira(inv.daily_earning_amount)}/day</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            lucide.createIcons();
         }
 
         // ---- Sparkline (hero card): smooth line across the last 7 days ----
@@ -894,13 +960,13 @@
                                 <i data-lucide="${iconMap[item.type] || 'circle'}" class="w-6 h-6"></i>
                             </div>
                             <div>
-                                <p class="text-sm font-semibold text-[var(--ink-text)] capitalize">${item.type.replace('_', ' ')}</p>
+                                <p class="text-sm font-semibold text-[var(--ink-text)] capitalize">${(item.type || '').replace('_', ' ')}</p>
                                 <p class="text-[10px] text-[var(--muted)] font-medium mono">${new Date(item.created_at).toLocaleString()}</p>
                             </div>
                         </div>
                         <div class="text-right">
                             <p class="text-sm font-semibold mono ${isPositive ? 'text-emerald-600' : 'text-[var(--ink-text)]'}">
-                                ${isPositive ? '+' : '-'}₦${item.amount.toLocaleString()}
+                                ${isPositive ? '+' : '-'}${naira(item.amount)}
                             </p>
                             <span class="text-[9px] uppercase font-bold px-2 py-1 rounded-md ${item.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
                                 ${item.status}
