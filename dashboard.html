@@ -389,7 +389,7 @@
                 <div class="relative flex flex-col lg:flex-row lg:items-end justify-between gap-8">
                     <div>
                         <p class="text-[11px] uppercase tracking-[0.2em] text-white/40 font-semibold mb-3 flex items-center gap-2">
-                            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Total Portfolio Value
+                            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Wallet Balance
                         </p>
                         <h2 id="heroTotalValue" class="text-4xl md:text-5xl heading-font font-semibold text-white tracking-tight">₦0.00</h2>
                         <div class="flex items-center gap-2 mt-4">
@@ -397,7 +397,7 @@
                                 <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
                                 <span id="heroDeltaAmount">+₦0.00</span> today
                             </span>
-                            <span class="text-white/30 text-xs">Wallet + active investments</span>
+                            <span class="text-white/30 text-xs">Available to invest or withdraw</span>
                         </div>
                     </div>
 
@@ -803,10 +803,14 @@
             document.getElementById('totalDeposits').textContent = naira(totalDeposits);
             document.getElementById('totalWithdrawals').textContent = naira(totalWithdrawals);
 
-            // ---- Hero: Total Portfolio Value + today's delta ----
-            const totalPortfolio = walletAvailable + activeInvestment;
-            document.getElementById('heroTotalValue').textContent = naira(totalPortfolio);
+            // ---- Hero: Wallet Balance + today's delta ----
+            // Per request: the hero figure reflects wallet balance only —
+            // active investments are shown separately (metric card + allocation
+            // + the Active Investments list) rather than folded into this total.
+            document.getElementById('heroTotalValue').textContent = naira(walletAvailable);
             document.getElementById('heroDeltaAmount').textContent = `+${naira(todayEarnings)}`;
+
+            const totalPortfolio = walletAvailable + activeInvestment; // still used for the allocation split below
 
             // ---- Portfolio Allocation: Wallet vs Active Investment ----
             const allocTotal = totalPortfolio > 0 ? totalPortfolio : 1; // avoid divide-by-zero
