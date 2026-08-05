@@ -492,6 +492,15 @@
             import.meta.env.VITE_SUPABASE_ANON_KEY
         );
 
+        // Helper: coerce to a safe number so nulls/undefined never throw or render as NaN
+        function toNum(val) {
+            const n = Number(val);
+            return Number.isFinite(n) ? n : 0;
+        }
+        function naira(val) {
+            return `₦${toNum(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
         // --- 0. Active nav state (sidebar + mobile island + drawer) ---
         function setActiveNav() {
             const current = (window.location.pathname.split('/').pop() || 'dashboard.html').replace('.html', '') || 'dashboard';
@@ -556,22 +565,25 @@
                     supabase.from('withdrawals').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
                 ]);
 
-                if (walletRes.data) {
-                    availableBalance = walletRes.data.balance;
-                    document.getElementById('walletBalance').textContent = `₦${availableBalance.toLocaleString()}`;
-                    document.getElementById('topBarBalance').textContent = `₦${availableBalance.toLocaleString()}`;
-                    document.getElementById('drawerBalance').textContent = `₦${availableBalance.toLocaleString()}`;
-                }
+                if (walletRes.error) console.error('Wallet load error:', walletRes.error.message);
+                if (profileRes.error) console.error('Profile load error:', profileRes.error.message);
+                if (withdrawHistoryRes.error) console.error('Withdrawal history load error:', withdrawHistoryRes.error.message);
 
-                if (profileRes.data) {
+                // "wallets" table column is available_balance, not balance
+                const wallet = walletRes.data || {};
+                availableBalance = toNum(wallet.available_balance);
+                document.getElementById('walletBalance').textContent = naira(availableBalance);
+                document.getElementById('topBarBalance').textContent = naira(availableBalance);
+                document.getElementById('drawerBalance').textContent = naira(availableBalance);
+
+                if (profileRes.data && profileRes.data.full_name) {
                     document.getElementById('userInitials').textContent = profileRes.data.full_name.charAt(0);
                     document.getElementById('drawerInitials').textContent = profileRes.data.full_name.charAt(0);
                 }
 
-                if (withdrawHistoryRes.data) {
-                    renderHistory(withdrawHistoryRes.data);
-                    calculateSummary(withdrawHistoryRes.data);
-                }
+                const history = withdrawHistoryRes.data || [];
+                renderHistory(history);
+                calculateSummary(history);
 
             } catch (err) {
                 console.error("Fetch Error:", err);
@@ -580,10 +592,10 @@
 
         // --- Calc Payout Summary ---
         function calculateSummary(history) {
-            const pending = history.filter(w => w.status === 'pending').reduce((acc, curr) => acc + curr.amount, 0);
-            const completed = history.filter(w => w.status === 'completed').reduce((acc, curr) => acc + curr.amount, 0);
-            document.getElementById('pendingWithdrawal').textContent = `₦${pending.toLocaleString()}`;
-            document.getElementById('completedWithdrawal').textContent = `₦${completed.toLocaleString()}`;
+            const pending = history.filter(w => w.status === 'pending').reduce((acc, curr) => acc + toNum(curr.amount), 0);
+            const completed = history.filter(w => w.status === 'completed').reduce((acc, curr) => acc + toNum(curr.amount), 0);
+            document.getElementById('pendingWithdrawal').textContent = naira(pending);
+            document.getElementById('completedWithdrawal').textContent = naira(completed);
         }
 
         // --- Render Table ---
@@ -601,8 +613,8 @@
                         <p class="text-[9px] text-[var(--muted)] mono">REF: ${row.id.split('-')[0].toUpperCase()}</p>
                     </td>
                     <td class="px-8 py-6">
-                        <p class="text-sm font-semibold text-[var(--ink-text)] mono">₦${(row.amount - row.charge).toLocaleString()}</p>
-                        <p class="text-[9px] text-red-400 uppercase font-bold">Fee: ₦${row.charge.toLocaleString()}</p>
+                        <p class="text-sm font-semibold text-[var(--ink-text)] mono">${naira(toNum(row.amount) - toNum(row.charge))}</p>
+                        <p class="text-[9px] text-red-400 uppercase font-bold">Fee: ${naira(row.charge)}</p>
                     </td>
                     <td class="px-8 py-6">
                         <p class="text-[10px] font-semibold text-[var(--ink-text)]">${row.bank_name}</p>
@@ -629,16 +641,16 @@
         // --- Form Logic ---
         const amountInput = document.getElementById('withdrawAmount');
         amountInput.addEventListener('input', () => {
-            const val = parseFloat(amountInput.value) || 0;
+            const val = toNum(amountInput.value);
             const fee = val * CHARGE_PERCENT;
             const net = val - fee;
-            document.getElementById('feeDisplay').textContent = `₦${fee.toLocaleString()}`;
-            document.getElementById('netDisplay').textContent = `₦${(net > 0 ? net : 0).toLocaleString()}`;
+            document.getElementById('feeDisplay').textContent = naira(fee);
+            document.getElementById('netDisplay').textContent = naira(net > 0 ? net : 0);
         });
 
         document.getElementById('withdrawForm').onsubmit = async (e) => {
             e.preventDefault();
-            const amount = parseFloat(amountInput.value);
+            const amount = toNum(amountInput.value);
             const bankName = document.getElementById('bankName').value;
             const accNum = document.getElementById('accNumber').value;
             const accName = document.getElementById('accName').value;
@@ -656,41 +668,53 @@
             setLoading(true);
 
             try {
-                // 1. Create Withdrawal Record
-                const { error: withdrawErr } = await supabase.from('withdrawals').insert([{
-                    user_id: user.id,
-                    amount: amount,
-                    charge: charge,
-                    bank_name: bankName,
-                    account_number: accNum,
-                    account_name: accName,
-                    status: 'pending'
-                }]);
+                // 1. Create Withdrawal Record FIRST — so a failed wallet update
+                //    can never leave the user debited without a matching record.
+                const { data: withdrawData, error: withdrawErr } = await supabase
+                    .from('withdrawals')
+                    .insert([{
+                        user_id: user.id,
+                        amount: amount,
+                        charge: charge,
+                        bank_name: bankName,
+                        account_number: accNum,
+                        account_name: accName,
+                        status: 'pending'
+                    }])
+                    .select()
+                    .single();
 
                 if (withdrawErr) throw withdrawErr;
 
-                // 2. Reduce Wallet Balance
-                const { error: walletErr } = await supabase.from('wallets').update({
-                    balance: availableBalance - amount
-                }).eq('user_id', user.id);
+                // 2. Reduce Wallet Balance — column is available_balance, not balance.
+                //    Roll back the withdrawal record if this fails.
+                const { error: walletErr } = await supabase
+                    .from('wallets')
+                    .update({ available_balance: availableBalance - amount })
+                    .eq('user_id', user.id);
 
-                if (walletErr) throw walletErr;
+                if (walletErr) {
+                    await supabase.from('withdrawals').delete().eq('id', withdrawData.id);
+                    throw walletErr;
+                }
 
                 // 3. Create Transaction
-                await supabase.from('transactions').insert([{
+                const { error: txErr } = await supabase.from('transactions').insert([{
                     user_id: user.id,
                     amount: amount,
                     type: 'withdrawal',
                     status: 'pending',
                     description: `Withdrawal request to ${bankName} (${accNum})`
                 }]);
+                if (txErr) console.error('Transaction log error:', txErr.message);
 
                 // 4. Notification
-                await supabase.from('notifications').insert([{
+                const { error: notifErr } = await supabase.from('notifications').insert([{
                     user_id: user.id,
                     title: 'Withdrawal Pending',
-                    message: `Your request for ₦${amount.toLocaleString()} is being reviewed.`
+                    message: `Your request for ${naira(amount)} is being reviewed.`
                 }]);
+                if (notifErr) console.error('Notification error:', notifErr.message);
 
                 alert('Withdrawal request submitted successfully.');
                 location.reload();
