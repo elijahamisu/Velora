@@ -608,12 +608,12 @@
                 if (creditRes.error) throw new Error(`Could not credit wallet: ${creditRes.error.message}`);
 
                 // D. Log Transaction
+                // transactions table has no `status` or `reference` column —
+                // the code is folded into the description text instead.
                 const txRes = await supabase.from('transactions').insert([{
                     user_id: user.id,
                     amount: gift.amount,
                     type: 'gift_code',
-                    status: 'completed',
-                    reference: code,
                     description: `Redeemed Gift Reward: ${code}`
                 }]);
                 if (txRes.error) console.error('Transaction log error:', txRes.error.message);
