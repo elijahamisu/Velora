@@ -776,11 +776,11 @@
                 .filter(inv => !('status' in inv) || inv.status === 'active')
                 .reduce((sum, inv) => sum + toNum(inv.amount_invested), 0);
 
-            // Today's Earnings = sum of 'earning' type transactions created today
+            // Today's Earnings = sum of 'daily_earning' type transactions created today
             const startOfToday = new Date();
             startOfToday.setHours(0, 0, 0, 0);
             const todayEarnings = transactions
-                .filter(t => t.type === 'earning' && new Date(t.created_at) >= startOfToday)
+                .filter(t => t.type === 'daily_earning' && new Date(t.created_at) >= startOfToday)
                 .reduce((sum, t) => sum + toNum(t.amount), 0);
 
             // "Total Earnings" is intentionally the same as today's earnings here —
@@ -837,7 +837,7 @@
                 const next = new Date(day);
                 next.setDate(next.getDate() + 1);
                 return transactions
-                    .filter(t => t.type === 'earning' && new Date(t.created_at) >= day && new Date(t.created_at) < next)
+                    .filter(t => t.type === 'daily_earning' && new Date(t.created_at) >= day && new Date(t.created_at) < next)
                     .reduce((sum, t) => sum + toNum(t.amount), 0);
             });
             const weekTotal = dayTotals.reduce((a, b) => a + b, 0);
@@ -948,7 +948,7 @@
             }
 
             list.innerHTML = items.map(item => {
-                const isPositive = ['deposit', 'earning', 'referral', 'welcome_bonus', 'gift_code'].includes(item.type);
+                const isPositive = ['deposit', 'daily_earning', 'referral_bonus', 'welcome_bonus', 'gift_code'].includes(item.type);
                 const iconMap = {
                     deposit: 'arrow-down-circle',
                     withdrawal: 'arrow-up-circle',
