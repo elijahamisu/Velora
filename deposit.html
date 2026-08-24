@@ -592,13 +592,15 @@
                 if (depErr) throw depErr;
 
                 // 2. Create Pending Transaction Record
-                await supabase.from('transactions').insert([{
+                // transactions table has no `status` column — pending/completed
+                // state lives on the `deposits` table row instead, not here.
+                const { error: depTxErr } = await supabase.from('transactions').insert([{
                     user_id: user.id,
                     amount: amount,
                     type: 'deposit',
-                    status: 'pending',
-                    description: `Deposit via Kuda Bank (Ref: ${refNumber})`
+                    description: `Deposit via Kuda Bank (Ref: ${refNumber}) — pending`
                 }]);
+                if (depTxErr) console.error('Transaction log error:', depTxErr.message);
 
                 // 3. Create Notification
                 await supabase.from('notifications').insert([{
