@@ -776,17 +776,19 @@
                 .filter(inv => !('status' in inv) || inv.status === 'active')
                 .reduce((sum, inv) => sum + toNum(inv.amount_invested), 0);
 
-            // Total Earnings = sum of all 'earning' type transactions
-            const totalEarnings = transactions
-                .filter(t => t.type === 'earning')
-                .reduce((sum, t) => sum + toNum(t.amount), 0);
-
             // Today's Earnings = sum of 'earning' type transactions created today
             const startOfToday = new Date();
             startOfToday.setHours(0, 0, 0, 0);
             const todayEarnings = transactions
                 .filter(t => t.type === 'earning' && new Date(t.created_at) >= startOfToday)
                 .reduce((sum, t) => sum + toNum(t.amount), 0);
+
+            // "Total Earnings" is intentionally the same as today's earnings here —
+            // by design it resets to ₦0.00 right after midnight and rebuilds through
+            // the day, rather than accumulating a lifetime total. If a lifetime total
+            // is ever needed elsewhere, compute it separately rather than reusing
+            // this variable.
+            const totalEarnings = todayEarnings;
 
             document.getElementById('activeInvestment').textContent = naira(activeInvestment);
             document.getElementById('totalEarnings').textContent = naira(totalEarnings);
