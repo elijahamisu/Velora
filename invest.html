@@ -792,11 +792,11 @@
                 }
 
                 // 3. Create Transaction Record
+                // transactions table has no `status` column.
                 const { error: txErr } = await supabase.from('transactions').insert([{
                     user_id: user.id,
                     amount: amount,
                     type: 'investment',
-                    status: 'completed',
                     description: `Committed ₦${amount} to the ${plan.name}`
                 }]);
                 if (txErr) console.error('Transaction log error:', txErr.message);
