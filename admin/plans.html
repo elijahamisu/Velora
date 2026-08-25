@@ -1,1 +1,881 @@
-amisuelijaholuwasegun2324@gmail.com
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Plans | VELORA Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --ink: #0C0E13;
+            --ink-soft: #171A22;
+            --paper: #F6F4EF;
+            --paper-card: #FFFFFF;
+            --gold: #B7935B;
+            --gold-deep: #8F6E3E;
+            --gold-light: #E7D9BC;
+            --line: rgba(183, 147, 91, 0.16);
+            --ink-text: #14161C;
+            --muted: #7A7E88;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--paper);
+            color: var(--ink-text);
+            overflow-x: hidden;
+        }
+        .heading-font { font-family: 'Fraunces', serif; font-feature-settings: "ss01"; }
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+        .gold-gradient { background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%); }
+        .gold-text {
+            background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .ink-gradient { background: linear-gradient(160deg, var(--ink) 0%, var(--ink-soft) 100%); }
+        .card {
+            background: var(--paper-card);
+            border: 1px solid rgba(20, 22, 28, 0.06);
+            box-shadow: 0 1px 2px rgba(12,14,19,0.03), 0 12px 24px -18px rgba(12,14,19,0.18);
+        }
+        .card-gold-edge { border-top: 2px solid var(--gold); }
+        .field {
+            background: #FAF9F6;
+            border: 1px solid rgba(20,22,28,0.08);
+            transition: border-color .18s ease, background .18s ease;
+        }
+        .field:focus { outline: none; border-color: var(--gold); background: #fff; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        /* ---------- Sidebar (desktop) ---------- */
+        #sidebar { background: var(--ink); }
+        #sidebar .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+        .sidebar-item {
+            color: rgba(246, 244, 239, 0.55);
+            border-left: 2px solid transparent;
+            transition: color .18s ease, background .18s ease, border-color .18s ease;
+        }
+        .sidebar-item:hover {
+            background: linear-gradient(90deg, rgba(183,147,91,0.12) 0%, transparent 85%);
+            color: var(--gold-light);
+        }
+        .sidebar-active {
+            background: linear-gradient(90deg, rgba(183,147,91,0.16) 0%, transparent 85%);
+            color: var(--gold-light) !important;
+            border-left: 2px solid var(--gold);
+        }
+        .sidebar-item i { width: 17px; height: 17px; }
+
+        /* ---------- Mobile Island Navigation ---------- */
+        #islandNav {
+            background: rgba(12, 14, 19, 0.97);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(183, 147, 91, 0.22);
+            box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(183,147,91,0.05) inset;
+        }
+        .island-item {
+            position: relative; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 2px;
+            padding: 7px 4px; border-radius: 13px;
+            color: rgba(246, 244, 239, 0.4);
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+        .island-item i { width: 16px; height: 16px; }
+        .island-item span { font-size: 8px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+        .island-item.active {
+            color: var(--gold-light);
+            background: linear-gradient(135deg, rgba(183,147,91,0.22) 0%, rgba(143,110,62,0.10) 100%);
+        }
+        .island-item.active i { filter: drop-shadow(0 2px 6px rgba(183,147,91,0.45)); }
+
+        ::selection { background: var(--gold-light); color: var(--ink); }
+        :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+        /* ---------- Mobile Drawer Sidebar ---------- */
+        #drawerOverlay {
+            background: rgba(8, 9, 13, 0.55);
+            backdrop-filter: blur(2px);
+            opacity: 0; pointer-events: none;
+            transition: opacity .28s ease;
+        }
+        #drawerOverlay.open { opacity: 1; pointer-events: auto; }
+        #mobileDrawer {
+            background: var(--ink);
+            width: min(86vw, 320px);
+            transform: translateX(-100%);
+            transition: transform .32s cubic-bezier(.32,.72,0,1);
+            box-shadow: 24px 0 60px -20px rgba(0,0,0,0.5);
+        }
+        #mobileDrawer.open { transform: translateX(0); }
+        #mobileDrawer .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+        .drawer-item {
+            color: rgba(246, 244, 239, 0.6);
+            border-left: 2px solid transparent;
+            transition: color .18s ease, background .18s ease, border-color .18s ease;
+        }
+        .drawer-item:active, .drawer-item:hover {
+            background: linear-gradient(90deg, rgba(183,147,91,0.14) 0%, transparent 85%);
+            color: var(--gold-light);
+        }
+        .drawer-active {
+            background: linear-gradient(90deg, rgba(183,147,91,0.18) 0%, transparent 85%);
+            color: var(--gold-light) !important;
+            border-left: 2px solid var(--gold);
+        }
+        .drawer-item i { width: 18px; height: 18px; }
+        #menuToggle {
+            width: 38px; height: 38px; border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(20,22,28,0.08);
+            color: var(--ink-text);
+            transition: background .18s ease, border-color .18s ease;
+        }
+        #menuToggle:hover { background: rgba(183,147,91,0.08); border-color: rgba(183,147,91,0.3); }
+        #menuToggle i { width: 18px; height: 18px; }
+
+        /* ---------- Toolbar ---------- */
+        .search-box { display: flex; align-items: center; gap: 10px; }
+        .search-box i { width: 16px; height: 16px; color: var(--muted); }
+        .search-box input { background: transparent; border: none; outline: none; width: 100%; font-size: 14px; color: var(--ink-text); }
+
+        /* ---------- Mobile plan cards ---------- */
+        .plan-card-actions { display: flex; gap: 8px; border-top: 1px solid rgba(20,22,28,0.06); padding-top: 12px; margin-top: 12px; }
+        .btn-edit-plan, .btn-delete-plan {
+            flex: 1; padding: 10px; border-radius: 10px; border: none;
+            font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.02em;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .btn-edit-plan { background: rgba(20,22,28,0.05); color: var(--ink-text); }
+        .btn-edit-plan:hover { background: rgba(20,22,28,0.08); }
+        .btn-delete-plan { background: #FEF2F2; color: #DC2626; }
+        .btn-delete-plan:hover { background: #FEE2E2; }
+        .action-icon { background: none; border: none; color: var(--muted); cursor: pointer; padding: 8px; border-radius: 8px; transition: 0.15s; }
+        .action-icon:hover { background: rgba(20,22,28,0.05); color: var(--ink-text); }
+        .action-icon.danger:hover { background: #FEF2F2; color: #DC2626; }
+
+        /* ---------- Modal ---------- */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(12,14,19,0.6); backdrop-filter: blur(6px);
+            z-index: 2000; display: none; align-items: flex-end; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: var(--paper); width: 100%; max-width: 600px;
+            border-radius: 28px 28px 0 0; max-height: 92vh; overflow-y: auto;
+            border-top: 2px solid var(--gold);
+        }
+        @media (min-width: 640px) {
+            .modal-overlay { align-items: center; padding: 20px; }
+            .modal-content { border-radius: 28px; max-height: 88vh; border-top: 2px solid var(--gold); }
+        }
+        .modal-header {
+            padding: 20px 24px; border-bottom: 1px solid rgba(20,22,28,0.06);
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; background: var(--paper); z-index: 5;
+        }
+        .modal-body { padding: 24px; }
+        .modal-close { cursor: pointer; padding: 6px; color: var(--muted); }
+        .modal-close:hover { color: var(--ink-text); }
+
+        .calc-preview {
+            background: rgba(183, 147, 91, 0.06);
+            border: 1px solid rgba(183, 147, 91, 0.25);
+            border-radius: 16px; padding: 16px; margin-bottom: 18px; font-size: 13px;
+        }
+        .calc-preview-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .calc-preview-row:last-child { margin-bottom: 0; }
+        .calc-preview-row span:first-child { color: var(--muted); }
+        .calc-preview-row span:last-child { font-weight: 700; color: var(--gold-deep); }
+
+        .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+        .toggle-switch { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background-color: rgba(20,22,28,0.15); transition: 0.2s; border-radius: 26px;
+        }
+        .toggle-slider::before {
+            position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
+            background-color: white; transition: 0.2s; border-radius: 50%;
+        }
+        .toggle-switch input:checked + .toggle-slider { background-color: var(--gold); }
+        .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; white-space: nowrap; }
+        .status-active-plan { background: #ECFDF5; color: #059669; }
+        .status-inactive-plan { background: #FEF2F2; color: #DC2626; }
+    </style>
+</head>
+<body class="bg-[var(--paper)]">
+
+    <!-- Auth Guard Loader -->
+    <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
+        <div class="text-center" id="loaderContent">
+            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(183,147,91,0.25); border-top-color: var(--gold);"></div>
+            <p class="heading-font gold-text text-2xl tracking-wide">VELORA</p>
+            <p class="text-[10px] uppercase tracking-[0.3em] text-white/30 mt-2">Verifying Admin Access</p>
+        </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="fixed top-0 right-0 left-0 h-20 bg-[var(--paper)]/85 backdrop-blur-md border-b border-black/[0.06] z-40 lg:left-64">
+        <div class="h-full flex items-center justify-between px-6">
+            <div class="flex items-center gap-3">
+                <button id="menuToggle" class="lg:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div class="w-7 h-7 gold-gradient rounded-full flex items-center justify-center text-white heading-font text-xs lg:hidden">V</div>
+                <div>
+                    <h2 class="text-lg font-semibold heading-font hidden md:block tracking-tight">Investment <span class="gold-text italic">Plans</span></h2>
+                    <h2 class="text-base font-semibold heading-font md:hidden">Plans</h2>
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] hidden md:block">Executive Terminal</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-3 border-l border-black/[0.06] pl-6">
+                    <div class="text-right hidden sm:block">
+                        <p id="adminName" class="text-sm font-semibold">Admin</p>
+                        <p id="adminRole" class="text-[9px] gold-text font-bold uppercase tracking-widest">...</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold" id="adminInitials">A</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Menu (Desktop only) -->
+    <aside id="sidebar" class="hidden lg:block fixed top-0 left-0 bottom-0 w-64 z-50">
+        <div class="p-8 h-full flex flex-col">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-9 h-9 rounded-lg border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
+                <h1 class="text-xl heading-font gold-text tracking-tight font-semibold">VELORA ADMIN</h1>
+            </div>
+            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-8 ml-12 -mt-1">Executive Terminal</p>
+            <div class="h-px w-full brand-hair mb-8"></div>
+
+            <nav class="space-y-1 flex-1" id="sidebarNav">
+                <a href="dashboard.html" data-page="dashboard" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="users.html" data-page="users" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="users"></i> Users
+                </a>
+                <a href="deposits.html" data-page="deposits" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-down-circle"></i> Deposits
+                </a>
+                <a href="withdrawals.html" data-page="withdrawals" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-up-circle"></i> Withdrawals
+                </a>
+                <a href="investments.html" data-page="investments" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gem"></i> Investments
+                </a>
+                <a href="plans.html" data-page="plans" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layers"></i> Plans
+                </a>
+                <a href="gift-codes.html" data-page="gift-codes" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gift"></i> Gift Codes
+                </a>
+                <a href="support.html" data-page="support" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="headphones"></i> Support
+                </a>
+
+                <div class="pt-8 mt-8 border-t border-white/[0.06]">
+                    <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
+                        <i data-lucide="log-out" class="w-[17px] h-[17px]"></i> Logout
+                    </button>
+                </div>
+            </nav>
+
+            <div class="pt-6 border-t border-white/[0.06]">
+                <div class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/25">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Restricted Access
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ============ Mobile Drawer Sidebar ============ -->
+    <div id="drawerOverlay" class="lg:hidden fixed inset-0 z-[60]"></div>
+    <aside id="mobileDrawer" class="lg:hidden fixed top-0 left-0 bottom-0 z-[70] overflow-y-auto">
+        <div class="p-7 min-h-full flex flex-col">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
+                    <h1 class="text-lg heading-font gold-text tracking-tight font-semibold">VELORA ADMIN</h1>
+                </div>
+                <button id="drawerClose" aria-label="Close menu" class="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-[var(--gold-light)] hover:bg-white/5 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-6 ml-12 -mt-1">Executive Terminal</p>
+            <div class="h-px w-full brand-hair mb-6"></div>
+
+            <div class="flex items-center gap-3 p-3 mb-6 rounded-2xl bg-white/[0.04] border border-white/10">
+                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold shrink-0" id="drawerInitials">A</div>
+                <div class="min-w-0">
+                    <p id="drawerName" class="text-sm font-semibold text-white truncate">Admin</p>
+                    <p id="drawerRole" class="text-[10px] text-[var(--gold-light)] font-bold tracking-widest uppercase truncate">...</p>
+                </div>
+            </div>
+
+            <nav class="space-y-1 flex-1" id="drawerNav">
+                <a href="dashboard.html" data-page="dashboard" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="users.html" data-page="users" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="users"></i> Users
+                </a>
+                <a href="deposits.html" data-page="deposits" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-down-circle"></i> Deposits
+                </a>
+                <a href="withdrawals.html" data-page="withdrawals" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="arrow-up-circle"></i> Withdrawals
+                </a>
+                <a href="investments.html" data-page="investments" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gem"></i> Investments
+                </a>
+                <a href="plans.html" data-page="plans" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="layers"></i> Plans
+                </a>
+                <a href="gift-codes.html" data-page="gift-codes" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="gift"></i> Gift Codes
+                </a>
+                <a href="support.html" data-page="support" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
+                    <i data-lucide="headphones"></i> Support
+                </a>
+
+                <div class="pt-6 mt-6 border-t border-white/[0.06]">
+                    <button id="drawerLogoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
+                        <i data-lucide="log-out" class="w-[18px] h-[18px]"></i> Logout
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- ============ Mobile Island Navigation ============ -->
+    <nav id="islandNav" class="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-[22px] flex items-center gap-1 px-2 py-1.5 w-[92%] max-w-sm">
+        <a href="dashboard.html" data-page="dashboard" class="island-item flex-1">
+            <i data-lucide="layout-dashboard"></i><span>Home</span>
+        </a>
+        <a href="users.html" data-page="users" class="island-item flex-1">
+            <i data-lucide="users"></i><span>Users</span>
+        </a>
+        <a href="deposits.html" data-page="deposits" class="island-item flex-1">
+            <i data-lucide="arrow-down-circle"></i><span>Deposits</span>
+        </a>
+        <a href="withdrawals.html" data-page="withdrawals" class="island-item flex-1">
+            <i data-lucide="arrow-up-circle"></i><span>Payouts</span>
+        </a>
+        <a href="support.html" data-page="support" class="island-item flex-1">
+            <i data-lucide="headphones"></i><span>Support</span>
+        </a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="lg:ml-64 pt-28 px-6 pb-24 lg:pb-12">
+        <div class="max-w-7xl mx-auto">
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6 mb-8">
+                <div class="card p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Total Plans</p>
+                    <h3 id="statTotal" class="text-2xl heading-font font-semibold mono">0</h3>
+                </div>
+                <div class="card p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Active</p>
+                    <h3 id="statActive" class="text-2xl heading-font font-semibold mono text-emerald-600">0</h3>
+                </div>
+                <div class="card p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Inactive</p>
+                    <h3 id="statDisabled" class="text-2xl heading-font font-semibold mono text-red-500">0</h3>
+                </div>
+                <div class="card card-gold-edge p-6 rounded-[28px]">
+                    <p class="text-[10px] text-[var(--gold-deep)] uppercase font-bold tracking-widest mb-1">Avg. Daily Rate</p>
+                    <h3 id="statAvgRoi" class="text-2xl heading-font font-semibold gold-text mono">0%</h3>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="card rounded-[24px] p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
+                <div class="search-box field flex-1 rounded-xl px-4 py-3">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="planSearch" placeholder="Search plan name...">
+                </div>
+                <div class="flex gap-3">
+                    <select id="statusFilter" class="field rounded-xl px-4 py-3 text-sm flex-1 sm:flex-none">
+                        <option value="all">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                    <button onclick="openCreateModal()" class="gold-gradient text-white font-bold rounded-xl text-sm px-5 py-3 flex items-center justify-center gap-2 whitespace-nowrap" style="box-shadow: 0 12px 28px -14px rgba(143,110,62,0.6);">
+                        <i data-lucide="plus" class="w-4 h-4"></i> New Plan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Plans: mobile cards + desktop table -->
+            <div class="card rounded-[28px] overflow-hidden">
+                <!-- Mobile stacked cards -->
+                <div id="planCardList" class="flex flex-col gap-3 p-4 md:hidden">
+                    <div class="text-center text-[var(--muted)] text-xs italic py-8">Loading plans...</div>
+                </div>
+
+                <!-- Desktop table -->
+                <div class="hidden md:block overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-black/[0.06]">
+                                <th class="text-left px-6 py-4 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Plan Name</th>
+                                <th class="text-left px-6 py-4 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Price</th>
+                                <th class="text-left px-6 py-4 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Daily Profit</th>
+                                <th class="text-left px-6 py-4 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Duration</th>
+                                <th class="text-left px-6 py-4 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Status</th>
+                                <th class="text-left px-6 py-4 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="planTableBody">
+                            <tr><td colspan="6" class="text-center text-[var(--muted)] text-xs italic py-10">Loading plans...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Create / Edit Plan Modal -->
+    <div class="modal-overlay" id="planModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="planModalTitle" class="text-lg font-semibold heading-font">New Investment Plan</h3>
+                <i data-lucide="x" class="modal-close" onclick="closePlanModal()"></i>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="planId">
+
+                <div class="mb-4">
+                    <label class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest block mb-2">Plan Name</label>
+                    <input type="text" id="planName" placeholder="e.g. Gold Plan" class="field w-full px-4 py-3 rounded-xl text-sm">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest block mb-2">Price (₦)</label>
+                        <input type="number" id="planPrice" placeholder="5000" class="field w-full px-4 py-3 rounded-xl text-sm mono">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest block mb-2">Sort Order</label>
+                        <input type="number" id="planSort" placeholder="0" class="field w-full px-4 py-3 rounded-xl text-sm mono">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest block mb-2">Rate Multiplier (Price × this = Total Income)</label>
+                        <input type="number" step="0.0001" id="planMultiplier" placeholder="e.g. 3" class="field w-full px-4 py-3 rounded-xl text-sm mono">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest block mb-2">Duration (Days)</label>
+                        <input type="number" id="planDuration" placeholder="30" class="field w-full px-4 py-3 rounded-xl text-sm mono">
+                    </div>
+                </div>
+
+                <!-- Live-calculated preview: updates automatically as the fields above are filled in -->
+                <div class="calc-preview" id="calcPreview" style="display:none;">
+                    <div class="calc-preview-row"><span>Total Income over duration</span><span id="previewTotal">₦0</span></div>
+                    <div class="calc-preview-row"><span>Daily Profit</span><span id="previewDaily">₦0</span></div>
+                    <div class="calc-preview-row"><span>Equivalent Daily Rate</span><span id="previewRate">0%</span></div>
+                </div>
+
+                <div class="mb-1">
+                    <div class="toggle-row">
+                        <label class="text-xs font-semibold text-[var(--ink-text)]">Mark as "Popular"</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="planPopular">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-row border-t border-black/[0.06]">
+                        <label class="text-xs font-semibold text-[var(--ink-text)]">Plan Active</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="planActive" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 mt-6 pt-5 border-t border-black/[0.06]">
+                    <button onclick="savePlan()" class="flex-1 py-3.5 gold-gradient text-white font-bold rounded-xl text-sm" style="box-shadow: 0 20px 40px -20px rgba(143,110,62,0.5);">Save Plan</button>
+                    <button onclick="closePlanModal()" class="flex-1 py-3.5 bg-black/[0.05] hover:bg-black/[0.08] text-[var(--ink-text)] font-bold rounded-xl text-sm transition">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+        lucide.createIcons();
+
+        const supabase = createClient(
+            import.meta.env.VITE_SUPABASE_URL,
+            import.meta.env.VITE_SUPABASE_ANON_KEY
+        );
+
+        // --- 0. Active nav state (sidebar + mobile island + drawer) ---
+        function setActiveNav() {
+            const current = (window.location.pathname.split('/').pop() || 'dashboard.html').replace('.html', '') || 'dashboard';
+            document.querySelectorAll('#sidebarNav a[data-page]').forEach(a => {
+                a.classList.toggle('sidebar-active', a.dataset.page === current);
+            });
+            document.querySelectorAll('#islandNav a[data-page]').forEach(a => {
+                a.classList.toggle('active', a.dataset.page === current);
+            });
+            document.querySelectorAll('#drawerNav a[data-page]').forEach(a => {
+                a.classList.toggle('drawer-active', a.dataset.page === current);
+            });
+        }
+
+        // --- 0b. Mobile drawer open/close ---
+        // FIX: the previous version referenced `document.getElementById('sidebarOverlay')`
+        // which did not exist in the markup, producing `overlay === null` and then
+        // crashing on `overlay.onclick = ...` before init() ever ran. These are all
+        // now real elements that exist in the DOM above.
+        const drawer = document.getElementById('mobileDrawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+        const drawerClose = document.getElementById('drawerClose');
+
+        function openDrawer() {
+            drawer.classList.add('open');
+            drawerOverlay.classList.add('open');
+            menuToggle.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeDrawer() {
+            drawer.classList.remove('open');
+            drawerOverlay.classList.remove('open');
+            menuToggle.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
+        menuToggle.addEventListener('click', openDrawer);
+        drawerClose.addEventListener('click', closeDrawer);
+        drawerOverlay.addEventListener('click', closeDrawer);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+        document.querySelectorAll('#drawerNav a[data-page]').forEach(a => a.addEventListener('click', closeDrawer));
+
+        // --- 1. Init and Robust Security ---
+        async function init() {
+            try {
+                const { data: { session }, error: authError } = await supabase.auth.getSession();
+                if (authError || !session) throw new Error("No valid session found.");
+
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('role, full_name')
+                    .eq('id', session.user.id)
+                    .single();
+
+                if (profileError || !profile || !['admin', 'super_admin'].includes(profile.role)) {
+                    await supabase.auth.signOut();
+                    window.location.href = 'login.html?error=unauthorized';
+                    return;
+                }
+
+                // Success
+                document.getElementById('adminName').textContent = profile.full_name;
+                document.getElementById('adminInitials').textContent = profile.full_name.charAt(0);
+                document.getElementById('drawerName').textContent = profile.full_name;
+                document.getElementById('drawerInitials').textContent = profile.full_name.charAt(0);
+                // FIX: role label is now set from the actual profile role
+                // instead of a hardcoded "Authorized Personnel" string.
+                const roleLabel = profile.role === 'super_admin' ? 'Super Admin' : 'Administrator';
+                document.getElementById('adminRole').textContent = roleLabel;
+                document.getElementById('drawerRole').textContent = roleLabel;
+                document.getElementById('authGuard').classList.add('hidden');
+
+                loadPlans();
+                setupRealtime();
+
+            } catch (err) {
+                console.error("Security Halt:", err);
+                document.getElementById('loaderContent').innerHTML = `
+                    <p class="text-red-400 font-semibold mb-4">Access Denied or Connection Failure</p>
+                    <a href="login.html" class="px-6 py-2 gold-gradient text-white rounded-xl text-sm font-bold">Return to Login</a>
+                `;
+            }
+        }
+
+        // --- 2. Data Fetching ---
+        // Matches the real `investment_plans` columns:
+        // id, name, price, daily_roi_pct, duration_days, sort_order, is_popular, is_active
+        //
+        // The modal collects a "Rate Multiplier" applied ONLY to the plan's
+        // Price to produce Total Income over its full duration
+        // (Total Income = Price x Multiplier). Daily Profit is then derived
+        // automatically by spreading that total evenly across the duration
+        // (Daily Profit = Total Income / Duration), and that daily figure is
+        // converted to daily_roi_pct before saving. The database schema and
+        // the rest of the app (invest.html's calculations, etc.) are
+        // unaffected and keep working exactly as before.
+
+        let allPlans = [];
+        let filteredPlans = [];
+
+        function loadStats() {
+            const active = allPlans.filter(p => p.is_active);
+            document.getElementById('statTotal').textContent = allPlans.length;
+            document.getElementById('statActive').textContent = active.length;
+            document.getElementById('statDisabled').textContent = allPlans.length - active.length;
+            const avgRoi = active.length > 0 ? (active.reduce((acc, p) => acc + Number(p.daily_roi_pct || 0), 0) / active.length) : 0;
+            document.getElementById('statAvgRoi').textContent = `${avgRoi.toFixed(2)}%`;
+        }
+
+        async function loadPlans() {
+            try {
+                const { data, error } = await supabase.from('investment_plans').select('*').order('sort_order', { ascending: true });
+                if (error) throw error;
+                allPlans = data || [];
+                loadStats();
+                applyFilters();
+            } catch (err) {
+                console.error('Plans fetch error:', err);
+                document.getElementById('planCardList').innerHTML = `<div class="text-center text-red-500 text-xs italic py-8">Could not load plans — check console</div>`;
+                document.getElementById('planTableBody').innerHTML = `<tr><td colspan="6" class="text-center text-red-500 text-xs italic py-10">Could not load plans — check console</td></tr>`;
+            }
+        }
+
+        // What ₦ figure a plan pays daily — matches price x (daily_roi_pct / 100).
+        function dailyProfitNaira(p) {
+            const price = parseFloat(p.price || 0);
+            const rate = parseFloat(p.daily_roi_pct || 0);
+            return (price * rate) / 100;
+        }
+
+        function applyFilters() {
+            const query = (document.getElementById('planSearch').value || '').toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+
+            filteredPlans = allPlans.filter(p => {
+                const matchSearch = (p.name || '').toLowerCase().includes(query);
+                const matchStatus = status === 'all' || (status === 'active' ? p.is_active : !p.is_active);
+                return matchSearch && matchStatus;
+            });
+            renderPlans();
+        }
+
+        function renderPlans() {
+            const tableBody = document.getElementById('planTableBody');
+            const cardList = document.getElementById('planCardList');
+
+            if (filteredPlans.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-[var(--muted)] text-xs italic py-10">No investment plans found.</td></tr>';
+                cardList.innerHTML = '<div class="text-center text-[var(--muted)] text-xs italic py-8">No investment plans found. Tap "New Plan" to create one.</div>';
+                return;
+            }
+
+            tableBody.innerHTML = filteredPlans.map(p => {
+                const statusClass = p.is_active ? 'status-active-plan' : 'status-inactive-plan';
+                const statusLabel = p.is_active ? 'Active' : 'Inactive';
+                return `
+                <tr class="border-b border-black/[0.04] ${!p.is_active ? 'opacity-60' : ''}">
+                    <td class="px-6 py-4">
+                        <p class="font-semibold heading-font">${p.name}</p>
+                        ${p.is_popular ? `<span class="text-[9px] font-bold text-[var(--gold-deep)] uppercase tracking-wide">Popular</span>` : ''}
+                    </td>
+                    <td class="px-6 py-4 mono">₦${Number(p.price || 0).toLocaleString()}</td>
+                    <td class="px-6 py-4 mono text-emerald-600">₦${dailyProfitNaira(p).toLocaleString(undefined, { maximumFractionDigits: 2 })} / day</td>
+                    <td class="px-6 py-4">${p.duration_days ? p.duration_days + ' days' : '—'}</td>
+                    <td class="px-6 py-4"><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+                    <td class="px-6 py-4">
+                        <button class="action-icon" onclick="openEditModal('${p.id}')" title="Edit"><i data-lucide="pen" class="w-4 h-4"></i></button>
+                        <button class="action-icon danger" onclick="deletePlan('${p.id}')" title="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            cardList.innerHTML = filteredPlans.map(p => {
+                const statusClass = p.is_active ? 'status-active-plan' : 'status-inactive-plan';
+                const statusLabel = p.is_active ? 'Active' : 'Inactive';
+                return `
+                <div class="card p-4 rounded-2xl ${!p.is_active ? 'opacity-60' : ''}">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <p class="font-semibold heading-font">${p.name}</p>
+                            ${p.is_popular ? `<span class="text-[9px] font-bold text-[var(--gold-deep)] uppercase tracking-wide">Popular</span>` : ''}
+                        </div>
+                        <span class="status-badge ${statusClass}">${statusLabel}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mt-4 text-sm">
+                        <div><p class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Price</p>₦${Number(p.price || 0).toLocaleString()}</div>
+                        <div><p class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Daily Profit</p><span class="text-emerald-600 font-semibold">₦${dailyProfitNaira(p).toLocaleString(undefined, { maximumFractionDigits: 2 })}</span></div>
+                        <div><p class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Duration</p>${p.duration_days ? p.duration_days + ' days' : '—'}</div>
+                    </div>
+                    <div class="plan-card-actions">
+                        <button class="btn-edit-plan" onclick="openEditModal('${p.id}')"><i data-lucide="pen" class="w-3.5 h-3.5"></i> Edit</button>
+                        <button class="btn-delete-plan" onclick="deletePlan('${p.id}')"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete</button>
+                    </div>
+                </div>`;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        // Recomputes Total Income, Daily Profit, and the equivalent daily %,
+        // live as the admin fills in Price / Multiplier / Duration.
+        function updateCalcPreview() {
+            const price = parseFloat(document.getElementById('planPrice').value);
+            const multiplier = parseFloat(document.getElementById('planMultiplier').value);
+            const duration = parseInt(document.getElementById('planDuration').value, 10);
+            const preview = document.getElementById('calcPreview');
+
+            if (!price || price <= 0 || isNaN(multiplier) || multiplier <= 0) {
+                preview.style.display = 'none';
+                return;
+            }
+
+            const totalIncome = price * multiplier;
+            document.getElementById('previewTotal').innerText = `₦${totalIncome.toLocaleString()}`;
+
+            if (duration && duration > 0) {
+                const dailyProfit = totalIncome / duration;
+                const ratePercent = (dailyProfit / price) * 100;
+                document.getElementById('previewDaily').innerText = `₦${dailyProfit.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+                document.getElementById('previewRate').innerText = `${ratePercent.toFixed(2)}%`;
+            } else {
+                document.getElementById('previewDaily').innerText = 'Enter duration to calculate';
+                document.getElementById('previewRate').innerText = '—';
+            }
+
+            preview.style.display = 'block';
+        }
+
+        window.openCreateModal = () => {
+            document.getElementById('planModalTitle').textContent = 'New Investment Plan';
+            document.getElementById('planId').value = '';
+            document.getElementById('planName').value = '';
+            document.getElementById('planPrice').value = '';
+            document.getElementById('planMultiplier').value = '';
+            document.getElementById('planDuration').value = '';
+            document.getElementById('planSort').value = '0';
+            document.getElementById('planPopular').checked = false;
+            document.getElementById('planActive').checked = true;
+            document.getElementById('calcPreview').style.display = 'none';
+            document.getElementById('planModal').classList.add('active');
+            lucide.createIcons();
+        };
+
+        window.openEditModal = (id) => {
+            const p = allPlans.find(pl => pl.id === id);
+            if (!p) return;
+
+            document.getElementById('planModalTitle').textContent = 'Edit Investment Plan';
+            document.getElementById('planId').value = p.id;
+            document.getElementById('planName').value = p.name || '';
+            document.getElementById('planPrice').value = p.price || '';
+            // Convert the stored daily percentage back into a total-income
+            // multiplier for editing: multiplier = (daily_roi_pct / 100) x duration_days.
+            document.getElementById('planMultiplier').value = (p.daily_roi_pct && p.duration_days)
+                ? (((parseFloat(p.daily_roi_pct) / 100)) * p.duration_days).toString()
+                : '';
+            document.getElementById('planDuration').value = p.duration_days || '';
+            document.getElementById('planSort').value = p.sort_order || 0;
+            document.getElementById('planPopular').checked = !!p.is_popular;
+            document.getElementById('planActive').checked = !!p.is_active;
+            updateCalcPreview();
+            document.getElementById('planModal').classList.add('active');
+            lucide.createIcons();
+        };
+
+        window.closePlanModal = () => {
+            document.getElementById('planModal').classList.remove('active');
+        };
+
+        window.savePlan = async () => {
+            const id = document.getElementById('planId').value;
+            const name = document.getElementById('planName').value.trim();
+            const price = parseFloat(document.getElementById('planPrice').value);
+            const multiplier = parseFloat(document.getElementById('planMultiplier').value);
+            const duration = parseInt(document.getElementById('planDuration').value, 10);
+            const sortOrder = document.getElementById('planSort').value ? parseInt(document.getElementById('planSort').value, 10) : 0;
+            const isPopular = document.getElementById('planPopular').checked;
+            const isActive = document.getElementById('planActive').checked;
+
+            if (!name) { alert('Plan name is required.'); return; }
+            if (isNaN(price) || price <= 0) { alert('Please enter a valid price.'); return; }
+            if (isNaN(multiplier) || multiplier <= 0) { alert('Please enter a valid rate multiplier.'); return; }
+            if (isNaN(duration) || duration <= 0) { alert('Please enter a valid duration in days.'); return; }
+
+            // Multiplier only multiplies the price to get the plan's total
+            // income; daily profit (and the % the rest of the app runs on)
+            // is derived by spreading that total across the duration.
+            const totalIncome = price * multiplier;
+            const dailyProfit = totalIncome / duration;
+            const dailyRatePercent = (dailyProfit / price) * 100;
+
+            const payload = {
+                name,
+                price,
+                daily_roi_pct: dailyRatePercent,
+                duration_days: duration,
+                sort_order: sortOrder,
+                is_popular: isPopular,
+                is_active: isActive
+            };
+
+            try {
+                if (id) {
+                    const { error } = await supabase.from('investment_plans').update(payload).eq('id', id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabase.from('investment_plans').insert([payload]);
+                    if (error) throw error;
+                }
+                closePlanModal();
+                loadPlans();
+            } catch (err) {
+                alert('Could not save plan: ' + err.message);
+            }
+        };
+
+        // Deleting a plan does not touch existing `investments` rows — those
+        // already store their own amount + daily_earning_amount independent
+        // of this plan, so investors already in are unaffected either way.
+        window.deletePlan = async (id) => {
+            const p = allPlans.find(pl => pl.id === id);
+            if (!confirm(`Delete the plan "${p?.name || 'this plan'}"? This cannot be undone. Existing user investments on this plan are not affected.`)) return;
+            try {
+                const { error } = await supabase.from('investment_plans').delete().eq('id', id);
+                if (error) throw error;
+                loadPlans();
+            } catch (err) {
+                alert('Could not delete plan: ' + err.message);
+            }
+        };
+
+        document.getElementById('planSearch').addEventListener('input', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        ['planPrice', 'planMultiplier', 'planDuration'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateCalcPreview);
+        });
+
+        function setupRealtime() {
+            supabase.channel('plans-sync')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'investment_plans' }, () => {
+                    loadPlans();
+                }).subscribe();
+        }
+
+        document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+        document.getElementById('drawerLogoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+
+        setActiveNav();
+        init();
+    </script>
+</body>
+</html>
