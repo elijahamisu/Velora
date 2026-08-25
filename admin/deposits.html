@@ -351,7 +351,7 @@
                             <tr>
                                 <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Client</th>
                                 <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Amount</th>
-                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Reference</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Receipt</th>
                                 <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Date</th>
                                 <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase text-right">Action</th>
                             </tr>
@@ -500,7 +500,11 @@
                 <tr class="hover:bg-black/[0.015] transition">
                     <td class="px-8 py-5 text-sm font-semibold text-[var(--ink-text)]">${d.profiles?.full_name || 'Unknown'}</td>
                     <td class="px-8 py-5 text-sm font-semibold mono">₦${Number(d.amount).toLocaleString()}</td>
-                    <td class="px-8 py-5 text-xs mono text-[var(--muted)]">${d.reference || '—'}</td>
+                    <td class="px-8 py-5 text-xs mono text-[var(--muted)]">
+                        ${d.proof_image_url
+                            ? `<a href="${d.proof_image_url}" target="_blank" class="text-[var(--gold-deep)] underline">View Receipt</a>`
+                            : '—'}
+                    </td>
                     <td class="px-8 py-5 text-xs text-[var(--muted)] mono">${new Date(d.created_at).toLocaleDateString()}</td>
                     <td class="px-8 py-5 text-right">
                         ${d.status === 'pending' ? `
