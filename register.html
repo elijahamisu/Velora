@@ -175,7 +175,9 @@
         const refCode = urlParams.get('ref');
         if (refCode) document.getElementById('referralCode').value = refCode;
 
-        // 2. Toggle Passwords
+        document.getElementById('referralCode').addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase();
+        });
         document.querySelectorAll('.toggle-pass').forEach(btn => {
             btn.addEventListener('click', () => {
                 const input = btn.previousElementSibling;
