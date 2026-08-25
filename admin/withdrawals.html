@@ -339,13 +339,20 @@
                 </select>
             </div>
 
-            <!-- Withdrawals Table -->
+            <!-- Withdrawals: stacked cards on mobile, full table on wider screens -->
             <div class="card rounded-[32px] overflow-hidden">
                 <div class="p-6 md:p-8 border-b border-black/[0.05] flex justify-between items-center">
                     <h4 class="text-lg font-semibold heading-font">Payout Requests</h4>
                     <span class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[9px] font-bold uppercase tracking-widest">Realtime Sync</span>
                 </div>
-                <div class="overflow-x-auto no-scrollbar">
+
+                <!-- Mobile: card list (no horizontal scroll, every field visible) -->
+                <div id="withdrawalsCards" class="md:hidden divide-y divide-black/[0.05]">
+                    <div class="p-10 text-center text-[var(--muted)] text-xs italic">Loading payout requests...</div>
+                </div>
+
+                <!-- Desktop/tablet: table -->
+                <div class="hidden md:block overflow-x-auto no-scrollbar">
                     <table class="w-full text-left whitespace-nowrap">
                         <thead class="bg-black/[0.02] border-b border-black/[0.05]">
                             <tr>
@@ -489,13 +496,61 @@
             }
         }
 
+        function statusBadge(status) {
+            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full ${status === 'completed' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}">${status}</span>`;
+        }
+
+        function actionButtons(w) {
+            if (w.status !== 'pending') return statusBadge(w.status);
+            return `
+                <div class="flex items-center gap-2">
+                    <button onclick="approveWithdrawal('${w.id}')" class="flex-1 px-3 py-2.5 bg-emerald-50 text-emerald-700 rounded-xl text-[11px] font-bold uppercase hover:bg-emerald-100 transition">Mark Paid</button>
+                    <button onclick="rejectWithdrawal('${w.id}', ${w.amount}, '${w.user_id}')" class="flex-1 px-3 py-2.5 bg-red-50 text-red-600 rounded-xl text-[11px] font-bold uppercase hover:bg-red-100 transition">Reject</button>
+                </div>`;
+        }
+
         function renderWithdrawals(rows) {
+            const cards = document.getElementById('withdrawalsCards');
             const body = document.getElementById('withdrawalsBody');
+
             if (rows.length === 0) {
+                cards.innerHTML = `<div class="p-10 text-center text-[var(--muted)] text-xs italic">No withdrawals match this filter.</div>`;
                 body.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-[var(--muted)] text-xs italic">No withdrawals match this filter.</td></tr>`;
                 return;
             }
 
+            // --- Mobile cards: everything stacked, nothing scrolls off-screen ---
+            cards.innerHTML = rows.map(w => `
+                <div class="p-5">
+                    <div class="flex items-start justify-between gap-3 mb-3">
+                        <div>
+                            <p class="text-sm font-semibold text-[var(--ink-text)] heading-font">${w.profiles?.full_name || 'Unknown'}</p>
+                            <p class="text-[10px] text-[var(--muted)] mono mt-0.5">${new Date(w.created_at).toLocaleDateString()}</p>
+                        </div>
+                        ${w.status !== 'pending' ? statusBadge(w.status) : `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full bg-amber-50 text-amber-700">pending</span>`}
+                    </div>
+
+                    <div class="bg-black/[0.02] rounded-2xl p-4 mb-3 space-y-2">
+                        <div class="flex justify-between items-baseline">
+                            <span class="text-[10px] font-bold text-[var(--muted)] uppercase">Payout (Net)</span>
+                            <span class="text-base font-bold mono">₦${(Number(w.amount) - Number(w.charge || 0)).toLocaleString()}</span>
+                        </div>
+                        <div class="flex justify-between items-baseline">
+                            <span class="text-[10px] font-bold text-[var(--muted)] uppercase">Fee</span>
+                            <span class="text-xs font-semibold mono text-red-500">₦${Number(w.charge || 0).toLocaleString()}</span>
+                        </div>
+                        <div class="border-t border-black/[0.06] pt-2 mt-1">
+                            <p class="text-[10px] font-bold text-[var(--muted)] uppercase mb-1">Bank Detail</p>
+                            <p class="text-xs font-semibold text-[var(--ink-text)]">${w.bank_name || '—'}</p>
+                            <p class="text-[11px] text-[var(--muted)] mono">${w.account_number || ''} · ${w.account_name || ''}</p>
+                        </div>
+                    </div>
+
+                    ${actionButtons(w)}
+                </div>
+            `).join('');
+
+            // --- Desktop table (unchanged layout) ---
             body.innerHTML = rows.map(w => `
                 <tr class="hover:bg-black/[0.015] transition">
                     <td class="px-8 py-5 text-sm font-semibold text-[var(--ink-text)]">${w.profiles?.full_name || 'Unknown'}</td>
@@ -514,22 +569,40 @@
                                 <button onclick="approveWithdrawal('${w.id}')" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-bold uppercase hover:bg-emerald-100 transition">Mark Paid</button>
                                 <button onclick="rejectWithdrawal('${w.id}', ${w.amount}, '${w.user_id}')" class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold uppercase hover:bg-red-100 transition">Reject</button>
                             </div>
-                        ` : `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full ${w.status === 'completed' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}">${w.status}</span>`}
+                        ` : statusBadge(w.status)}
                     </td>
                 </tr>
             `).join('');
         }
 
         // --- 3. Actions ---
-        // NOTE: withdrawal funds are deducted from the wallet at request time
-        // (see withdraw.html), so "Mark Paid" only needs to flip the status —
-        // the wallet was already debited. "Reject" must refund the full
-        // amount back to available_balance since the debit needs reversing.
+        // Approve/reject go through /api/admin/withdrawals, which runs
+        // server-side with the service-role key. Doing this with the anon
+        // key directly (the old code) silently fails under RLS: an admin
+        // updating another user's withdrawals/wallets row matches 0 rows,
+        // Supabase returns no error, and the button just appears to do
+        // nothing. Routing through the API sidesteps RLS safely.
+        async function callWithdrawalAction(id, action) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = 'login.html'; return; }
+
+            const res = await fetch('/api/admin/withdrawals', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify({ id, action })
+            });
+            const body = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(body.error || `Request failed (${res.status})`);
+            return body;
+        }
+
         window.approveWithdrawal = async (id) => {
             if (!confirm('Mark this withdrawal as paid?')) return;
             try {
-                await supabase.from('withdrawals').update({ status: 'completed' }).eq('id', id);
-                await supabase.from('transactions').update({ status: 'completed' }).eq('reference', id);
+                await callWithdrawalAction(id, 'complete');
                 loadStats();
                 loadWithdrawals();
             } catch (err) {
@@ -540,18 +613,7 @@
         window.rejectWithdrawal = async (id, amount, userId) => {
             if (!confirm(`Reject and refund ₦${Number(amount).toLocaleString()} back to the client's wallet?`)) return;
             try {
-                await supabase.from('withdrawals').update({ status: 'rejected' }).eq('id', id);
-
-                const { data: wallet } = await supabase.from('wallets').select('available_balance').eq('user_id', userId).single();
-                const refundedBalance = Number(wallet?.available_balance || 0) + Number(amount);
-                await supabase.from('wallets').update({ available_balance: refundedBalance }).eq('user_id', userId);
-
-                await supabase.from('notifications').insert([{
-                    user_id: userId,
-                    title: 'Withdrawal Rejected',
-                    message: `Your withdrawal of ₦${Number(amount).toLocaleString()} was rejected and refunded to your wallet.`
-                }]);
-
+                await callWithdrawalAction(id, 'reject');
                 loadStats();
                 loadWithdrawals();
             } catch (err) {
