@@ -392,10 +392,11 @@
                 <div class="lg:col-span-3">
                     <h4 class="text-xl font-semibold heading-font mb-5">Available Plans</h4>
 
-                    <div class="flex gap-2 mb-6 p-1.5 rounded-2xl" style="background: rgba(20,22,28,0.04);">
+                    <div class="flex gap-2 mb-3 p-1.5 rounded-2xl" style="background: rgba(20,22,28,0.04);">
                         <button type="button" id="tabElite" class="plan-tab-btn flex-1 py-2.5 rounded-xl text-sm font-bold transition">Elite</button>
                         <button type="button" id="tabProfessional" class="plan-tab-btn flex-1 py-2.5 rounded-xl text-sm font-bold transition">Professional</button>
                     </div>
+                    <p id="planNarration" class="text-xs text-[var(--muted)] mb-6"></p>
 
                     <div id="plansList" class="space-y-6">
                         <!-- Plan cards are rendered here by JS -->
@@ -643,6 +644,13 @@
                     .filter(inv => !('status' in inv) || inv.status === 'active')
                     .reduce((sum, inv) => sum + toNum(inv.daily_earning_amount), 0);
 
+                // Professional plans require at least one active investment
+                // (any plan, elite or professional counts). Re-render plan
+                // cards now that this is known, since loadPlans() may have
+                // already rendered them once before this data arrived.
+                hasActiveInvestment = investments.some(inv => !('status' in inv) || inv.status === 'active');
+                renderPlans();
+
                 document.getElementById('activeInvestment').textContent = naira(activeInvestment);
                 document.getElementById('dailyEarnings').textContent = naira(dailyAccrual);
 
@@ -654,11 +662,18 @@
 
         // --- 3. Render Plan Cards ---
         let activeCategory = 'elite';
+        let hasActiveInvestment = false; // set once investments load in loadData()
+
+        const CATEGORY_NARRATION = {
+            elite: 'Elite plans pay out a total income of 4× your investment amount over the plan duration.',
+            professional: 'Professional plans pay out a total income of 6× your investment amount over the plan duration. Requires at least one active investment to unlock.'
+        };
 
         function setActiveTab(category) {
             activeCategory = category;
             document.getElementById('tabElite').classList.toggle('active', category === 'elite');
             document.getElementById('tabProfessional').classList.toggle('active', category === 'professional');
+            document.getElementById('planNarration').textContent = CATEGORY_NARRATION[category] || '';
             renderPlans();
         }
         document.getElementById('tabElite').addEventListener('click', () => setActiveTab('elite'));
@@ -681,8 +696,10 @@
                 return;
             }
 
-            container.innerHTML = visiblePlans.map(plan => `
-                <div class="card p-6 md:p-8 rounded-[28px] relative overflow-hidden" data-plan-id="${plan.id}">
+            container.innerHTML = visiblePlans.map(plan => {
+                const locked = plan.category === 'professional' && !hasActiveInvestment;
+                return `
+                <div class="card p-6 md:p-8 rounded-[28px] relative overflow-hidden ${locked ? 'opacity-70' : ''}" data-plan-id="${plan.id}">
                     <div class="flex items-start justify-between gap-4 mb-1">
                         <div>
                             <h3 class="text-xl md:text-2xl heading-font font-semibold gold-text">${plan.name}</h3>
@@ -702,11 +719,19 @@
                         </div>
                     </div>
 
-                    <button type="button" class="plan-invest-btn w-full py-4 gold-gradient text-white font-bold rounded-2xl hover:-translate-y-0.5 transition-all" style="box-shadow: 0 20px 40px -20px rgba(143,110,62,0.5);">
-                        Invest Now
-                    </button>
+                    ${locked ? `
+                        <button type="button" disabled class="w-full py-4 bg-black/[0.06] text-[var(--muted)] font-bold rounded-2xl cursor-not-allowed">
+                            Requires an Active Investment
+                        </button>
+                        <p class="text-[11px] text-[var(--muted)] mt-2 text-center">Activate any Elite plan first to unlock Professional plans.</p>
+                    ` : `
+                        <button type="button" class="plan-invest-btn w-full py-4 gold-gradient text-white font-bold rounded-2xl hover:-translate-y-0.5 transition-all" style="box-shadow: 0 20px 40px -20px rgba(143,110,62,0.5);">
+                            Invest Now
+                        </button>
+                    `}
                 </div>
-            `).join('');
+            `;
+            }).join('');
 
             attachPlanHandlers();
         }
@@ -717,6 +742,7 @@
                 const planId = card.dataset.planId;
                 const plan = PLANS.find(p => p.id === planId);
                 const investBtn = card.querySelector('.plan-invest-btn');
+                if (!investBtn) return; // locked/disabled card — nothing to wire up
 
                 investBtn.addEventListener('click', () => openInvestModal(plan));
             });
@@ -772,6 +798,12 @@
 
             if (amount > currentBalance) {
                 errorBox.textContent = 'Insufficient wallet balance.';
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            if (plan.category === 'professional' && !hasActiveInvestment) {
+                errorBox.textContent = 'You need at least one active investment before purchasing a Professional plan.';
                 errorBox.classList.remove('hidden');
                 return;
             }
