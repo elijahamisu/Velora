@@ -453,7 +453,7 @@
                                 <tr class="bg-black/[0.02] border-b border-black/[0.05]">
                                     <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Amount</th>
                                     <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Date</th>
-                                    <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest text-center">Reference</th>
+                                    <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest text-center">Receipt</th>
                                     <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest text-right">Status</th>
                                 </tr>
                             </thead>
@@ -550,9 +550,10 @@
                 ]);
 
                 if (walletRes.data) {
-                    document.getElementById('walletBalance').textContent = `₦${walletRes.data.balance.toLocaleString()}`;
-                    document.getElementById('topBarBalance').textContent = `₦${walletRes.data.balance.toLocaleString()}`;
-                    document.getElementById('drawerBalance').textContent = `₦${walletRes.data.balance.toLocaleString()}`;
+                    const bal = Number(walletRes.data.available_balance || 0);
+                    document.getElementById('walletBalance').textContent = `₦${bal.toLocaleString()}`;
+                    document.getElementById('topBarBalance').textContent = `₦${bal.toLocaleString()}`;
+                    document.getElementById('drawerBalance').textContent = `₦${bal.toLocaleString()}`;
                 }
                 if (profileRes.data) {
                     document.getElementById('userInitials').textContent = profileRes.data.full_name.charAt(0);
@@ -579,13 +580,31 @@
             setLoading(true);
 
             try {
+                // 0. Upload receipt image if provided — `deposits` has no
+                // `reference` text column; it stores `proof_image_url`
+                // instead, so the receipt upload is what that field
+                // actually maps to. The typed reference number still gets
+                // preserved by folding it into the transaction description.
+                let proofImageUrl = null;
+                const receiptFile = document.getElementById('receipt').files[0];
+                if (receiptFile) {
+                    const fileExt = receiptFile.name.split('.').pop();
+                    const filePath = `${user.id}-${Date.now()}.${fileExt}`;
+                    const { error: uploadError } = await supabase.storage
+                        .from('deposit-receipts')
+                        .upload(filePath, receiptFile);
+                    if (uploadError) throw new Error(`Receipt upload failed: ${uploadError.message}`);
+                    const { data: { publicUrl } } = supabase.storage.from('deposit-receipts').getPublicUrl(filePath);
+                    proofImageUrl = publicUrl;
+                }
+
                 // 1. Create Deposit Record
                 const { error: depErr } = await supabase
                     .from('deposits')
                     .insert([{
                         user_id: user.id,
                         amount: amount,
-                        reference: refNumber,
+                        proof_image_url: proofImageUrl,
                         status: 'pending'
                     }]);
 
@@ -632,7 +651,11 @@
                 <tr class="hover:bg-black/[0.015] transition">
                     <td class="px-8 py-6 font-semibold text-[var(--ink-text)] mono">₦${row.amount.toLocaleString()}</td>
                     <td class="px-8 py-6 text-xs text-[var(--muted)] font-medium mono">${new Date(row.created_at).toLocaleDateString()}</td>
-                    <td class="px-8 py-6 text-center text-[10px] mono text-[var(--muted)]">${row.reference}</td>
+                    <td class="px-8 py-6 text-center text-[10px] mono text-[var(--muted)]">
+                        ${row.proof_image_url
+                            ? `<a href="${row.proof_image_url}" target="_blank" class="underline">Receipt</a>`
+                            : '—'}
+                    </td>
                     <td class="px-8 py-6 text-right">
                         <span class="text-[9px] uppercase font-bold px-3 py-1 rounded-full ${getStatusStyle(row.status)}">
                             ${row.status}
