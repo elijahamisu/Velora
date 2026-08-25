@@ -158,6 +158,9 @@
         }
         #menuToggle:hover { background: rgba(183,147,91,0.08); border-color: rgba(183,147,91,0.3); }
         #menuToggle i { width: 18px; height: 18px; }
+
+        .plan-tab-btn { color: var(--muted); }
+        .plan-tab-btn.active { background: var(--paper); color: var(--gold-deep); box-shadow: 0 4px 14px -6px rgba(20,22,28,0.15); }
     </style>
 </head>
 <body class="bg-[var(--paper)]">
@@ -388,6 +391,12 @@
                 <!-- Available Plans -->
                 <div class="lg:col-span-3">
                     <h4 class="text-xl font-semibold heading-font mb-5">Available Plans</h4>
+
+                    <div class="flex gap-2 mb-6 p-1.5 rounded-2xl" style="background: rgba(20,22,28,0.04);">
+                        <button type="button" id="tabElite" class="plan-tab-btn flex-1 py-2.5 rounded-xl text-sm font-bold transition">Elite</button>
+                        <button type="button" id="tabProfessional" class="plan-tab-btn flex-1 py-2.5 rounded-xl text-sm font-bold transition">Professional</button>
+                    </div>
+
                     <div id="plansList" class="space-y-6">
                         <!-- Plan cards are rendered here by JS -->
                     </div>
@@ -570,6 +579,7 @@
                 PLANS = (data || []).map(p => ({
                     id: p.id,
                     name: p.name,
+                    category: p.category || 'elite',
                     dailyRoiPct: Number(p.daily_roi_pct),
                     minInvest: Number(p.price),
                     dailyProfitNaira: (Number(p.price) * Number(p.daily_roi_pct)) / 100,
@@ -643,14 +653,27 @@
         }
 
         // --- 3. Render Plan Cards ---
+        let activeCategory = 'elite';
+
+        function setActiveTab(category) {
+            activeCategory = category;
+            document.getElementById('tabElite').classList.toggle('active', category === 'elite');
+            document.getElementById('tabProfessional').classList.toggle('active', category === 'professional');
+            renderPlans();
+        }
+        document.getElementById('tabElite').addEventListener('click', () => setActiveTab('elite'));
+        document.getElementById('tabProfessional').addEventListener('click', () => setActiveTab('professional'));
+        setActiveTab('elite'); // default tab on load
+
         function renderPlans() {
             const container = document.getElementById('plansList');
+            const visiblePlans = PLANS.filter(p => p.category === activeCategory);
 
-            if (PLANS.length === 0) {
+            if (visiblePlans.length === 0) {
                 container.innerHTML = `
                     <div class="card p-10 rounded-[28px] text-center">
                         <i data-lucide="inbox" class="w-8 h-8 text-[var(--muted)] mx-auto mb-3"></i>
-                        <p class="text-sm font-semibold text-[var(--ink-text)]">No investment plans available right now</p>
+                        <p class="text-sm font-semibold text-[var(--ink-text)]">No ${activeCategory} plans available right now</p>
                         <p class="text-xs text-[var(--muted)] mt-1">Please check back shortly.</p>
                     </div>
                 `;
@@ -658,7 +681,7 @@
                 return;
             }
 
-            container.innerHTML = PLANS.map(plan => `
+            container.innerHTML = visiblePlans.map(plan => `
                 <div class="card p-6 md:p-8 rounded-[28px] relative overflow-hidden" data-plan-id="${plan.id}">
                     <div class="flex items-start justify-between gap-4 mb-1">
                         <div>
