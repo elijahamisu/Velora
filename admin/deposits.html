@@ -527,7 +527,39 @@
                 const newBalance = Number(wallet?.available_balance || 0) + Number(amount);
                 await supabase.from('wallets').update({ available_balance: newBalance }).eq('user_id', userId);
 
-                await supabase.from('transactions').update({ status: 'completed' }).eq('user_id', userId).eq('type', 'deposit').eq('amount', amount).eq('status', 'pending');
+                // NOTE: the previous version of this function also tried to
+                // update transactions.status, but `transactions` has no
+                // `status` column — that call was silently failing every
+                // time (error wasn't even checked) and has been removed.
+                // Deposit status lives only on `deposits.status`, already
+                // updated above.
+
+                // Referral bonus: 20% of every approved deposit is credited
+                // to the depositor's referrer (profiles.referred_by), if any.
+                const { data: depositorProfile } = await supabase.from('profiles')
+                    .select('referred_by')
+                    .eq('id', userId)
+                    .single();
+
+                if (depositorProfile?.referred_by) {
+                    const bonusAmount = Number(amount) * 0.20;
+                    const { data: referrerWallet } = await supabase.from('wallets')
+                        .select('available_balance')
+                        .eq('user_id', depositorProfile.referred_by)
+                        .single();
+                    const referrerNewBalance = Number(referrerWallet?.available_balance || 0) + bonusAmount;
+
+                    await supabase.from('wallets')
+                        .update({ available_balance: referrerNewBalance })
+                        .eq('user_id', depositorProfile.referred_by);
+
+                    await supabase.from('transactions').insert([{
+                        user_id: depositorProfile.referred_by,
+                        amount: bonusAmount,
+                        type: 'referral_bonus',
+                        description: `20% referral bonus from a downstream deposit of ₦${Number(amount).toLocaleString()}`
+                    }]);
+                }
 
                 await supabase.from('notifications').insert([{
                     user_id: userId,
