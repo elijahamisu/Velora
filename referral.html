@@ -639,20 +639,38 @@
         // --- Load Referral Data ---
         async function loadReferralData() {
             try {
-                // Get referrals
-                const { data: refs } = await supabase.from('profiles')
+                // `profiles` has no `referral_code_used` column — the real
+                // column (written by the handle_new_user trigger) is
+                // `referred_by`, a uuid pointing at the referrer's own id.
+                const { data: refs, error: refsErr } = await supabase.from('profiles')
                     .select('*')
-                    .eq('referral_code_used', profile.referral_code)
+                    .eq('referred_by', user.id)
                     .order('created_at', { ascending: false });
+                if (refsErr) console.error('Referrals load error:', refsErr.message);
 
-                // Get earnings
-                const { data: bonuses } = await supabase.from('transactions')
+                // `profiles` has no `is_active` column. "Active" here means
+                // the referred user currently has at least one active
+                // investment — fetched separately and merged in below.
+                const refIds = (refs || []).map(r => r.id);
+                let activeInvestorIds = new Set();
+                if (refIds.length > 0) {
+                    const { data: activeInvestments } = await supabase.from('investments')
+                        .select('user_id')
+                        .in('user_id', refIds)
+                        .eq('status', 'active');
+                    activeInvestorIds = new Set((activeInvestments || []).map(inv => inv.user_id));
+                }
+                const refsWithActivity = (refs || []).map(r => ({ ...r, is_active: activeInvestorIds.has(r.id) }));
+
+                // Get earnings — real type value is 'referral_bonus', not 'referral'.
+                const { data: bonuses, error: bonusErr } = await supabase.from('transactions')
                     .select('amount, created_at')
                     .eq('user_id', user.id)
-                    .eq('type', 'referral');
+                    .eq('type', 'referral_bonus');
+                if (bonusErr) console.error('Bonuses load error:', bonusErr.message);
 
-                updateUI(refs || [], bonuses || []);
-                loadTeamTiers(refs || []);
+                updateUI(refsWithActivity, bonuses || []);
+                loadTeamTiers(refsWithActivity);
             } catch (err) {
                 console.error(err);
             }
@@ -660,43 +678,43 @@
 
         // --- Team Performance tiers ---
         // Level 1 (Direct) is the `refs` list already fetched above via
-        // referral_code_used. Level 2 (Secondary) and Level 3 (Tertiary)
-        // are computed by chaining the same referral_code_used match against
-        // each prior level's own referral_code — this mirrors the existing
-        // single-level pattern rather than introducing a new schema.
+        // referred_by = user.id. Level 2 (Secondary) and Level 3 (Tertiary)
+        // are computed by chaining referred_by against each prior level's
+        // own id (uuid), matching the real schema.
         async function loadTeamTiers(directRefs) {
             document.getElementById('directCount').textContent = directRefs.length;
 
-            const directCodes = directRefs.map(r => r.referral_code).filter(Boolean);
-            if (directCodes.length === 0) {
+            const directIds = directRefs.map(r => r.id).filter(Boolean);
+            if (directIds.length === 0) {
                 document.getElementById('secondaryCount').textContent = 0;
                 document.getElementById('tertiaryCount').textContent = 0;
                 return;
             }
 
             const { data: secondaryRefs } = await supabase.from('profiles')
-                .select('referral_code')
-                .in('referral_code_used', directCodes);
+                .select('id')
+                .in('referred_by', directIds);
             const secondary = secondaryRefs || [];
             document.getElementById('secondaryCount').textContent = secondary.length;
 
-            const secondaryCodes = secondary.map(r => r.referral_code).filter(Boolean);
-            if (secondaryCodes.length === 0) {
+            const secondaryIds = secondary.map(r => r.id).filter(Boolean);
+            if (secondaryIds.length === 0) {
                 document.getElementById('tertiaryCount').textContent = 0;
                 return;
             }
 
             const { data: tertiaryRefs } = await supabase.from('profiles')
                 .select('id')
-                .in('referral_code_used', secondaryCodes);
+                .in('referred_by', secondaryIds);
             document.getElementById('tertiaryCount').textContent = (tertiaryRefs || []).length;
         }
 
         async function loadWallet() {
-            const { data } = await supabase.from('wallets').select('balance').eq('user_id', user.id).single();
+            // wallets has no plain "balance" column — it's available_balance.
+            const { data } = await supabase.from('wallets').select('available_balance').eq('user_id', user.id).single();
             if (data) {
-                document.getElementById('topBalance').textContent = `₦${data.balance.toLocaleString()}`;
-                document.getElementById('drawerBalance').textContent = `₦${data.balance.toLocaleString()}`;
+                document.getElementById('topBalance').textContent = `₦${Number(data.available_balance || 0).toLocaleString()}`;
+                document.getElementById('drawerBalance').textContent = `₦${Number(data.available_balance || 0).toLocaleString()}`;
             }
         }
 
@@ -735,7 +753,10 @@
                         </span>
                     </td>
                     <td class="px-8 py-6 text-right font-semibold text-[var(--ink-text)] mono">
-                        ₦${(bonuses.filter(b => b.ref_id === r.id).reduce((acc, c) => acc + c.amount, 0)).toLocaleString()}
+                        <!-- transactions has no ref_id column linking a bonus to a
+                             specific downstream referral, so per-referral bonus
+                             attribution isn't tracked in the current schema. -->
+                        —
                     </td>
                 </tr>
             `).join('');
