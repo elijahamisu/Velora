@@ -463,6 +463,14 @@
                     <input type="text" id="planName" placeholder="e.g. Gold Plan" class="field w-full px-4 py-3 rounded-xl text-sm">
                 </div>
 
+                <div class="mb-4">
+                    <label class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest block mb-2">Category</label>
+                    <select id="planCategory" class="field w-full px-4 py-3 rounded-xl text-sm">
+                        <option value="elite">Elite</option>
+                        <option value="professional">Professional</option>
+                    </select>
+                </div>
+
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest block mb-2">Price (₦)</label>
@@ -686,7 +694,8 @@
                 <tr class="border-b border-black/[0.04] ${!p.is_active ? 'opacity-60' : ''}">
                     <td class="px-6 py-4">
                         <p class="font-semibold heading-font">${p.name}</p>
-                        ${p.is_popular ? `<span class="text-[9px] font-bold text-[var(--gold-deep)] uppercase tracking-wide">Popular</span>` : ''}
+                        <span class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-wide">${p.category || 'elite'}</span>
+                        ${p.is_popular ? `<span class="text-[9px] font-bold text-[var(--gold-deep)] uppercase tracking-wide ml-2">Popular</span>` : ''}
                     </td>
                     <td class="px-6 py-4 mono">₦${Number(p.price || 0).toLocaleString()}</td>
                     <td class="px-6 py-4 mono text-emerald-600">₦${dailyProfitNaira(p).toLocaleString(undefined, { maximumFractionDigits: 2 })} / day</td>
@@ -707,7 +716,8 @@
                     <div class="flex items-start justify-between gap-3">
                         <div>
                             <p class="font-semibold heading-font">${p.name}</p>
-                            ${p.is_popular ? `<span class="text-[9px] font-bold text-[var(--gold-deep)] uppercase tracking-wide">Popular</span>` : ''}
+                            <span class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-wide">${p.category || 'elite'}</span>
+                            ${p.is_popular ? `<span class="text-[9px] font-bold text-[var(--gold-deep)] uppercase tracking-wide ml-2">Popular</span>` : ''}
                         </div>
                         <span class="status-badge ${statusClass}">${statusLabel}</span>
                     </div>
@@ -758,6 +768,7 @@
         window.openCreateModal = () => {
             document.getElementById('planModalTitle').textContent = 'New Investment Plan';
             document.getElementById('planId').value = '';
+            document.getElementById('planCategory').value = 'elite';
             document.getElementById('planName').value = '';
             document.getElementById('planPrice').value = '';
             document.getElementById('planMultiplier').value = '';
@@ -776,6 +787,7 @@
 
             document.getElementById('planModalTitle').textContent = 'Edit Investment Plan';
             document.getElementById('planId').value = p.id;
+            document.getElementById('planCategory').value = p.category || 'elite';
             document.getElementById('planName').value = p.name || '';
             document.getElementById('planPrice').value = p.price || '';
             // Convert the stored daily percentage back into a total-income
@@ -805,6 +817,7 @@
             const sortOrder = document.getElementById('planSort').value ? parseInt(document.getElementById('planSort').value, 10) : 0;
             const isPopular = document.getElementById('planPopular').checked;
             const isActive = document.getElementById('planActive').checked;
+            const category = document.getElementById('planCategory').value;
 
             if (!name) { alert('Plan name is required.'); return; }
             if (isNaN(price) || price <= 0) { alert('Please enter a valid price.'); return; }
@@ -820,6 +833,7 @@
 
             const payload = {
                 name,
+                category,
                 price,
                 daily_roi_pct: dailyRatePercent,
                 duration_days: duration,
