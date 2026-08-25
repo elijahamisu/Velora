@@ -699,12 +699,13 @@
                 }
 
                 // 3. Create Transaction
+                // transactions table has no `status` column — pending/completed
+                // state lives on the `withdrawals` table row instead, not here.
                 const { error: txErr } = await supabase.from('transactions').insert([{
                     user_id: user.id,
                     amount: amount,
                     type: 'withdrawal',
-                    status: 'pending',
-                    description: `Withdrawal request to ${bankName} (${accNum})`
+                    description: `Withdrawal request to ${bankName} (${accNum}) — pending`
                 }]);
                 if (txErr) console.error('Transaction log error:', txErr.message);
 
