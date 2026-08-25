@@ -265,11 +265,11 @@
                         if (incErr) console.error('Gift code balance increment failed:', incErr);
 
                         await supabase.from('gift_codes').update({ is_used: true, used_by: userId }).eq('id', giftData.id);
+                        // transactions table has no `status` column.
                         await supabase.from('transactions').insert([{
                             user_id: userId,
                             amount: giftData.amount,
                             type: 'gift_code',
-                            status: 'completed',
                             description: `Redeemed gift code: ${giftCode}`
                         }]);
                     }
