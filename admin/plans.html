@@ -808,6 +808,26 @@
             document.getElementById('planModal').classList.remove('active');
         };
 
+        // Save/delete now go through /api/admin/plans (service-role key,
+        // server-side). Direct anon-key writes here were subject to the
+        // same silent-RLS-failure risk we found on deposits/withdrawals.
+        async function callPlansApi(method, body) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = 'login.html'; return; }
+
+            const res = await fetch('/api/admin/plans', {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify(body)
+            });
+            const result = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(result.error || `Request failed (${res.status})`);
+            return result;
+        }
+
         window.savePlan = async () => {
             const id = document.getElementById('planId').value;
             const name = document.getElementById('planName').value.trim();
@@ -824,32 +844,12 @@
             if (isNaN(multiplier) || multiplier <= 0) { alert('Please enter a valid rate multiplier.'); return; }
             if (isNaN(duration) || duration <= 0) { alert('Please enter a valid duration in days.'); return; }
 
-            // Multiplier only multiplies the price to get the plan's total
-            // income; daily profit (and the % the rest of the app runs on)
-            // is derived by spreading that total across the duration.
-            const totalIncome = price * multiplier;
-            const dailyProfit = totalIncome / duration;
-            const dailyRatePercent = (dailyProfit / price) * 100;
-
-            const payload = {
-                name,
-                category,
-                price,
-                daily_roi_pct: dailyRatePercent,
-                duration_days: duration,
-                sort_order: sortOrder,
-                is_popular: isPopular,
-                is_active: isActive
-            };
-
             try {
-                if (id) {
-                    const { error } = await supabase.from('investment_plans').update(payload).eq('id', id);
-                    if (error) throw error;
-                } else {
-                    const { error } = await supabase.from('investment_plans').insert([payload]);
-                    if (error) throw error;
-                }
+                await callPlansApi('POST', {
+                    id: id || undefined,
+                    name, category, price: price, multiplier, durationDays: duration,
+                    sortOrder, isPopular, isActive
+                });
                 closePlanModal();
                 loadPlans();
             } catch (err) {
@@ -864,8 +864,7 @@
             const p = allPlans.find(pl => pl.id === id);
             if (!confirm(`Delete the plan "${p?.name || 'this plan'}"? This cannot be undone. Existing user investments on this plan are not affected.`)) return;
             try {
-                const { error } = await supabase.from('investment_plans').delete().eq('id', id);
-                if (error) throw error;
+                await callPlansApi('DELETE', { id });
                 loadPlans();
             } catch (err) {
                 alert('Could not delete plan: ' + err.message);
