@@ -363,28 +363,29 @@
                 <div class="space-y-6">
                     <div class="card card-gold-edge p-8 rounded-[32px] relative overflow-hidden">
                         <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full" style="background: rgba(183,147,91,0.06);"></div>
-                        <h4 class="text-xl font-semibold heading-font mb-6 flex items-center gap-2">
+                        <h4 class="text-xl font-semibold heading-font mb-1 flex items-center gap-2">
                             <i data-lucide="banknote" class="text-[var(--gold-deep)]"></i> Manual Transfer
                         </h4>
+                        <p class="text-[10px] font-bold text-[var(--gold-deep)] uppercase tracking-widest mb-6">Zap Account</p>
 
                         <div class="space-y-4">
                             <div class="bg-black/[0.02] p-4 rounded-2xl border border-black/[0.05]">
                                 <p class="text-[10px] uppercase font-bold text-[var(--muted)] mb-1 tracking-wide">Bank Name</p>
                                 <div class="flex justify-between items-center">
-                                    <p class="font-semibold text-[var(--ink-text)]" id="bankNameDisplay">KUDA BANK</p>
+                                    <p class="font-semibold text-[var(--ink-text)]" id="bankNameDisplay">FIDELITY BANK</p>
                                 </div>
                             </div>
                             <div class="bg-black/[0.02] p-4 rounded-2xl border border-black/[0.05]">
                                 <p class="text-[10px] uppercase font-bold text-[var(--muted)] mb-1 tracking-wide">Account Name</p>
                                 <div class="flex justify-between items-center">
-                                    <p class="font-semibold text-[var(--ink-text)]" id="accNameDisplay">---</p>
+                                    <p class="font-semibold text-[var(--ink-text)]" id="accNameDisplay">AMISU ELIJAH</p>
                                     <button class="copy-btn text-[var(--gold-deep)] hover:text-[var(--gold)] transition" onclick="copyText('accNameDisplay')"><i data-lucide="copy" class="w-4 h-4"></i></button>
                                 </div>
                             </div>
                             <div class="bg-black/[0.02] p-4 rounded-2xl border border-black/[0.05]">
                                 <p class="text-[10px] uppercase font-bold text-[var(--muted)] mb-1 tracking-wide">Account Number</p>
                                 <div class="flex justify-between items-center">
-                                    <p class="font-semibold text-[var(--ink-text)] text-2xl tracking-wider mono" id="accNumDisplay">---</p>
+                                    <p class="font-semibold text-[var(--ink-text)] text-2xl tracking-wider mono" id="accNumDisplay">4580003805</p>
                                     <button class="copy-btn text-[var(--gold-deep)] hover:text-[var(--gold)] transition" onclick="copyText('accNumDisplay')"><i data-lucide="copy" class="w-5 h-5"></i></button>
                                 </div>
                             </div>
@@ -530,14 +531,11 @@
             }
             user = session.user;
             document.getElementById('authGuard').classList.add('hidden');
-            setupBankDetails();
+            // Bank details are set directly in the HTML above (Zap Account:
+            // Fidelity Bank / AMISU ELIJAH / 4580003805) rather than pulled
+            // from VITE_BANK_ACCOUNT_NAME/NUMBER env vars, so there's one
+            // source of truth instead of two that can drift out of sync.
             loadData();
-        }
-
-        // --- 2. Setup Bank Details from ENV ---
-        function setupBankDetails() {
-            document.getElementById('accNameDisplay').textContent = import.meta.env.VITE_BANK_ACCOUNT_NAME || "VELORA INVESTMENTS";
-            document.getElementById('accNumDisplay').textContent = import.meta.env.VITE_BANK_ACCOUNT_NUMBER || "0000000000";
         }
 
         // --- 3. Load Data ---
