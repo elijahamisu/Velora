@@ -393,7 +393,7 @@
                         <div class="mt-8 p-4 bg-amber-50 rounded-2xl border border-amber-100 flex gap-3">
                             <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0"></i>
                             <p class="text-xs text-amber-800 leading-relaxed">
-                                Please transfer the exact amount and provide the reference number. Minimum deposit: <strong>₦3,000</strong>.
+                                Please transfer the exact amount and enter the account name and bank you paid from. Minimum deposit: <strong>₦3,000</strong>.
                             </p>
                         </div>
                     </div>
@@ -421,14 +421,14 @@
                                     class="field w-full px-6 py-4 rounded-2xl font-semibold mono">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-[var(--muted)] uppercase mb-2 ml-1 tracking-wide">Transaction Reference / ID</label>
-                                <input type="text" id="refNumber" placeholder="Kuda-Ref-123..." required
-                                    class="field w-full px-6 py-4 rounded-2xl font-semibold mono">
+                                <label class="block text-xs font-bold text-[var(--muted)] uppercase mb-2 ml-1 tracking-wide">Account Name</label>
+                                <input type="text" id="accountName" placeholder="Name on the account you paid from" required
+                                    class="field w-full px-6 py-4 rounded-2xl font-semibold">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-[var(--muted)] uppercase mb-2 ml-1 tracking-wide">Payment Receipt (Optional)</label>
-                                <input type="file" id="receipt" accept="image/*"
-                                    class="w-full text-xs text-[var(--muted)] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[rgba(183,147,91,0.1)] file:text-[var(--gold-deep)] hover:file:bg-[rgba(183,147,91,0.18)]">
+                                <label class="block text-xs font-bold text-[var(--muted)] uppercase mb-2 ml-1 tracking-wide">Bank Name</label>
+                                <input type="text" id="bankName" placeholder="e.g. GTBank, Kuda, Opay" required
+                                    class="field w-full px-6 py-4 rounded-2xl font-semibold">
                             </div>
 
                             <button type="submit" id="submitBtn"
@@ -453,7 +453,7 @@
                                 <tr class="bg-black/[0.02] border-b border-black/[0.05]">
                                     <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Amount</th>
                                     <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Date</th>
-                                    <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest text-center">Receipt</th>
+                                    <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest text-center">Account</th>
                                     <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest text-right">Status</th>
                                 </tr>
                             </thead>
@@ -570,41 +570,29 @@
         document.getElementById('depositForm').onsubmit = async (e) => {
             e.preventDefault();
             const amount = parseFloat(document.getElementById('depositAmount').value);
-            const refNumber = document.getElementById('refNumber').value;
+            const accountName = document.getElementById('accountName').value.trim();
+            const bankName = document.getElementById('bankName').value.trim();
 
             if (amount < MIN_DEPOSIT) {
                 alert(`Minimum deposit is ₦${MIN_DEPOSIT}`);
+                return;
+            }
+            if (!accountName || !bankName) {
+                alert('Please enter both the account name and bank name.');
                 return;
             }
 
             setLoading(true);
 
             try {
-                // 0. Upload receipt image if provided — `deposits` has no
-                // `reference` text column; it stores `proof_image_url`
-                // instead, so the receipt upload is what that field
-                // actually maps to. The typed reference number still gets
-                // preserved by folding it into the transaction description.
-                let proofImageUrl = null;
-                const receiptFile = document.getElementById('receipt').files[0];
-                if (receiptFile) {
-                    const fileExt = receiptFile.name.split('.').pop();
-                    const filePath = `${user.id}-${Date.now()}.${fileExt}`;
-                    const { error: uploadError } = await supabase.storage
-                        .from('deposit-receipts')
-                        .upload(filePath, receiptFile);
-                    if (uploadError) throw new Error(`Receipt upload failed: ${uploadError.message}`);
-                    const { data: { publicUrl } } = supabase.storage.from('deposit-receipts').getPublicUrl(filePath);
-                    proofImageUrl = publicUrl;
-                }
-
                 // 1. Create Deposit Record
                 const { error: depErr } = await supabase
                     .from('deposits')
                     .insert([{
                         user_id: user.id,
                         amount: amount,
-                        proof_image_url: proofImageUrl,
+                        account_name: accountName,
+                        bank_name: bankName,
                         status: 'pending'
                     }]);
 
@@ -617,7 +605,7 @@
                     user_id: user.id,
                     amount: amount,
                     type: 'deposit',
-                    description: `Deposit via Kuda Bank (Ref: ${refNumber}) — pending`
+                    description: `Deposit from ${accountName} (${bankName}) — pending`
                 }]);
                 if (depTxErr) console.error('Transaction log error:', depTxErr.message);
 
@@ -652,9 +640,7 @@
                     <td class="px-8 py-6 font-semibold text-[var(--ink-text)] mono">₦${row.amount.toLocaleString()}</td>
                     <td class="px-8 py-6 text-xs text-[var(--muted)] font-medium mono">${new Date(row.created_at).toLocaleDateString()}</td>
                     <td class="px-8 py-6 text-center text-[10px] mono text-[var(--muted)]">
-                        ${row.proof_image_url
-                            ? `<a href="${row.proof_image_url}" target="_blank" class="underline">Receipt</a>`
-                            : '—'}
+                        ${row.account_name ? `${row.account_name}<br><span class="opacity-70">${row.bank_name || ''}</span>` : '—'}
                     </td>
                     <td class="px-8 py-6 text-right">
                         <span class="text-[9px] uppercase font-bold px-3 py-1 rounded-full ${getStatusStyle(row.status)}">
