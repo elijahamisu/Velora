@@ -345,7 +345,12 @@
                     <h4 class="text-lg font-semibold heading-font">Deposit Requests</h4>
                     <span class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[9px] font-bold uppercase tracking-widest">Realtime Sync</span>
                 </div>
-                <div class="overflow-x-auto no-scrollbar">
+                <!-- Mobile: stacked cards -->
+                <div id="depositsCardList" class="flex flex-col gap-3 p-4 md:hidden">
+                    <div class="text-center text-[var(--muted)] text-xs italic py-8">Loading deposit requests...</div>
+                </div>
+
+                <div class="hidden md:block overflow-x-auto no-scrollbar">
                     <table class="w-full text-left whitespace-nowrap">
                         <thead class="bg-black/[0.02] border-b border-black/[0.05]">
                             <tr>
@@ -486,15 +491,26 @@
             } catch (err) {
                 console.error('Deposits fetch error:', err);
                 document.getElementById('depositsBody').innerHTML = `<tr><td colspan="5" class="p-12 text-center text-red-400 text-xs italic">Could not load deposits — check console</td></tr>`;
+                document.getElementById('depositsCardList').innerHTML = `<div class="text-center text-red-400 text-xs italic py-8">Could not load deposits — check console</div>`;
             }
         }
 
         function renderDeposits(rows) {
             const body = document.getElementById('depositsBody');
+            const cardList = document.getElementById('depositsCardList');
+
             if (rows.length === 0) {
                 body.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-[var(--muted)] text-xs italic">No deposits match this filter.</td></tr>`;
+                cardList.innerHTML = `<div class="text-center text-[var(--muted)] text-xs italic py-8">No deposits match this filter.</div>`;
                 return;
             }
+
+            const actionButtons = (d) => d.status === 'pending' ? `
+                <div class="flex items-center gap-2">
+                    <button onclick="approveDeposit('${d.id}', ${d.amount}, '${d.user_id}')" class="flex-1 px-3 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-bold uppercase hover:bg-emerald-100 transition">Approve</button>
+                    <button onclick="rejectDeposit('${d.id}')" class="flex-1 px-3 py-2 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold uppercase hover:bg-red-100 transition">Reject</button>
+                </div>
+            ` : `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full ${d.status === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}">${d.status}</span>`;
 
             body.innerHTML = rows.map(d => `
                 <tr class="hover:bg-black/[0.015] transition">
@@ -514,6 +530,25 @@
                     </td>
                 </tr>
             `).join('');
+
+            cardList.innerHTML = rows.map(d => `
+                <div class="card rounded-2xl p-4">
+                    <div class="flex items-start justify-between gap-3 mb-3">
+                        <div>
+                            <p class="text-sm font-semibold text-[var(--ink-text)] heading-font">${d.profiles?.full_name || 'Unknown'}</p>
+                            <p class="text-[10px] text-[var(--muted)] mono mt-0.5">${new Date(d.created_at).toLocaleDateString()}</p>
+                        </div>
+                        <p class="text-base font-bold mono text-[var(--gold-deep)]">₦${Number(d.amount).toLocaleString()}</p>
+                    </div>
+                    <div class="bg-black/[0.02] rounded-xl p-3 mb-3 text-xs">
+                        <p class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Paid From</p>
+                        <p class="mono text-[var(--ink-text)]">${d.account_name ? `${d.account_name} · ${d.bank_name || ''}` : '—'}</p>
+                    </div>
+                    ${actionButtons(d)}
+                </div>
+            `).join('');
+
+            lucide.createIcons();
         }
 
         // --- 3. Actions ---
