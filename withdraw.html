@@ -381,6 +381,13 @@
                 <div class="lg:col-span-3">
                     <div class="card p-8 rounded-[32px]">
                         <h4 class="text-xl font-semibold heading-font mb-8">Payout Details</h4>
+
+                        <!-- Shown only when the user has no active investment -->
+                        <div id="noActiveInvestmentBanner" class="hidden mb-6 p-5 bg-amber-50 border border-amber-100 rounded-2xl flex gap-3">
+                            <i data-lucide="lock" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+                            <p class="text-xs text-amber-800 leading-relaxed">You need at least one active investment before you can withdraw. <a href="invest.html" class="font-bold underline">View investment plans →</a></p>
+                        </div>
+
                         <form id="withdrawForm" class="space-y-6">
                             <div>
                                 <label class="block text-xs font-bold text-[var(--muted)] uppercase mb-3 ml-1 tracking-wide">Withdrawal Amount (₦)</label>
@@ -557,17 +564,36 @@
         }
 
         // --- Data Loading ---
+        let hasActiveInvestment = false;
+
         async function loadWithdrawalData() {
             try {
-                const [walletRes, profileRes, withdrawHistoryRes] = await Promise.all([
+                const [walletRes, profileRes, withdrawHistoryRes, investmentsRes] = await Promise.all([
                     supabase.from('wallets').select('*').eq('user_id', user.id).single(),
                     supabase.from('profiles').select('*').eq('id', user.id).single(),
-                    supabase.from('withdrawals').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
+                    supabase.from('withdrawals').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+                    supabase.from('investments').select('id').eq('user_id', user.id).eq('status', 'active')
                 ]);
 
                 if (walletRes.error) console.error('Wallet load error:', walletRes.error.message);
                 if (profileRes.error) console.error('Profile load error:', profileRes.error.message);
                 if (withdrawHistoryRes.error) console.error('Withdrawal history load error:', withdrawHistoryRes.error.message);
+                if (investmentsRes.error) console.error('Investments load error:', investmentsRes.error.message);
+
+                // Withdrawals require at least one active investment.
+                hasActiveInvestment = (investmentsRes.data || []).length > 0;
+                const submitBtn = document.getElementById('submitBtn');
+                const banner = document.getElementById('noActiveInvestmentBanner');
+                if (!hasActiveInvestment) {
+                    banner.classList.remove('hidden');
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    lucide.createIcons();
+                } else {
+                    banner.classList.add('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
 
                 // "wallets" table column is available_balance, not balance
                 const wallet = walletRes.data || {};
@@ -660,6 +686,10 @@
             const accName = document.getElementById('accName').value;
             const charge = amount * CHARGE_PERCENT;
 
+            if (!hasActiveInvestment) {
+                alert('You need at least one active investment before you can withdraw.');
+                return;
+            }
             if (amount < MIN_WITHDRAWAL) {
                 alert(`Minimum withdrawal is ₦${MIN_WITHDRAWAL}`);
                 return;
