@@ -593,7 +593,7 @@
         // --- Calc Payout Summary ---
         function calculateSummary(history) {
             const pending = history.filter(w => w.status === 'pending').reduce((acc, curr) => acc + toNum(curr.amount), 0);
-            const completed = history.filter(w => w.status === 'completed').reduce((acc, curr) => acc + toNum(curr.amount), 0);
+            const completed = history.filter(w => w.status === 'approved').reduce((acc, curr) => acc + toNum(curr.amount), 0);
             document.getElementById('pendingWithdrawal').textContent = naira(pending);
             document.getElementById('completedWithdrawal').textContent = naira(completed);
         }
@@ -622,7 +622,7 @@
                     </td>
                     <td class="px-8 py-6 text-right">
                         <span class="text-[9px] uppercase font-bold px-3 py-1 rounded-full ${getStatusStyle(row.status)}">
-                            ${row.status}
+                            ${getStatusLabel(row.status)}
                         </span>
                     </td>
                 </tr>
@@ -632,10 +632,14 @@
         function getStatusStyle(status) {
             switch(status) {
                 case 'pending': return 'bg-amber-100 text-amber-700';
-                case 'completed': return 'bg-emerald-100 text-emerald-700';
+                case 'approved': return 'bg-emerald-100 text-emerald-700';
                 case 'rejected': return 'bg-red-100 text-red-700';
                 default: return 'bg-black/5 text-[var(--ink-text)]';
             }
+        }
+
+        function getStatusLabel(status) {
+            return status === 'approved' ? 'Completed' : status;
         }
 
         // --- Form Logic ---
