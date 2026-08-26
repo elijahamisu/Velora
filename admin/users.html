@@ -348,11 +348,12 @@
                                 <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Referral Code</th>
                                 <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Wallet Balance</th>
                                 <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Joined</th>
-                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase text-right">Role</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase">Role</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-[var(--muted)] uppercase text-right">Manage</th>
                             </tr>
                         </thead>
                         <tbody id="usersBody" class="divide-y divide-black/[0.05]">
-                            <tr><td colspan="5" class="p-12 text-center text-[var(--muted)] text-xs italic">Loading client registry...</td></tr>
+                            <tr><td colspan="6" class="p-12 text-center text-[var(--muted)] text-xs italic">Loading client registry...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -360,6 +361,49 @@
 
         </div>
     </main>
+
+    <!-- ============ Manage Client Modal ============ -->
+    <div id="manageOverlay" class="fixed inset-0 z-[90] hidden items-center justify-center p-4" style="background: rgba(8,9,13,0.55); backdrop-filter: blur(2px);">
+        <div class="card rounded-[28px] w-full max-w-md max-h-[88vh] overflow-y-auto">
+            <div class="p-6 border-b border-black/[0.06] flex items-center justify-between sticky top-0 bg-[var(--paper-card)] z-10">
+                <div>
+                    <h3 class="text-lg font-semibold heading-font" id="manageClientName">Client</h3>
+                    <p class="text-[10px] text-[var(--muted)] mono" id="manageClientBalance">₦0</p>
+                </div>
+                <button onclick="closeManageModal()" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5 transition">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <!-- Funds -->
+                <div>
+                    <p class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-3">Adjust Wallet</p>
+                    <input type="number" id="fundsAmount" placeholder="Amount (₦)" min="1" class="field w-full rounded-xl px-4 py-3 text-sm mb-2">
+                    <div class="flex gap-2">
+                        <button onclick="submitFundsAction('add_funds')" class="flex-1 px-3 py-3 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold uppercase hover:bg-emerald-100 transition">Add Funds</button>
+                        <button onclick="submitFundsAction('remove_funds')" class="flex-1 px-3 py-3 bg-amber-50 text-amber-700 rounded-xl text-xs font-bold uppercase hover:bg-amber-100 transition">Remove Funds</button>
+                    </div>
+                </div>
+
+                <!-- Plan -->
+                <div class="pt-6 border-t border-black/[0.06]">
+                    <p class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-3">Assign Plan</p>
+                    <select id="assignPlanSelect" class="field w-full rounded-xl px-4 py-3 text-sm mb-2">
+                        <option value="">Select a plan...</option>
+                    </select>
+                    <p class="text-[10px] text-[var(--muted)] mb-3">Granted free — does not deduct from the client's wallet.</p>
+                    <button onclick="submitAssignPlan()" class="w-full px-3 py-3 bg-[rgba(183,147,91,0.12)] text-[var(--gold-deep)] rounded-xl text-xs font-bold uppercase hover:bg-[rgba(183,147,91,0.2)] transition">Assign Plan</button>
+                </div>
+
+                <!-- Danger zone -->
+                <div class="pt-6 border-t border-black/[0.06]">
+                    <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-3">Danger Zone</p>
+                    <button onclick="submitDeleteUser()" class="w-full px-3 py-3 bg-red-50 text-red-600 rounded-xl text-xs font-bold uppercase hover:bg-red-100 transition">Delete User Permanently</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
@@ -495,14 +539,14 @@
                 renderUsers(allUsers);
             } catch (err) {
                 console.error('Users fetch error:', err);
-                document.getElementById('usersBody').innerHTML = `<tr><td colspan="5" class="p-12 text-center text-red-400 text-xs italic">Could not load client registry — check console</td></tr>`;
+                document.getElementById('usersBody').innerHTML = `<tr><td colspan="6" class="p-12 text-center text-red-400 text-xs italic">Could not load client registry — check console</td></tr>`;
             }
         }
 
         function renderUsers(list) {
             const body = document.getElementById('usersBody');
             if (list.length === 0) {
-                body.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-[var(--muted)] text-xs italic">No matching clients found.</td></tr>`;
+                body.innerHTML = `<tr><td colspan="6" class="p-12 text-center text-[var(--muted)] text-xs italic">No matching clients found.</td></tr>`;
                 return;
             }
 
@@ -523,13 +567,118 @@
                         <td class="px-8 py-5 text-xs mono text-[var(--muted)]">${u.referral_code || '—'}</td>
                         <td class="px-8 py-5 text-sm font-semibold mono">₦${Number(balance).toLocaleString()}</td>
                         <td class="px-8 py-5 text-xs text-[var(--muted)] mono">${new Date(u.created_at).toLocaleDateString()}</td>
-                        <td class="px-8 py-5 text-right">
+                        <td class="px-8 py-5">
                             <span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full ${isAdmin ? 'bg-[rgba(183,147,91,0.12)] text-[var(--gold-deep)]' : 'bg-black/5 text-[var(--ink-text)]'}">${u.role || 'client'}</span>
+                        </td>
+                        <td class="px-8 py-5 text-right">
+                            ${isAdmin ? `<span class="text-[9px] text-[var(--muted)] italic">—</span>` : `<button onclick="openManageModal('${u.id}')" class="px-3 py-1.5 bg-black/5 hover:bg-black/10 rounded-lg text-[10px] font-bold uppercase transition">Manage</button>`}
                         </td>
                     </tr>
                 `;
             }).join('');
         }
+
+        // --- Manage Client Modal ---
+        let managePlansCache = null;
+        let manageActiveUser = null;
+
+        async function callUsersApi(body) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = 'login.html'; return; }
+
+            const res = await fetch('/api/admin/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify(body)
+            });
+            const result = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(result.error || `Request failed (${res.status})`);
+            return result;
+        }
+
+        window.openManageModal = async (userId) => {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            manageActiveUser = user;
+
+            const balance = user.wallets?.[0]?.available_balance ?? user.wallets?.available_balance ?? 0;
+            document.getElementById('manageClientName').textContent = user.full_name || 'Unnamed';
+            document.getElementById('manageClientBalance').textContent = `Balance: ₦${Number(balance).toLocaleString()}`;
+            document.getElementById('fundsAmount').value = '';
+
+            if (!managePlansCache) {
+                const { data } = await supabase.from('investment_plans').select('id, name, price').eq('is_active', true).order('sort_order', { ascending: true });
+                managePlansCache = data || [];
+            }
+            const select = document.getElementById('assignPlanSelect');
+            select.innerHTML = '<option value="">Select a plan...</option>' +
+                managePlansCache.map(p => `<option value="${p.id}">${p.name} — ₦${Number(p.price).toLocaleString()}</option>`).join('');
+
+            const overlay = document.getElementById('manageOverlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        };
+
+        window.closeManageModal = () => {
+            const overlay = document.getElementById('manageOverlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+            manageActiveUser = null;
+        };
+
+        window.submitFundsAction = async (action) => {
+            if (!manageActiveUser) return;
+            const amount = parseFloat(document.getElementById('fundsAmount').value);
+            if (!amount || amount <= 0) { alert('Enter a valid amount.'); return; }
+
+            const verb = action === 'add_funds' ? 'add' : 'remove';
+            if (!confirm(`${verb === 'add' ? 'Add' : 'Remove'} ₦${amount.toLocaleString()} ${verb === 'add' ? 'to' : 'from'} ${manageActiveUser.full_name}'s wallet?`)) return;
+
+            try {
+                await callUsersApi({ action, userId: manageActiveUser.id, amount });
+                closeManageModal();
+                loadStats();
+                loadUsers();
+            } catch (err) {
+                alert(err.message);
+            }
+        };
+
+        window.submitAssignPlan = async () => {
+            if (!manageActiveUser) return;
+            const planId = document.getElementById('assignPlanSelect').value;
+            if (!planId) { alert('Select a plan first.'); return; }
+            const plan = managePlansCache.find(p => p.id === planId);
+
+            if (!confirm(`Grant the "${plan?.name}" plan to ${manageActiveUser.full_name} for free? This does not deduct their wallet.`)) return;
+
+            try {
+                await callUsersApi({ action: 'assign_plan', userId: manageActiveUser.id, planId });
+                closeManageModal();
+                alert('Plan assigned successfully.');
+            } catch (err) {
+                alert(err.message);
+            }
+        };
+
+        window.submitDeleteUser = async () => {
+            if (!manageActiveUser) return;
+            const name = manageActiveUser.full_name || 'this user';
+            const typed = prompt(`This permanently deletes ${name}'s account, wallet, and history — it cannot be undone.\n\nType DELETE to confirm.`);
+            if (typed !== 'DELETE') return;
+
+            try {
+                await callUsersApi({ action: 'delete_user', userId: manageActiveUser.id });
+                closeManageModal();
+                loadStats();
+                loadUsers();
+            } catch (err) {
+                alert(err.message);
+            }
+        };
 
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const q = e.target.value.toLowerCase();
