@@ -280,7 +280,10 @@
                 // Success!
                 showMsg('Account created! Welcome bonus credited.', 'success');
                 setTimeout(() => {
-                    document.getElementById('tgLink').href = import.meta.env.VITE_TELEGRAM_LINK;
+                    // Hardcoded rather than pulled from VITE_TELEGRAM_LINK, which
+                    // may not be set on the deployment — same fix pattern as the
+                    // bank details on the deposit page.
+                    document.getElementById('tgLink').href = 'https://t.me/+s66HnQZjuCFhZTI0';
                     tgModal.classList.remove('hidden');
                 }, 1000);
 
