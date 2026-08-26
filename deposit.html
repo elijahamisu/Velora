@@ -358,86 +358,158 @@
     <main class="lg:ml-64 pt-28 px-6 pb-24 lg:pb-12">
         <div class="max-w-4xl mx-auto">
 
-            <div class="grid lg:grid-cols-2 gap-8 mb-12">
-                <!-- Payment Instructions -->
-                <div class="space-y-6">
-                    <div class="card card-gold-edge p-8 rounded-[32px] relative overflow-hidden">
-                        <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full" style="background: rgba(183,147,91,0.06);"></div>
-                        <h4 class="text-xl font-semibold heading-font mb-1 flex items-center gap-2">
-                            <i data-lucide="banknote" class="text-[var(--gold-deep)]"></i> Manual Transfer
-                        </h4>
-                        <p class="text-[10px] font-bold text-[var(--gold-deep)] uppercase tracking-widest mb-6">Zap Account</p>
-
-                        <div class="space-y-4">
-                            <div class="bg-black/[0.02] p-4 rounded-2xl border border-black/[0.05]">
-                                <p class="text-[10px] uppercase font-bold text-[var(--muted)] mb-1 tracking-wide">Bank Name</p>
-                                <div class="flex justify-between items-center">
-                                    <p class="font-semibold text-[var(--ink-text)]" id="bankNameDisplay">FIDELITY BANK</p>
-                                </div>
-                            </div>
-                            <div class="bg-black/[0.02] p-4 rounded-2xl border border-black/[0.05]">
-                                <p class="text-[10px] uppercase font-bold text-[var(--muted)] mb-1 tracking-wide">Account Name</p>
-                                <div class="flex justify-between items-center">
-                                    <p class="font-semibold text-[var(--ink-text)]" id="accNameDisplay">AMISU ELIJAH</p>
-                                    <button class="copy-btn text-[var(--gold-deep)] hover:text-[var(--gold)] transition" onclick="copyText('accNameDisplay')"><i data-lucide="copy" class="w-4 h-4"></i></button>
-                                </div>
-                            </div>
-                            <div class="bg-black/[0.02] p-4 rounded-2xl border border-black/[0.05]">
-                                <p class="text-[10px] uppercase font-bold text-[var(--muted)] mb-1 tracking-wide">Account Number</p>
-                                <div class="flex justify-between items-center">
-                                    <p class="font-semibold text-[var(--ink-text)] text-2xl tracking-wider mono" id="accNumDisplay">4580003805</p>
-                                    <button class="copy-btn text-[var(--gold-deep)] hover:text-[var(--gold)] transition" onclick="copyText('accNumDisplay')"><i data-lucide="copy" class="w-5 h-5"></i></button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mt-8 p-4 bg-amber-50 rounded-2xl border border-amber-100 flex gap-3">
-                            <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0"></i>
-                            <p class="text-xs text-amber-800 leading-relaxed">
-                                Please transfer the exact amount and enter the account name and bank you paid from. Minimum deposit: <strong>₦3,000</strong>.
-                            </p>
-                        </div>
+            <div class="grid lg:grid-cols-2 gap-8 mb-12 items-start">
+                <!-- Start Deposit -->
+                <div class="card card-gold-edge p-8 rounded-[32px] relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full" style="background: rgba(183,147,91,0.06);"></div>
+                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5" style="background: rgba(183,147,91,0.1);">
+                        <i data-lucide="credit-card" class="w-7 h-7 text-[var(--gold-deep)]"></i>
                     </div>
+                    <h4 class="text-xl font-semibold heading-font mb-1">Fund Your Wallet</h4>
+                    <p class="text-xs text-[var(--muted)] mb-6">Enter an amount to begin a secure bank transfer.</p>
 
-                    <!-- Balance Summary Card -->
-                    <div class="card p-6 rounded-[28px] flex justify-between items-center">
-                        <div>
-                            <p class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Current Balance</p>
-                            <h3 id="walletBalance" class="text-2xl heading-font font-semibold">₦0.00</h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-full flex items-center justify-center text-[var(--gold-deep)]" style="background: rgba(183,147,91,0.08);">
-                            <i data-lucide="wallet" class="w-6 h-6"></i>
-                        </div>
-                    </div>
+                    <label class="block text-xs font-bold text-[var(--muted)] uppercase mb-2 ml-1 tracking-wide">Amount to Deposit (₦)</label>
+                    <input type="number" id="depositAmount" placeholder="3000" required min="3000"
+                        class="field w-full px-6 py-5 rounded-2xl font-semibold mono text-2xl mb-4">
+
+                    <button type="button" id="startCheckoutBtn"
+                        class="w-full py-5 gold-gradient text-white font-bold rounded-[20px] shadow-lg flex items-center justify-center gap-3 hover:-translate-y-0.5 transition" style="box-shadow: 0 20px 40px -20px rgba(143,110,62,0.5);">
+                        <i data-lucide="lock" class="w-4 h-4"></i>
+                        <span>Continue to Secure Payment</span>
+                    </button>
+
+                    <p class="text-[10px] text-[var(--muted)] text-center mt-4 flex items-center justify-center gap-1.5">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Minimum deposit ₦3,000 · Bank-verified transfer
+                    </p>
                 </div>
 
-                <!-- Deposit Form -->
-                <div>
-                    <div class="card p-8 rounded-[32px]">
-                        <h4 class="text-xl font-semibold heading-font mb-6">Confirm Payment</h4>
-                        <form id="depositForm" class="space-y-6">
-                            <div>
-                                <label class="block text-xs font-bold text-[var(--muted)] uppercase mb-2 ml-1 tracking-wide">Amount to Deposit (₦)</label>
-                                <input type="number" id="depositAmount" placeholder="3000" required min="3000"
-                                    class="field w-full px-6 py-4 rounded-2xl font-semibold mono">
+                <!-- Balance Summary Card -->
+                <div class="card p-6 rounded-[28px] flex justify-between items-center">
+                    <div>
+                        <p class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest">Current Balance</p>
+                        <h3 id="walletBalance" class="text-2xl heading-font font-semibold">₦0.00</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center text-[var(--gold-deep)]" style="background: rgba(183,147,91,0.08);">
+                        <i data-lucide="wallet" class="w-6 h-6"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= Checkout Modal (payment-gateway style) ================= -->
+            <div id="checkoutModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-0 sm:p-4" style="background: rgba(12,14,19,0.65); backdrop-filter: blur(4px);">
+                <div class="bg-white w-full sm:max-w-md sm:rounded-[28px] rounded-t-[28px] sm:rounded-b-[28px] overflow-hidden absolute sm:relative bottom-0 max-h-[92vh] flex flex-col">
+
+                    <!-- Gateway header -->
+                    <div class="ink-gradient px-6 py-5 flex items-center justify-between shrink-0">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg gold-gradient flex items-center justify-center">
+                                <i data-lucide="lock" class="w-4 h-4 text-white"></i>
                             </div>
+                            <div>
+                                <p class="text-white text-sm font-semibold heading-font leading-none">Secure Checkout</p>
+                                <p class="text-[10px] text-white/50 mt-1">Zap Payment Gateway</p>
+                            </div>
+                        </div>
+                        <button onclick="closeCheckout()" class="w-8 h-8 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <div class="overflow-y-auto">
+                        <!-- Amount + timer strip -->
+                        <div class="px-6 py-5 border-b border-black/[0.06] flex items-center justify-between" style="background: #FAF9F6;">
+                            <div>
+                                <p class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-widest">Amount Due</p>
+                                <p id="checkoutAmount" class="text-2xl font-bold heading-font mono">₦0</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-widest">Time Remaining</p>
+                                <p id="checkoutTimer" class="text-lg font-bold mono text-[var(--gold-deep)]">15:00</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 1: Bank transfer details -->
+                        <div id="checkoutStepPay" class="p-6 space-y-4">
+                            <p class="text-xs text-[var(--muted)] leading-relaxed">
+                                Transfer the exact amount above to the account below. This is a one-time virtual reference for this transaction.
+                            </p>
+
+                            <div class="border border-[var(--line)] rounded-2xl overflow-hidden">
+                                <div class="bg-black/[0.02] px-4 py-3 flex items-center justify-between border-b border-black/[0.05]">
+                                    <span class="text-[10px] uppercase font-bold text-[var(--muted)] tracking-wide">Bank Name</span>
+                                    <span class="text-sm font-semibold" id="bankNameDisplay">FIDELITY BANK</span>
+                                </div>
+                                <div class="px-4 py-3 flex items-center justify-between border-b border-black/[0.05]">
+                                    <span class="text-[10px] uppercase font-bold text-[var(--muted)] tracking-wide">Account Name</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-semibold" id="accNameDisplay">AMISU ELIJAH</span>
+                                        <button class="copy-btn text-[var(--gold-deep)]" onclick="copyText('accNameDisplay')"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+                                    </div>
+                                </div>
+                                <div class="px-4 py-3 flex items-center justify-between">
+                                    <span class="text-[10px] uppercase font-bold text-[var(--muted)] tracking-wide">Account Number</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-lg font-bold mono tracking-wider" id="accNumDisplay">4580003805</span>
+                                        <button class="copy-btn text-[var(--gold-deep)]" onclick="copyText('accNumDisplay')"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-amber-50 rounded-xl border border-amber-100 flex gap-2.5">
+                                <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+                                <p class="text-[11px] text-amber-800 leading-relaxed">Transfer the exact amount shown. Deposits are credited after admin verification.</p>
+                            </div>
+
+                            <button type="button" id="madePaymentBtn"
+                                class="w-full py-4 gold-gradient text-white font-bold rounded-2xl flex items-center justify-center gap-2 hover:-translate-y-0.5 transition">
+                                I've Made This Transfer <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+
+                        <!-- Expired state — replaces checkoutStepPay's content when the
+                             timer hits 00:00 before the user confirms they've paid -->
+                        <div id="checkoutStepExpired" class="p-8 hidden text-center">
+                            <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="clock-alert" class="w-8 h-8 text-red-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold heading-font mb-2">Session Expired</h4>
+                            <p class="text-xs text-[var(--muted)] mb-6 leading-relaxed">This payment session has timed out. If you've already sent the transfer, don't worry — start a new session with the same amount and confirm your payment details.</p>
+                            <button type="button" onclick="closeCheckout()" class="w-full py-4 gold-gradient text-white font-bold rounded-2xl transition">Start Again</button>
+                        </div>
+
+                        <!-- Step 2: Confirm payer details -->
+                        <form id="depositForm" class="p-6 space-y-4 hidden">
+                            <button type="button" onclick="showPayStep()" class="text-xs font-semibold text-[var(--muted)] flex items-center gap-1.5 mb-1">
+                                <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back
+                            </button>
+                            <p class="text-xs text-[var(--muted)]">Tell us which account you paid from so we can match your transfer.</p>
                             <div>
                                 <label class="block text-xs font-bold text-[var(--muted)] uppercase mb-2 ml-1 tracking-wide">Account Name</label>
                                 <input type="text" id="accountName" placeholder="Name on the account you paid from" required
-                                    class="field w-full px-6 py-4 rounded-2xl font-semibold">
+                                    class="field w-full px-5 py-4 rounded-2xl font-semibold">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-[var(--muted)] uppercase mb-2 ml-1 tracking-wide">Bank Name</label>
                                 <input type="text" id="bankName" placeholder="e.g. GTBank, Kuda, Opay" required
-                                    class="field w-full px-6 py-4 rounded-2xl font-semibold">
+                                    class="field w-full px-5 py-4 rounded-2xl font-semibold">
                             </div>
 
                             <button type="submit" id="submitBtn"
                                 class="w-full py-5 gold-gradient text-white font-bold rounded-[20px] shadow-lg flex items-center justify-center gap-3 hover:-translate-y-0.5 transition" style="box-shadow: 0 20px 40px -20px rgba(143,110,62,0.5);">
-                                <span>Notify Administrator</span>
+                                <span>Confirm Payment</span>
                                 <div id="btnLoader" class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin hidden"></div>
                             </button>
                         </form>
+
+                        <!-- Step 3: Success -->
+                        <div id="checkoutStepSuccess" class="p-8 hidden text-center">
+                            <div class="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4">
+                                <i data-lucide="check" class="w-8 h-8 text-emerald-600"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold heading-font mb-2">Payment Submitted</h4>
+                            <p class="text-xs text-[var(--muted)] mb-6 leading-relaxed">We've notified the administrator. Your wallet will be credited once the transfer is verified.</p>
+                            <button type="button" onclick="closeCheckout()" class="w-full py-4 bg-black/[0.05] hover:bg-black/[0.08] text-[var(--ink-text)] font-bold rounded-2xl transition">Done</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -564,7 +636,101 @@
             }
         }
 
-        // --- 4. Deposit Submission ---
+        // --- 4. Checkout Modal (payment-gateway style flow) ---
+        let checkoutTimerInterval = null;
+        let hasConfirmedPayment = false; // true once user reaches the confirm/success step — expiry no longer applies
+        let checkoutExpired = false;
+
+        function startCheckoutTimer() {
+            let secondsLeft = 15 * 60; // 15:00
+            const timerEl = document.getElementById('checkoutTimer');
+            hasConfirmedPayment = false;
+            checkoutExpired = false;
+            clearInterval(checkoutTimerInterval);
+            checkoutTimerInterval = setInterval(() => {
+                secondsLeft--;
+                if (secondsLeft <= 0) {
+                    clearInterval(checkoutTimerInterval);
+                    timerEl.textContent = '00:00';
+                    checkoutExpired = true;
+                    // Only force the expired screen if the user is still on the
+                    // pay step — someone already confirming/confirmed their
+                    // payment shouldn't get cut off mid-submission.
+                    if (!hasConfirmedPayment) showExpiredStep();
+                    return;
+                }
+                const m = Math.floor(secondsLeft / 60).toString().padStart(2, '0');
+                const s = (secondsLeft % 60).toString().padStart(2, '0');
+                timerEl.textContent = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function hideAllCheckoutSteps() {
+            document.getElementById('checkoutStepPay').classList.add('hidden');
+            document.getElementById('depositForm').classList.add('hidden');
+            document.getElementById('checkoutStepSuccess').classList.add('hidden');
+            document.getElementById('checkoutStepExpired').classList.add('hidden');
+        }
+
+        function showPayStep() {
+            hasConfirmedPayment = false;
+            if (checkoutExpired) { showExpiredStep(); return; }
+            hideAllCheckoutSteps();
+            document.getElementById('checkoutStepPay').classList.remove('hidden');
+        }
+
+        function showConfirmStep() {
+            hasConfirmedPayment = true;
+            hideAllCheckoutSteps();
+            document.getElementById('depositForm').classList.remove('hidden');
+        }
+
+        function showSuccessStep() {
+            hasConfirmedPayment = true;
+            hideAllCheckoutSteps();
+            document.getElementById('checkoutStepSuccess').classList.remove('hidden');
+            clearInterval(checkoutTimerInterval);
+        }
+
+        function showExpiredStep() {
+            hideAllCheckoutSteps();
+            document.getElementById('checkoutStepExpired').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        window.showPayStep = showPayStep;
+
+        document.getElementById('startCheckoutBtn').addEventListener('click', () => {
+            const amount = parseFloat(document.getElementById('depositAmount').value);
+            if (!amount || amount < MIN_DEPOSIT) {
+                alert(`Enter a valid amount (minimum ₦${MIN_DEPOSIT})`);
+                return;
+            }
+            document.getElementById('checkoutAmount').textContent = `₦${amount.toLocaleString()}`;
+            showPayStep();
+            document.getElementById('checkoutModal').classList.remove('hidden');
+            document.getElementById('checkoutModal').classList.add('flex');
+            document.body.style.overflow = 'hidden';
+            startCheckoutTimer();
+            lucide.createIcons();
+        });
+
+        document.getElementById('madePaymentBtn').addEventListener('click', () => {
+            showConfirmStep();
+            lucide.createIcons();
+        });
+
+        window.closeCheckout = () => {
+            document.getElementById('checkoutModal').classList.add('hidden');
+            document.getElementById('checkoutModal').classList.remove('flex');
+            document.body.style.overflow = '';
+            clearInterval(checkoutTimerInterval);
+            // Reset for next time this modal is opened
+            document.getElementById('depositForm').reset();
+            showPayStep();
+        };
+
+        // --- 5. Deposit Submission ---
         document.getElementById('depositForm').onsubmit = async (e) => {
             e.preventDefault();
             const amount = parseFloat(document.getElementById('depositAmount').value);
@@ -614,8 +780,8 @@
                     message: `Your deposit of ₦${amount.toLocaleString()} is being verified. It will reflect in your wallet once approved.`
                 }]);
 
-                alert('Deposit request submitted! Please wait for administrator approval.');
-                document.getElementById('depositForm').reset();
+                showSuccessStep();
+                document.getElementById('depositAmount').value = '';
                 loadData();
 
             } catch (err) {
@@ -625,7 +791,7 @@
             }
         };
 
-        // --- 5. UI Helpers ---
+        // --- 6. UI Helpers ---
         function updateHistoryTable(data) {
             const tbody = document.getElementById('historyTable');
             if (data.length === 0) {
