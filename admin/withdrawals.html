@@ -333,7 +333,7 @@
                 <span class="text-xs font-bold text-[var(--muted)] uppercase tracking-wide ml-2">Filter:</span>
                 <select id="statusFilter" class="field px-4 py-2 rounded-xl text-sm font-semibold">
                     <option value="pending">Pending</option>
-                    <option value="completed">Completed</option>
+                    <option value="approved">Completed</option>
                     <option value="rejected">Rejected</option>
                     <option value="all">All</option>
                 </select>
@@ -476,9 +476,9 @@
                 const { data } = await supabase.from('withdrawals').select('amount, charge, status');
                 const rows = data || [];
                 document.getElementById('statPending').textContent = rows.filter(r => r.status === 'pending').length;
-                document.getElementById('statCompleted').textContent = rows.filter(r => r.status === 'completed').length;
+                document.getElementById('statCompleted').textContent = rows.filter(r => r.status === 'approved').length;
                 document.getElementById('statRejected').textContent = rows.filter(r => r.status === 'rejected').length;
-                const fees = rows.filter(r => r.status === 'completed').reduce((acc, r) => acc + Number(r.charge || 0), 0);
+                const fees = rows.filter(r => r.status === 'approved').reduce((acc, r) => acc + Number(r.charge || 0), 0);
                 document.getElementById('statFees').textContent = `₦${fees.toLocaleString()}`;
             } catch (err) { console.error("Stats fail:", err); }
         }
@@ -497,7 +497,8 @@
         }
 
         function statusBadge(status) {
-            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full ${status === 'completed' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}">${status}</span>`;
+            const label = status === 'approved' ? 'Completed' : status;
+            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full ${status === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}">${label}</span>`;
         }
 
         function actionButtons(w) {
