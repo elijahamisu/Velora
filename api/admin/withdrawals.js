@@ -32,11 +32,13 @@ export default async function handler(req, res) {
     if (action === 'complete') {
       // Funds were already debited from the wallet at request time
       // (see withdraw.html) — completing just flips the status.
+      // NOTE: withdrawals_status_check only permits 'pending' | 'approved'
+      // | 'rejected' — there is no 'completed' value in this schema.
       // NOTE: `transactions` has no `status` column in this schema, so
       // there is nothing else to update here.
       const { data: updatedRows, error } = await supabaseAdmin
         .from('withdrawals')
-        .update({ status: 'completed', processed_at: new Date().toISOString() })
+        .update({ status: 'approved', processed_at: new Date().toISOString() })
         .eq('id', id)
         .eq('status', 'pending')
         .select('id');
@@ -45,7 +47,7 @@ export default async function handler(req, res) {
         return res.status(409).json({ error: 'Withdrawal was already processed.' });
       }
 
-      return res.status(200).json({ ok: true, status: 'completed' });
+      return res.status(200).json({ ok: true, status: 'approved' });
     }
 
     // action === 'reject' — reverse the earlier debit, refund the client.
