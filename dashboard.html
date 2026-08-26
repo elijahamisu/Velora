@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -169,6 +168,26 @@
             <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(183,147,91,0.25); border-top-color: var(--gold);"></div>
             <p class="heading-font gold-text text-2xl tracking-wide">VELORA</p>
             <p class="text-[10px] uppercase tracking-[0.3em] text-white/30 mt-2">Verifying Access</p>
+        </div>
+    </div>
+
+    <!-- Telegram Popup Modal (Hidden by default) -->
+    <div id="telegramModal" class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm hidden">
+        <div class="bg-[var(--paper)] rounded-[32px] w-full max-w-sm p-8 text-center shadow-2xl">
+            <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background: rgba(34,158,217,0.1);">
+                <i data-lucide="send" class="w-10 h-10 text-[#229ED9] -mr-1"></i>
+            </div>
+            <h3 class="text-2xl heading-font font-bold mb-2">Join Our Community</h3>
+            <p class="text-[var(--muted)] mb-8 text-sm">Stay updated with investment news, daily earnings announcements, and elite support.</p>
+
+            <div class="space-y-3">
+                <a href="https://t.me/+s66HnQZjuCFhZTI0" target="_blank" id="dashboardTelegramLink" class="block w-full py-4 bg-[#229ED9] text-white font-bold rounded-2xl hover:bg-[#1c8adb] transition-colors">
+                    Join Telegram
+                </a>
+                <button id="skipTelegram" class="block w-full py-4 bg-black/[0.04] text-[var(--muted)] font-semibold rounded-2xl hover:bg-black/[0.07] transition-colors">
+                    Continue to Dashboard
+                </button>
+            </div>
         </div>
     </div>
 
@@ -710,7 +729,20 @@
             user = session.user;
             document.getElementById('authGuard').classList.add('hidden');
             loadDashboardData();
+            showTelegramPopup();
         }
+
+        // Shows every time a user lands on the dashboard, per request —
+        // not gated behind a "seen before" check.
+        function showTelegramPopup() {
+            document.getElementById('telegramModal').classList.remove('hidden');
+            document.getElementById('telegramModal').classList.add('flex');
+            lucide.createIcons();
+        }
+        document.getElementById('skipTelegram').addEventListener('click', () => {
+            document.getElementById('telegramModal').classList.add('hidden');
+            document.getElementById('telegramModal').classList.remove('flex');
+        });
 
         // --- 2. Load Dashboard Data ---
         // NOTE: "investments" table columns are: user_id, plan_id, amount_invested,
