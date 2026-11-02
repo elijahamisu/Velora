@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#0A0F1C">
     <title>Support · Altivex</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
@@ -16,10 +16,10 @@
             --ink-soft: #171A22;
             --paper: #F6F4EF;
             --paper-card: #FFFFFF;
-            --gold: #C6F432;
-            --gold-deep: #C6F432;
-            --gold-light: #C6F432;
-            --line: rgba(198, 244, 50, 0.16);
+            --gold: #D9C7A3;
+            --gold-deep: #D9C7A3;
+            --gold-light: #D9C7A3;
+            --line: rgba(217, 199, 163, 0.16);
             --ink-text: #14161C;
             --muted: #7A7E88;
         }
@@ -55,8 +55,8 @@
     <!-- Auth Guard Loader -->
     <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
         <div class="text-center">
-            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(198, 244, 50,0.25); border-top-color: var(--gold);"></div>
-            <span class="ax-logo ax-logo-lg"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span>
+            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(217, 199, 163,0.25); border-top-color: var(--gold);"></div>
+            <span class="ax-logo ax-logo-lg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span>
             <p class="text-[10px] uppercase tracking-[0.08em] text-white/30 mt-2">Verifying Access</p>
         </div>
     </div>
@@ -65,7 +65,7 @@
     <header class="ax-topbar no-print">
         <div class="ax-topbar-inner">
             <div class="flex items-center gap-3 min-w-0">
-                <a href="dashboard.html" aria-label="Altivex home"><span class="ax-logo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span></a>
+                <a href="dashboard.html" aria-label="Altivex home"><span class="ax-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span></a>
                 <span class="ax-crumb">Support</span>
             </div>
             <div class="flex items-center gap-2">
@@ -101,7 +101,7 @@
     <div id="drawerOverlay" class="no-print"></div>
     <aside id="mobileDrawer" class="no-print" aria-label="Account menu">
         <div class="ax-sheet-head">
-            <span class="ax-logo ax-logo-sm"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span>
+            <span class="ax-logo ax-logo-sm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span>
             <button id="drawerClose" aria-label="Close menu" class="ax-icon-btn"><i data-lucide="x"></i></button>
         </div>
         <div class="ax-sheet-account">
@@ -149,7 +149,7 @@
                     <!-- Create Ticket Form -->
                     <div class="ax-card rounded-[14px] p-8">
                         <div class="flex items-center gap-3 mb-8">
-                            <div class="w-10 h-10 rounded-[10px] flex items-center justify-center ax-accent" style="background: rgba(198, 244, 50,0.08);">
+                            <div class="w-10 h-10 rounded-[10px] flex items-center justify-center ax-accent" style="background: rgba(217, 199, 163,0.08);">
                                 <i data-lucide="plus-circle" class="w-6 h-6"></i>
                             </div>
                             <h4 class="text-lg font-semibold ax-display">New Support Inquiry</h4>
@@ -178,7 +178,7 @@
                             </div>
                             <div>
                                 <label class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest block mb-2">Upload Screenshot (Optional)</label>
-                                <input type="file" id="screenshot" accept="image/*" class="w-full text-xs text-[var(--muted)] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[rgba(198,244,50,0.1)] file:text-[#C6F432]">
+                                <input type="file" id="screenshot" accept="image/*" class="w-full text-xs text-[var(--muted)] file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[rgba(217, 199, 163,0.1)] file:text-[#D9C7A3]">
                             </div>
                             <button type="submit" id="submitBtn" class="w-full py-4 ax-fill text-white font-bold rounded-lg active:scale-95 transition flex items-center justify-center gap-2">
                                 <span>Submit Inquiry</span>
@@ -222,12 +222,12 @@
                     <div class="ax-panel rounded-[14px] p-8 text-white relative overflow-hidden group">
                         <div class="relative z-10 text-center">
                             <div class="w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-6" style="background: rgba(34,158,217,0.15);">
-                                <i data-lucide="send" class="w-8 h-8 text-[#5EB8E8]"></i>
+                                <i data-lucide="send" class="w-8 h-8 text-[#AFC0DA]"></i>
                             </div>
                             <h4 class="text-xl ax-display font-semibold mb-3">Community &amp; Support</h4>
                             <p class="text-xs text-white/45 mb-8 leading-relaxed">Join our private Telegram community for instant updates and dedicated live agent support.</p>
                             <div class="space-y-3">
-                                <a id="tgCommunity" href="#" target="_blank" class="block w-full py-3 bg-[#229ED9] text-white font-bold rounded-lg text-xs hover:brightness-110 transition">Join Channel</a>
+                                <a id="tgCommunity" href="#" target="_blank" class="block w-full py-3 bg-[#D9C7A3] text-[#0A0F1C] font-bold rounded-lg text-xs hover:brightness-110 transition">Join Channel</a>
                                 <a id="tgSupport" href="#" target="_blank" class="block w-full py-3 border border-white/15 text-white font-bold rounded-lg text-xs hover:bg-white/5 transition">Direct Support</a>
                             </div>
                         </div>

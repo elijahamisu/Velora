@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#0A0F1C">
     <title>Users · Altivex Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
@@ -16,10 +16,10 @@
             --ink-soft: #171A22;
             --paper: #F6F4EF;
             --paper-card: #FFFFFF;
-            --gold: #C6F432;
-            --gold-deep: #C6F432;
-            --gold-light: #C6F432;
-            --line: rgba(198, 244, 50, 0.16);
+            --gold: #D9C7A3;
+            --gold-deep: #D9C7A3;
+            --gold-light: #D9C7A3;
+            --line: rgba(217, 199, 163, 0.16);
             --ink-text: #14161C;
             --muted: #7A7E88;
         }
@@ -44,8 +44,8 @@
     <!-- Auth Guard Loader -->
     <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
         <div class="text-center" id="loaderContent">
-            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(198, 244, 50,0.25); border-top-color: var(--gold);"></div>
-            <span class="ax-logo ax-logo-lg"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span>
+            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(217, 199, 163,0.25); border-top-color: var(--gold);"></div>
+            <span class="ax-logo ax-logo-lg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span>
             <p class="text-[10px] uppercase tracking-[0.08em] text-white/30 mt-2">Verifying Admin Access</p>
         </div>
     </div>
@@ -57,7 +57,7 @@
                 <button id="menuToggle" class="ax-icon-btn lg:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
                     <i data-lucide="menu"></i>
                 </button>
-                <a href="dashboard.html" class="lg:hidden" aria-label="Admin home"><span class="ax-logo ax-logo-sm"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span></a>
+                <a href="dashboard.html" class="lg:hidden" aria-label="Admin home"><span class="ax-logo ax-logo-sm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span></a>
                 <span class="ax-admin-tag hidden sm:inline-flex lg:inline-flex">Admin</span>
                 <span class="ax-crumb">Users</span>
             </div>
@@ -73,7 +73,7 @@
 
     <!-- ============ Admin icon rail (id kept as "sidebar") ============ -->
     <aside id="sidebar" class="ax-rail" aria-label="Admin navigation">
-        <a href="dashboard.html" class="ax-rail-brand ax-logo ax-mark-only" aria-label="Altivex admin"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg></a>
+        <a href="dashboard.html" class="ax-rail-brand ax-logo ax-mark-only" aria-label="Altivex admin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
         <nav id="sidebarNav">
             <a href="dashboard.html" data-page="dashboard" class="sidebar-item" aria-label="Overview"><i data-lucide="layout-grid"></i><span class="ax-tip">Overview</span></a>
             <a href="users.html" data-page="users" class="sidebar-item" aria-label="Users"><i data-lucide="users"></i><span class="ax-tip">Users</span></a>
@@ -93,7 +93,7 @@
     <div id="drawerOverlay"></div>
     <aside id="mobileDrawer" class="ax-sheet-left" aria-label="Admin menu">
         <div class="ax-sheet-head">
-            <span class="flex items-center gap-2"><span class="ax-logo ax-logo-sm"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span><span class="ax-admin-tag">Admin</span></span>
+            <span class="flex items-center gap-2"><span class="ax-logo ax-logo-sm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span><span class="ax-admin-tag">Admin</span></span>
             <button id="drawerClose" aria-label="Close menu" class="ax-icon-btn"><i data-lucide="x"></i></button>
         </div>
         <div class="ax-sheet-account">
@@ -223,7 +223,7 @@
                         <option value="">Select a plan...</option>
                     </select>
                     <p class="text-[10px] text-[var(--muted)] mb-3">Granted free — does not deduct from the client's wallet.</p>
-                    <button onclick="submitAssignPlan()" class="w-full px-3 py-3 bg-[rgba(198,244,50,0.12)] ax-accent rounded-lg text-xs font-bold uppercase hover:bg-[rgba(198,244,50,0.2)] transition">Assign Plan</button>
+                    <button onclick="submitAssignPlan()" class="w-full px-3 py-3 bg-[rgba(217, 199, 163,0.12)] ax-accent rounded-lg text-xs font-bold uppercase hover:bg-[rgba(217, 199, 163,0.2)] transition">Assign Plan</button>
                 </div>
 
                 <!-- Danger zone -->
@@ -374,7 +374,7 @@
         }
 
         function roleBadge(role, isAdmin) {
-            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${isAdmin ? 'bg-[rgba(198,244,50,0.12)] ax-accent' : 'bg-black/5 text-[var(--ink-text)]'}">${role || 'client'}</span>`;
+            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${isAdmin ? 'bg-[rgba(217, 199, 163,0.12)] ax-accent' : 'bg-black/5 text-[var(--ink-text)]'}">${role || 'client'}</span>`;
         }
 
         function manageButton(u, isAdmin) {

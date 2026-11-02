@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#0A0F1C">
     <title>Sign in · Altivex</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         .loader {
@@ -28,7 +28,7 @@
 <body>
     <div class="ax-auth">
         <aside class="ax-auth-brand">
-            <a href="/" aria-label="Altivex home"><span class="ax-logo ax-logo-lg"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span></a>
+            <a href="/" aria-label="Altivex home"><span class="ax-logo ax-logo-lg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span></a>
             <div class="max-w-md">
                 <p class="ax-eyebrow ax-eyebrow-dot mb-6">Altivex</p>
                 <h2 class="ax-h1 text-[56px] text-white">Put your money<br>to work, <span class="ax-hl">daily.</span></h2>
@@ -52,7 +52,7 @@
         </aside>
         <main class="ax-auth-form">
             <div class="ax-auth-form-inner">
-                <div class="lg:hidden mb-10"><a href="/" aria-label="Altivex home"><span class="ax-logo "><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span></a></div>
+                <div class="lg:hidden mb-10"><a href="/" aria-label="Altivex home"><span class="ax-logo "><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span></a></div>
                 <p class="ax-eyebrow mb-3">Sign in</p>
                 <h1 class="text-[32px] ax-display font-semibold leading-tight">Welcome back</h1>
                 <p class="text-[var(--ax-muted)] mt-2 mb-8 text-[15px]">Log in to check your balance and earnings.</p>
@@ -103,7 +103,7 @@
 
                 <p class="text-[var(--ax-muted)] text-sm mt-8">
                     New to Altivex?
-                    <a href="register.html" class="text-white font-semibold underline decoration-[#C6F432] underline-offset-4">Create an account</a>
+                    <a href="register.html" class="text-white font-semibold underline decoration-[#D9C7A3] underline-offset-4">Create an account</a>
                 </p>
                 <p class="text-[12px] text-[var(--ax-faint)] mt-10"><a href="terms.html" class="hover:text-white">Terms of service</a></p>
             </div>
@@ -114,12 +114,12 @@
     <div id="telegramModal" class="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/70 backdrop-blur-sm hidden">
         <div class="ax-card w-full max-w-sm p-6 modal-enter">
             <div class="w-11 h-11 rounded-lg flex items-center justify-center mb-5" style="background: rgba(34,158,217,0.12);">
-                <i data-lucide="send" class="w-5 h-5 text-[#5EB8E8]"></i>
+                <i data-lucide="send" class="w-5 h-5 text-[#AFC0DA]"></i>
             </div>
             <h3 class="text-xl ax-display font-semibold mb-1.5">Join the community</h3>
             <p class="text-[var(--ax-muted)] mb-6 text-sm leading-relaxed">Get platform news, daily earnings updates and quick support on Telegram.</p>
             <div class="grid gap-2">
-                <a id="telegramLink" href="#" target="_blank" class="ax-btn ax-btn-lg ax-btn-block" style="background:#229ED9;border-color:#229ED9;color:#fff;">Join Telegram</a>
+                <a id="telegramLink" href="#" target="_blank" class="ax-btn ax-btn-primary ax-btn-lg ax-btn-block">Join Telegram</a>
                 <button id="skipTelegram" class="ax-btn ax-btn-lg ax-btn-block ax-btn-ghost">Go to dashboard</button>
             </div>
         </div>

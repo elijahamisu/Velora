@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#0A0F1C">
     <title>Altivex · Put your money to work, daily</title>
     <meta name="description" content="Altivex: pick an investment plan from ₦3,000, earn daily into your wallet, and withdraw to your bank.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         html { scroll-behavior: smooth; }
-        .hero-glowline { position: absolute; left: 0; right: 0; top: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(198,244,50,.6), transparent); }
+        .hero-glowline { position: absolute; left: 0; right: 0; top: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(217, 199, 163,.6), transparent); }
         .bento-big { min-height: 260px; }
-        .bar { background: #1E1E1E; border-radius: 2px; }
-        .bar.on { background: #C6F432; }
+        .bar { background: #1E2840; border-radius: 2px; }
+        .bar.on { background: #D9C7A3; }
     </style>
     <link rel="stylesheet" href="/altivex.css">
 </head>
@@ -25,7 +25,7 @@
     <!-- ===== Top nav ===== -->
     <header class="ax-nav">
         <div class="ax-container h-full flex items-center justify-between gap-6">
-            <a href="/" aria-label="Altivex home"><span class="ax-logo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span></a>
+            <a href="/" aria-label="Altivex home"><span class="ax-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span></a>
             <nav class="hidden md:flex items-center gap-8" aria-label="Primary">
                 <a href="#how-it-works" class="ax-navlink">How it works</a>
                 <a href="#features" class="ax-navlink">Features</a>
@@ -67,7 +67,7 @@
                     <div class="ax-card bg-[var(--ax-s1)] overflow-hidden relative">
                         <div class="hero-glowline"></div>
                         <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
-                            <span class="flex items-center gap-2 text-[13px] text-[var(--ax-muted)]"><span class="w-2 h-2 bg-[#C6F432]"></span> Wallet</span>
+                            <span class="flex items-center gap-2 text-[13px] text-[var(--ax-muted)]"><span class="w-2 h-2 bg-[#D9C7A3]"></span> Wallet</span>
                             <span class="ax-badge">Example</span>
                         </div>
                         <div class="p-5">
@@ -190,7 +190,7 @@
                             <div class="ax-kv"><dt>Unlock</dt><dd>Open to all</dd></div>
                         </dl>
                     </div>
-                    <div class="ax-card overflow-hidden border-[#C6F432]/40">
+                    <div class="ax-card overflow-hidden border-[#D9C7A3]/40">
                         <div class="p-6 border-b border-neutral-800">
                             <div class="flex items-center justify-between mb-4"><h3 class="font-semibold">Professional</h3><span class="ax-badge ax-badge-accent">Higher return</span></div>
                             <p class="mono text-[52px] font-bold leading-none ax-accent">6<span class="text-[28px] text-[var(--ax-muted)]">× total</span></p>
@@ -241,12 +241,12 @@
 
         <!-- ===== CTA band ===== -->
         <section class="ax-container pb-20">
-            <div class="rounded-[14px] bg-[#C6F432] text-black p-8 md:p-12 flex flex-col md:flex-row md:items-center justify-between gap-8 relative overflow-hidden">
+            <div class="ax-cta-band p-8 md:p-12 flex flex-col md:flex-row md:items-center justify-between gap-8 relative overflow-hidden">
                 <div>
-                    <h2 class="ax-h2 text-[34px] md:text-[48px] text-[#000]">Start with ₦3,000.</h2>
-                    <p class="text-[#000]/70 mt-3 text-[17px]">Open an account in a minute and get ₦600 to begin.</p>
+                    <h2 class="ax-h2 text-[34px] md:text-[48px] text-[var(--ax-text)]">Start with ₦3,000.</h2>
+                    <p class="text-[var(--ax-muted)] mt-3 text-[17px]">Open an account in a minute and get ₦600 to begin.</p>
                 </div>
-                <a href="register.html" class="ax-btn ax-btn-lg self-start md:self-auto" style="background:#000;border-color:#000;color:#fff;">Create free account <i data-lucide="arrow-right"></i></a>
+                <a href="register.html" class="ax-btn ax-btn-primary ax-btn-lg self-start md:self-auto">Create free account <i data-lucide="arrow-right"></i></a>
             </div>
         </section>
     </main>
@@ -255,7 +255,7 @@
     <footer class="border-t border-neutral-800">
         <div class="ax-container py-14 grid md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-10">
             <div>
-                <span class="ax-logo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span>
+                <span class="ax-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span>
                 <p class="text-[var(--ax-muted)] text-sm mt-4 max-w-xs">Daily-earning investment plans with a simple wallet and bank withdrawals.</p>
             </div>
             <div>
