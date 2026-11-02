@@ -132,21 +132,6 @@
         </main>
     </div>
 
-    <!-- Telegram Popup Modal (Hidden by default) -->
-    <div id="tgModal" class="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/70 backdrop-blur-sm hidden">
-        <div class="ax-card w-full max-w-sm p-6 modal-enter">
-            <div class="w-11 h-11 rounded-lg flex items-center justify-center mb-5" style="background: rgba(34,158,217,0.12);">
-                <i data-lucide="send" class="w-5 h-5 text-[#AFC0DA]"></i>
-            </div>
-            <h3 class="text-xl ax-display font-semibold mb-1.5">Welcome to Altivex</h3>
-            <p class="text-[var(--ax-muted)] mb-6 text-sm leading-relaxed">Join our Telegram community for product updates and real-time support.</p>
-            <div class="grid gap-2">
-                <a id="tgLink" href="#" target="_blank" class="ax-btn ax-btn-primary ax-btn-lg ax-btn-block">Join community</a>
-                <button id="skipTg" class="ax-btn ax-btn-lg ax-btn-block ax-btn-ghost">Go to dashboard</button>
-            </div>
-        </div>
-    </div>
-
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
@@ -162,7 +147,6 @@
         const submitBtn = document.getElementById('submitBtn');
         const loader = document.getElementById('loader');
         const btnText = document.getElementById('btnText');
-        const tgModal = document.getElementById('tgModal');
 
         // 1. Referral Auto-fill
         const urlParams = new URLSearchParams(window.location.search);
@@ -274,11 +258,7 @@
                 // Success!
                 showMsg('Account created! Welcome bonus credited.', 'success');
                 setTimeout(() => {
-                    // Hardcoded rather than pulled from VITE_TELEGRAM_LINK, which
-                    // may not be set on the deployment — same fix pattern as the
-                    // bank details on the deposit page.
-                    document.getElementById('tgLink').href = 'https://t.me/+s66HnQZjuCFhZTI0';
-                    tgModal.classList.remove('hidden');
+                    window.location.href = 'dashboard.html';
                 }, 1000);
 
             } catch (err) {
@@ -286,8 +266,6 @@
                 setLoading(false);
             }
         });
-
-        document.getElementById('skipTg').onclick = () => window.location.href = 'dashboard.html';
 
         function setLoading(state) {
             submitBtn.disabled = state;

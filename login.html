@@ -110,21 +110,6 @@
         </main>
     </div>
 
-    <!-- Telegram Popup Modal (Hidden by default) -->
-    <div id="telegramModal" class="fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/70 backdrop-blur-sm hidden">
-        <div class="ax-card w-full max-w-sm p-6 modal-enter">
-            <div class="w-11 h-11 rounded-lg flex items-center justify-center mb-5" style="background: rgba(34,158,217,0.12);">
-                <i data-lucide="send" class="w-5 h-5 text-[#AFC0DA]"></i>
-            </div>
-            <h3 class="text-xl ax-display font-semibold mb-1.5">Join the community</h3>
-            <p class="text-[var(--ax-muted)] mb-6 text-sm leading-relaxed">Get platform news, daily earnings updates and quick support on Telegram.</p>
-            <div class="grid gap-2">
-                <a id="telegramLink" href="#" target="_blank" class="ax-btn ax-btn-primary ax-btn-lg ax-btn-block">Join Telegram</a>
-                <button id="skipTelegram" class="ax-btn ax-btn-lg ax-btn-block ax-btn-ghost">Go to dashboard</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Scripting -->
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
@@ -134,7 +119,6 @@
         
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
         const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-        const telegramLink = import.meta.env.VITE_TELEGRAM_LINK;
         const supabase = createClient(supabaseUrl, supabaseKey);
 
         const loginForm = document.getElementById('loginForm');
@@ -146,9 +130,6 @@
         const togglePassword = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
         const eyeIcon = document.getElementById('eyeIcon');
-        const telegramModal = document.getElementById('telegramModal');
-        const skipTelegram = document.getElementById('skipTelegram');
-        const tgJoinBtn = document.getElementById('telegramLink');
 
         // Toggle Password Visibility
         togglePassword.addEventListener('click', () => {
@@ -199,28 +180,14 @@
                 // 3. Success State
                 successMessage.classList.remove('hidden');
                 
-                // Show Telegram Popup
                 setTimeout(() => {
-                    tgJoinBtn.href = telegramLink;
-                    telegramModal.classList.remove('hidden');
+                    window.location.href = 'dashboard.html';
                 }, 800);
 
             } catch (err) {
                 showError(err.message || 'An error occurred during sign in.');
                 setLoading(false);
             }
-        });
-
-        // Handle Post-Login Redirection
-        skipTelegram.addEventListener('click', () => {
-            window.location.href = 'dashboard.html';
-        });
-
-        tgJoinBtn.addEventListener('click', () => {
-            // Give them a moment to open the link before redirecting
-            setTimeout(() => {
-                window.location.href = 'dashboard.html';
-            }, 1500);
         });
 
         // Helpers
