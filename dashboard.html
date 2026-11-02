@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0A0A0A">
-    <title>Dashboard | ALTIVEX — Private Wealth</title>
+    <meta name="theme-color" content="#000000">
+    <title>Overview · Altivex</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
@@ -16,10 +17,10 @@
             --ink-soft: #171A22;
             --paper: #F6F4EF;       /* warm ivory canvas */
             --paper-card: #FFFFFF;
-            --gold: #B7935B;        /* antique, desaturated gold — restrained, not neon */
-            --gold-deep: #8F6E3E;
-            --gold-light: #E7D9BC;
-            --line: rgba(183, 147, 91, 0.16);
+            --gold: #C6F432;        /* antique, desaturated gold — restrained, not neon */
+            --gold-deep: #C6F432;
+            --gold-light: #C6F432;
+            --line: rgba(198, 244, 50, 0.16);
             --ink-text: #14161C;
             --muted: #7A7E88;
         }
@@ -29,23 +30,6 @@
             color: var(--ink-text);
             overflow-x: hidden;
         }
-        .heading-font { font-family: 'Fraunces', serif; font-feature-settings: "ss01"; }
-        .mono { font-family: 'IBM Plex Mono', monospace; }
-
-        .gold-gradient { background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%); }
-        .gold-text {
-            background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .ink-gradient { background: linear-gradient(160deg, var(--ink) 0%, var(--ink-soft) 100%); }
-
-        .card {
-            background: var(--paper-card);
-            border: 1px solid rgba(20, 22, 28, 0.06);
-            box-shadow: 0 1px 2px rgba(12,14,19,0.03), 0 12px 24px -18px rgba(12,14,19,0.18);
-        }
-        .card-gold-edge { border-top: 2px solid var(--gold); }
 
         .skeleton {
             background: linear-gradient(90deg, #eee 25%, #e2e2e2 50%, #eee 75%);
@@ -56,455 +40,219 @@
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
-
-        /* ---------- Sidebar (desktop) ---------- */
-        #sidebar { background: var(--ink); }
-        #sidebar .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
-        .sidebar-item {
-            color: rgba(246, 244, 239, 0.55);
-            border-left: 2px solid transparent;
-            transition: color .18s ease, background .18s ease, border-color .18s ease;
-        }
-        .sidebar-item:hover {
-            background: linear-gradient(90deg, rgba(183,147,91,0.12) 0%, transparent 85%);
-            color: var(--gold-light);
-        }
-        .sidebar-active {
-            background: linear-gradient(90deg, rgba(183,147,91,0.16) 0%, transparent 85%);
-            color: var(--gold-light) !important;
-            border-left: 2px solid var(--gold);
-        }
-        .sidebar-item i { width: 17px; height: 17px; }
-
-        /* ---------- Mobile Island Navigation ---------- */
-        #islandNav {
-            background: rgba(12, 14, 19, 0.97);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(183, 147, 91, 0.22);
-            box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(183,147,91,0.05) inset;
-        }
-        .island-item {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-            padding: 7px 4px;
-            border-radius: 13px;
-            color: rgba(246, 244, 239, 0.4);
-            transition: color 0.2s ease, background 0.2s ease;
-        }
-        .island-item i { width: 16px; height: 16px; }
-        .island-item span {
-            font-size: 8px;
-            font-weight: 700;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-        }
-        .island-item.active {
-            color: var(--gold-light);
-            background: linear-gradient(135deg, rgba(183,147,91,0.22) 0%, rgba(143,110,62,0.10) 100%);
-        }
-        .island-item.active i { filter: drop-shadow(0 2px 6px rgba(183,147,91,0.45)); }
-
-        ::selection { background: var(--gold-light); color: var(--ink); }
-        :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-
-        /* ---------- Mobile Drawer Sidebar ---------- */
-        #drawerOverlay {
-            background: rgba(8, 9, 13, 0.55);
-            backdrop-filter: blur(2px);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity .28s ease;
-        }
-        #drawerOverlay.open { opacity: 1; pointer-events: auto; }
-
-        #mobileDrawer {
-            background: var(--ink);
-            width: min(86vw, 320px);
-            transform: translateX(-100%);
-            transition: transform .32s cubic-bezier(.32,.72,0,1);
-            box-shadow: 24px 0 60px -20px rgba(0,0,0,0.5);
-        }
-        #mobileDrawer.open { transform: translateX(0); }
-        #mobileDrawer .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
-
-        .drawer-item {
-            color: rgba(246, 244, 239, 0.6);
-            border-left: 2px solid transparent;
-            transition: color .18s ease, background .18s ease, border-color .18s ease;
-        }
-        .drawer-item:active,
-        .drawer-item:hover {
-            background: linear-gradient(90deg, rgba(183,147,91,0.14) 0%, transparent 85%);
-            color: var(--gold-light);
-        }
-        .drawer-active {
-            background: linear-gradient(90deg, rgba(183,147,91,0.18) 0%, transparent 85%);
-            color: var(--gold-light) !important;
-            border-left: 2px solid var(--gold);
-        }
-        .drawer-item i { width: 18px; height: 18px; }
-
-        #menuToggle {
-            width: 38px; height: 38px;
-            border-radius: 11px;
-            display: flex; align-items: center; justify-content: center;
-            border: 1px solid rgba(20,22,28,0.08);
-            color: var(--ink-text);
-            transition: background .18s ease, border-color .18s ease;
-        }
-        #menuToggle:hover { background: rgba(183,147,91,0.08); border-color: rgba(183,147,91,0.3); }
-        #menuToggle i { width: 18px; height: 18px; }
     </style>
-    <link rel="stylesheet" href="/theme-dark.css">
+    <link rel="stylesheet" href="/altivex.css">
 </head>
 <body class="bg-[var(--paper)]">
 
     <!-- Auth Guard Loader -->
     <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
         <div class="text-center">
-            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(183,147,91,0.25); border-top-color: var(--gold);"></div>
-            <p class="heading-font gold-text text-2xl tracking-wide">ALTIVEX</p>
-            <p class="text-[10px] uppercase tracking-[0.3em] text-white/30 mt-2">Verifying Access</p>
+            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(198, 244, 50,0.25); border-top-color: var(--gold);"></div>
+            <span class="ax-logo ax-logo-lg"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span>
+            <p class="text-[10px] uppercase tracking-[0.08em] text-white/30 mt-2">Verifying Access</p>
         </div>
     </div>
 
     <!-- Telegram Popup Modal (Hidden by default) -->
     <div id="telegramModal" class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm hidden">
-        <div class="bg-[var(--paper)] rounded-[32px] w-full max-w-sm p-8 text-center shadow-2xl">
-            <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background: rgba(34,158,217,0.1);">
+        <div class="bg-[var(--paper)] rounded-[14px] w-full max-w-sm p-8 text-center ">
+            <div class="w-20 h-20 rounded-lg flex items-center justify-center mx-auto mb-6" style="background: rgba(34,158,217,0.1);">
                 <i data-lucide="send" class="w-10 h-10 text-[#229ED9] -mr-1"></i>
             </div>
-            <h3 class="text-2xl heading-font font-bold mb-2">Join Our Community</h3>
-            <p class="text-[var(--muted)] mb-8 text-sm">Stay updated with investment news, daily earnings announcements, and elite support.</p>
+            <h3 class="text-2xl ax-display font-bold mb-2">Join Our Community</h3>
+            <p class="text-[var(--muted)] mb-8 text-sm">Stay updated with investment news, daily earnings updates and fast support.</p>
 
             <div class="space-y-3">
-                <a href="https://t.me/+s66HnQZjuCFhZTI0" target="_blank" id="dashboardTelegramLink" class="block w-full py-4 bg-[#229ED9] text-white font-bold rounded-2xl hover:bg-[#1c8adb] transition-colors">
+                <a href="https://t.me/+s66HnQZjuCFhZTI0" target="_blank" id="dashboardTelegramLink" class="block w-full py-4 bg-[#229ED9] text-white font-bold rounded-lg hover:bg-[#1c8adb] transition-colors">
                     Join Telegram
                 </a>
-                <button id="skipTelegram" class="block w-full py-4 bg-black/[0.04] text-[var(--muted)] font-semibold rounded-2xl hover:bg-black/[0.07] transition-colors">
+                <button id="skipTelegram" class="block w-full py-4 bg-black/[0.04] text-[var(--muted)] font-semibold rounded-lg hover:bg-black/[0.07] transition-colors">
                     Continue to Dashboard
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Navigation Header -->
-    <header class="fixed top-0 right-0 left-0 h-20 bg-[var(--paper)]/85 backdrop-blur-md border-b border-black/[0.06] z-40 lg:left-64">
-        <div class="h-full flex items-center justify-between px-6">
-            <div class="flex items-center gap-3">
-                <button id="menuToggle" class="lg:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
-                    <i data-lucide="menu"></i>
-                </button>
-                <div class="w-7 h-7 gold-gradient rounded-full flex items-center justify-center text-white heading-font text-xs lg:hidden">A</div>
-                <div>
-                    <h2 class="text-lg font-semibold heading-font hidden md:block tracking-tight">Client <span class="gold-text italic">Dashboard</span></h2>
-                    <h2 class="text-base font-semibold heading-font md:hidden">Altivex <span class="gold-text italic">Dashboard</span></h2>
-                    <p class="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] hidden md:block">Portfolio Overview</p>
-                </div>
+    <!-- ============ Altivex app shell: top bar ============ -->
+    <header class="ax-topbar no-print">
+        <div class="ax-topbar-inner">
+            <div class="flex items-center gap-3 min-w-0">
+                <a href="dashboard.html" aria-label="Altivex home"><span class="ax-logo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span></a>
+                <span class="ax-crumb">Overview</span>
             </div>
-
-            <div class="flex items-center gap-6">
-                <!-- Notifications -->
-                <div class="relative cursor-pointer group">
-                    <i data-lucide="bell" class="text-[var(--muted)] group-hover:text-[var(--gold)] transition w-5 h-5"></i>
-                    <span id="notifBadge" class="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full hidden">0</span>
-                </div>
-                <!-- Profile Summary -->
-                <div class="flex items-center gap-3 pl-6 border-l border-black/[0.06]">
-                    <div class="text-right hidden sm:block">
-                        <p id="userName" class="text-sm font-semibold text-[var(--ink-text)]">...</p>
-                        <p id="userRef" class="text-[10px] text-[var(--gold-deep)] font-bold tracking-widest uppercase mono">...</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold">
-                        <span id="userInitials">A</span>
-                    </div>
-                </div>
+            <div class="flex items-center gap-2">
+                
+                <a href="notifications.html" class="ax-icon-btn" aria-label="Notifications"><i data-lucide="bell"></i><span id="notifBadge" class="ax-notif-badge hidden">0</span></a>
+                <div class="hidden md:block text-right leading-tight mr-1"><p id="userName" class="text-[13px] font-semibold text-white">...</p><p id="userRef" class="text-[11px] mono text-[var(--ax-muted)]">...</p></div>
+                <button id="menuToggle" class="ax-avatar-btn" aria-label="Open account menu" aria-expanded="false" aria-controls="mobileDrawer">
+                    <span class="ax-avatar"><span id="userInitials">A</span></span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 hidden sm:block"></i>
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- Sidebar Menu (Desktop only) -->
-    <aside id="sidebar" class="hidden lg:block fixed top-0 left-0 bottom-0 w-64 z-50">
-        <div class="p-8 h-full flex flex-col">
-            <div class="flex items-center gap-3 mb-2">
-                <div class="w-9 h-9 rounded-full border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">A</div>
-                <h1 class="text-2xl heading-font gold-text tracking-tight font-semibold">ALTIVEX</h1>
-            </div>
-            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-8 ml-12 -mt-1">Private Wealth</p>
-            <div class="h-px w-full brand-hair mb-8"></div>
+    <!-- ============ Desktop section nav (id kept as "sidebar" for scripts) ============ -->
+    <nav id="sidebar" class="ax-subnav no-print" aria-label="Sections">
+        <div class="ax-subnav-inner" id="sidebarNav">
+            <a href="dashboard.html" data-page="dashboard" class="sidebar-item"><i data-lucide="layout-grid"></i>Overview</a>
+            <a href="invest.html" data-page="invest" class="sidebar-item"><i data-lucide="trending-up"></i>Invest</a>
+            <a href="deposit.html" data-page="deposit" class="sidebar-item"><i data-lucide="arrow-down-left"></i>Deposit</a>
+            <a href="withdraw.html" data-page="withdraw" class="sidebar-item"><i data-lucide="arrow-up-right"></i>Withdraw</a>
+            <a href="wallet.html" data-page="wallet" class="sidebar-item"><i data-lucide="wallet"></i>Wallet</a>
+            <a href="transactions.html" data-page="transactions" class="sidebar-item"><i data-lucide="list"></i>Transactions</a>
+            <a href="referral.html" data-page="referral" class="sidebar-item"><i data-lucide="users"></i>Referrals</a>
+            <a href="gift.html" data-page="gift" class="sidebar-item"><i data-lucide="gift"></i>Gift codes</a>
+            <a href="support.html" data-page="support" class="sidebar-item"><i data-lucide="life-buoy"></i>Support</a>
+            <span class="ax-subnav-spacer"></span>
+            <button id="logoutBtn" class="sidebar-item ax-subnav-logout"><i data-lucide="log-out"></i>Log out</button>
+        </div>
+    </nav>
 
-            <nav class="space-y-1 flex-1" id="sidebarNav">
-                <a href="dashboard.html" data-page="dashboard" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="layout-dashboard"></i> Dashboard
-                </a>
-                <a href="invest.html" data-page="invest" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="gem"></i> Invest
-                </a>
-                <a href="deposit.html" data-page="deposit" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="arrow-down-circle"></i> Deposit
-                </a>
-                <a href="withdraw.html" data-page="withdraw" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="arrow-up-circle"></i> Withdraw
-                </a>
-                <a href="wallet.html" data-page="wallet" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="wallet"></i> Wallet
-                </a>
-                <a href="transactions.html" data-page="transactions" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="history"></i> Transactions
-                </a>
-                <a href="referral.html" data-page="referral" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="users"></i> Referral
-                </a>
-                <a href="gift.html" data-page="gift" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="gift"></i> Gift Code
-                </a>
-
-                <div class="pt-8 mt-8 border-t border-white/[0.06] space-y-1">
-                    <a href="profile.html" data-page="profile" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                        <i data-lucide="user"></i> Profile
-                    </a>
-                    <a href="support.html" data-page="support" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                        <i data-lucide="help-circle"></i> Support
-                    </a>
-                    <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
-                        <i data-lucide="log-out" class="w-[17px] h-[17px]"></i> Logout
-                    </button>
-                </div>
-            </nav>
-
-            <div class="pt-6 border-t border-white/[0.06]">
-                <div class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/25">
-                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Secured Session
-                </div>
+    <!-- ============ Account sheet (opens from the avatar button) ============ -->
+    <div id="drawerOverlay" class="no-print"></div>
+    <aside id="mobileDrawer" class="no-print" aria-label="Account menu">
+        <div class="ax-sheet-head">
+            <span class="ax-logo ax-logo-sm"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span>
+            <button id="drawerClose" aria-label="Close menu" class="ax-icon-btn"><i data-lucide="x"></i></button>
+        </div>
+        <div class="ax-sheet-account">
+            <span class="ax-avatar ax-avatar-lg"><span id="drawerInitials">A</span></span>
+            <div class="min-w-0">
+                <p id="drawerName" class="text-sm font-semibold text-white truncate">...</p><p id="drawerRef" class="text-[11px] mono text-[var(--ax-muted)] truncate">...</p>
             </div>
         </div>
+        <nav class="ax-sheet-nav" id="drawerNav">
+            <p class="ax-sheet-label">Money</p>
+            <a href="dashboard.html" data-page="dashboard" class="drawer-item"><i data-lucide="layout-grid"></i><span>Overview</span></a>
+            <a href="invest.html" data-page="invest" class="drawer-item"><i data-lucide="trending-up"></i><span>Invest</span></a>
+            <a href="deposit.html" data-page="deposit" class="drawer-item"><i data-lucide="arrow-down-left"></i><span>Deposit</span></a>
+            <a href="withdraw.html" data-page="withdraw" class="drawer-item"><i data-lucide="arrow-up-right"></i><span>Withdraw</span></a>
+            <a href="wallet.html" data-page="wallet" class="drawer-item"><i data-lucide="wallet"></i><span>Wallet</span></a>
+            <a href="transactions.html" data-page="transactions" class="drawer-item"><i data-lucide="list"></i><span>Transactions</span></a>
+            <p class="ax-sheet-label">Account</p>
+            <a href="referral.html" data-page="referral" class="drawer-item"><i data-lucide="users"></i><span>Referrals</span></a>
+            <a href="gift.html" data-page="gift" class="drawer-item"><i data-lucide="gift"></i><span>Gift codes</span></a>
+            <a href="profile.html" data-page="profile" class="drawer-item"><i data-lucide="user-round"></i><span>Profile & security</span></a>
+            <a href="support.html" data-page="support" class="drawer-item"><i data-lucide="life-buoy"></i><span>Support</span></a>
+            <div class="ax-divider my-2"></div>
+            <button id="drawerLogoutBtn" class="drawer-item ax-logout"><i data-lucide="log-out"></i><span>Log out</span></button>
+        </nav>
     </aside>
 
-    <!-- ============ Mobile Drawer Sidebar ============ -->
-    <div id="drawerOverlay" class="lg:hidden fixed inset-0 z-[60]"></div>
-    <aside id="mobileDrawer" class="lg:hidden fixed top-0 left-0 bottom-0 z-[70] overflow-y-auto">
-        <div class="p-7 min-h-full flex flex-col">
-            <div class="flex items-center justify-between mb-1">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">A</div>
-                    <h1 class="text-xl heading-font gold-text tracking-tight font-semibold">ALTIVEX</h1>
-                </div>
-                <button id="drawerClose" aria-label="Close menu" class="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-[var(--gold-light)] hover:bg-white/5 transition">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-6 ml-12 -mt-1">Private Wealth</p>
-            <div class="h-px w-full brand-hair mb-6"></div>
-
-            <!-- Account chip -->
-            <div class="flex items-center gap-3 p-3 mb-6 rounded-2xl bg-white/[0.04] border border-white/10">
-                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold shrink-0">
-                    <span id="drawerInitials">A</span>
-                </div>
-                <div class="min-w-0">
-                    <p id="drawerName" class="text-sm font-semibold text-white truncate">...</p>
-                    <p id="drawerRef" class="text-[10px] text-[var(--gold-light)] font-bold tracking-widest uppercase mono truncate">...</p>
-                </div>
-            </div>
-
-            <nav class="space-y-1 flex-1" id="drawerNav">
-                <a href="dashboard.html" data-page="dashboard" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="layout-dashboard"></i> Dashboard
-                </a>
-                <a href="invest.html" data-page="invest" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="gem"></i> Invest
-                </a>
-                <a href="deposit.html" data-page="deposit" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="arrow-down-circle"></i> Deposit
-                </a>
-                <a href="withdraw.html" data-page="withdraw" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="arrow-up-circle"></i> Withdraw
-                </a>
-                <a href="wallet.html" data-page="wallet" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="wallet"></i> Wallet
-                </a>
-                <a href="transactions.html" data-page="transactions" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="history"></i> Transactions
-                </a>
-                <a href="referral.html" data-page="referral" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="users"></i> Referral
-                </a>
-                <a href="gift.html" data-page="gift" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="gift"></i> Gift Code
-                </a>
-
-                <div class="pt-6 mt-6 border-t border-white/[0.06] space-y-1">
-                    <a href="profile.html" data-page="profile" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                        <i data-lucide="user"></i> Profile
-                    </a>
-                    <a href="support.html" data-page="support" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                        <i data-lucide="help-circle"></i> Support
-                    </a>
-                    <button id="drawerLogoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
-                        <i data-lucide="log-out" class="w-[18px] h-[18px]"></i> Logout
-                    </button>
-                </div>
-            </nav>
-
-            <div class="pt-6 mt-6 border-t border-white/[0.06]">
-                <div class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/25">
-                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Secured Session
-                </div>
-            </div>
-        </div>
-    </aside>
-
-    <!-- ============ Mobile Island Navigation ============ -->
-    <nav id="islandNav" class="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-[22px] flex items-center gap-1 px-2 py-1.5 w-[92%] max-w-sm">
-        <a href="dashboard.html" data-page="dashboard" class="island-item flex-1">
-            <i data-lucide="layout-dashboard"></i>
-            <span>Home</span>
-        </a>
-        <a href="invest.html" data-page="invest" class="island-item flex-1">
-            <i data-lucide="gem"></i>
-            <span>Plans</span>
-        </a>
-        <a href="wallet.html" data-page="wallet" class="island-item flex-1">
-            <i data-lucide="wallet"></i>
-            <span>Wallet</span>
-        </a>
-        <a href="referral.html" data-page="referral" class="island-item flex-1">
-            <i data-lucide="users"></i>
-            <span>Referrals</span>
-        </a>
-        <a href="profile.html" data-page="profile" class="island-item flex-1">
-            <i data-lucide="user"></i>
-            <span>Profile</span>
-        </a>
+    <!-- ============ Mobile tab bar (id kept as "islandNav" for scripts) ============ -->
+    <nav id="islandNav" class="ax-tabbar no-print" aria-label="Tabs">
+        <a href="dashboard.html" data-page="dashboard" class="island-item"><i data-lucide="layout-grid"></i><span>Home</span></a>
+        <a href="invest.html" data-page="invest" class="island-item"><i data-lucide="trending-up"></i><span>Invest</span></a>
+        <a href="wallet.html" data-page="wallet" class="island-item"><i data-lucide="wallet"></i><span>Wallet</span></a>
+        <a href="referral.html" data-page="referral" class="island-item"><i data-lucide="users"></i><span>Referral</span></a>
+        <a href="profile.html" data-page="profile" class="island-item"><i data-lucide="user-round"></i><span>Profile</span></a>
     </nav>
 
     <!-- Main Content -->
-    <main class="lg:ml-64 pt-28 px-6 pb-24 lg:pb-12">
+    <main class="ax-main">
         <div class="max-w-7xl mx-auto">
 
-            <!-- Welcome Section -->
-            <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+            <!-- Welcome strip -->
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
                 <div>
-                    <h3 class="text-3xl heading-font font-semibold tracking-tight">Good Day, <span id="welcomeName" class="gold-text italic">Investor</span></h3>
-                    <p class="text-[var(--muted)] text-sm mt-1">Here is what's happening with your portfolio today.</p>
+                    <p class="ax-eyebrow ax-eyebrow-dot mb-2">Portfolio</p>
+                    <h1 class="text-[28px] md:text-[34px] ax-display font-semibold leading-none">Hi, <span id="welcomeName">Investor</span></h1>
                 </div>
-                <div class="flex items-center gap-3 card p-2 rounded-2xl">
-                    <div class="px-4 py-2 text-center border-r border-black/[0.06]">
-                        <p class="text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] font-semibold">Next Earning</p>
-                        <p id="countdown" class="text-sm mono font-semibold text-[var(--gold-deep)]">23:59:59</p>
+                <div class="flex items-stretch rounded-lg border border-neutral-800 bg-[var(--ax-s1)] divide-x divide-neutral-800 text-left self-start sm:self-auto">
+                    <div class="px-4 py-2.5">
+                        <p class="text-[11px] text-[var(--ax-muted)]">Next payout in</p>
+                        <p id="countdown" class="text-[15px] mono font-semibold ax-accent">23:59:59</p>
                     </div>
-                    <div class="px-4 py-2 text-center">
-                        <p class="text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] font-semibold">Server Time</p>
-                        <p id="serverTime" class="text-sm mono font-semibold">00:00</p>
+                    <div class="px-4 py-2.5">
+                        <p class="text-[11px] text-[var(--ax-muted)]">Server time</p>
+                        <p id="serverTime" class="text-[15px] mono font-semibold">00:00</p>
                     </div>
                 </div>
             </div>
 
-            <!-- ===== Hero: Total Portfolio Value ===== -->
-            <div class="ink-gradient rounded-[32px] p-8 md:p-10 relative overflow-hidden mb-8" style="box-shadow: 0 30px 60px -30px rgba(12,14,19,0.55);">
-                <div class="absolute -top-16 -right-16 w-72 h-72 rounded-full" style="background: radial-gradient(circle, rgba(183,147,91,0.16), transparent 70%);"></div>
-                <div class="relative flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+            <!-- ===== Balance hero: full-width, lime edge ===== -->
+            <section class="ax-hero p-6 md:p-8 mb-4">
+                <div class="grid lg:grid-cols-[1fr_320px] gap-8 items-end">
                     <div>
-                        <p class="text-[11px] uppercase tracking-[0.2em] text-white/40 font-semibold mb-3 flex items-center gap-2">
-                            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Wallet Balance
+                        <p class="text-[13px] text-[var(--ax-muted)] mb-2 flex items-center gap-2">
+                            Available balance <span class="ax-badge ax-badge-accent">NGN</span>
                         </p>
-                        <h2 id="heroTotalValue" class="text-4xl md:text-5xl heading-font font-semibold text-white tracking-tight">₦0.00</h2>
-                        <div class="flex items-center gap-2 mt-4">
-                            <span id="heroDeltaChip" class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-emerald-400/10 text-emerald-400">
+                        <h2 id="heroTotalValue" class="text-[44px] md:text-[64px] leading-none mono font-bold text-white">₦0.00</h2>
+                        <div class="flex flex-wrap items-center gap-3 mt-4">
+                            <span id="heroDeltaChip" class="ax-badge ax-badge-pos">
                                 <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
                                 <span id="heroDeltaAmount">+₦0.00</span> today
                             </span>
-                            <span class="text-white/30 text-xs">Available to invest or withdraw</span>
+                            <span class="text-[var(--ax-muted)] text-xs">Ready to invest or withdraw</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:flex gap-2 mt-6">
+                            <a href="deposit.html" class="ax-btn ax-btn-primary"><i data-lucide="plus"></i>Deposit</a>
+                            <a href="withdraw.html" class="ax-btn"><i data-lucide="arrow-up-right"></i>Withdraw</a>
+                            <a href="invest.html" class="ax-btn hidden sm:inline-flex"><i data-lucide="trending-up"></i>Invest</a>
                         </div>
                     </div>
 
                     <!-- 7-day earnings sparkline -->
-                    <div class="w-full lg:w-72 shrink-0">
-                        <div class="flex items-center justify-between mb-2">
-                            <p class="text-[10px] uppercase tracking-[0.15em] text-white/35 font-semibold">Earnings, Last 7 Days</p>
-                            <p id="sparklineTotal" class="text-[10px] mono text-[var(--gold-light)] font-semibold">₦0.00</p>
+                    <div class="w-full rounded-lg border border-neutral-800 bg-black/60 p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-[12px] text-[var(--ax-muted)]">Earnings · 7 days</p>
+                            <p id="sparklineTotal" class="text-[13px] mono ax-accent font-semibold">₦0.00</p>
                         </div>
                         <svg id="sparklineChart" viewBox="0 0 280 64" class="w-full h-16" preserveAspectRatio="none">
                             <!-- populated by JS -->
                         </svg>
-                        <div id="sparklineLabels" class="flex justify-between mt-1 text-[9px] text-white/25 mono"></div>
+                        <div id="sparklineLabels" class="flex justify-between mt-1 text-[10px] text-[var(--ax-faint)] mono"></div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- ===== Account Services (icon grid) ===== -->
-            <div class="card rounded-[28px] p-6 md:p-8 mb-10">
-                <h4 class="text-base font-semibold heading-font mb-6">Account Services</h4>
-                <div class="grid grid-cols-3 gap-4 md:gap-6">
-                    <a href="invest.html" class="flex flex-col items-center gap-2.5 group">
-                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-[var(--gold-deep)] group-hover:-translate-y-0.5 transition" style="background: rgba(183,147,91,0.08);">
-                            <i data-lucide="gem" class="w-6 h-6"></i>
-                        </div>
-                        <span class="text-xs font-semibold text-[var(--ink-text)]">Invest</span>
-                    </a>
-                    <a href="deposit.html" class="flex flex-col items-center gap-2.5 group">
-                        <div class="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-700 group-hover:-translate-y-0.5 transition">
-                            <i data-lucide="arrow-down-circle" class="w-6 h-6"></i>
-                        </div>
-                        <span class="text-xs font-semibold text-[var(--ink-text)]">Deposit</span>
-                    </a>
-                    <a href="withdraw.html" class="flex flex-col items-center gap-2.5 group">
-                        <div class="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-700 group-hover:-translate-y-0.5 transition">
-                            <i data-lucide="arrow-up-circle" class="w-6 h-6"></i>
-                        </div>
-                        <span class="text-xs font-semibold text-[var(--ink-text)]">Withdraw</span>
-                    </a>
-                    <a href="referral.html" class="flex flex-col items-center gap-2.5 group">
-                        <div class="w-14 h-14 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-700 group-hover:-translate-y-0.5 transition">
-                            <i data-lucide="users" class="w-6 h-6"></i>
-                        </div>
-                        <span class="text-xs font-semibold text-[var(--ink-text)]">Team</span>
-                    </a>
-                    <a href="gift.html" class="flex flex-col items-center gap-2.5 group">
-                        <div class="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-700 group-hover:-translate-y-0.5 transition">
-                            <i data-lucide="gift" class="w-6 h-6"></i>
-                        </div>
-                        <span class="text-xs font-semibold text-[var(--ink-text)]">Gift Code</span>
-                    </a>
-                    <a href="transactions.html" class="flex flex-col items-center gap-2.5 group">
-                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-[var(--ink)] group-hover:-translate-y-0.5 transition" style="background: rgba(255,255,255,0.06);">
-                            <i data-lucide="history" class="w-6 h-6"></i>
-                        </div>
-                        <span class="text-xs font-semibold text-[var(--ink-text)]">History</span>
-                    </a>
-                </div>
-            </div>
+            <!-- ===== Quick actions (compact row) ===== -->
+            <nav class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-8" aria-label="Quick actions">
+                <a href="invest.html" class="ax-card flex flex-col md:flex-row items-center gap-2 md:gap-3 px-2 md:px-3 py-3 text-center md:text-left hover:border-neutral-600 transition">
+                    <span class="ax-tile w-9 h-9 flex items-center justify-center shrink-0"><i data-lucide="trending-up" class="w-[18px] h-[18px]"></i></span>
+                    <span class="text-[13px] font-medium">Invest</span>
+                </a>
+                <a href="deposit.html" class="ax-card flex flex-col md:flex-row items-center gap-2 md:gap-3 px-2 md:px-3 py-3 text-center md:text-left hover:border-neutral-600 transition">
+                    <span class="ax-tile w-9 h-9 flex items-center justify-center shrink-0"><i data-lucide="arrow-down-left" class="w-[18px] h-[18px]"></i></span>
+                    <span class="text-[13px] font-medium">Deposit</span>
+                </a>
+                <a href="withdraw.html" class="ax-card flex flex-col md:flex-row items-center gap-2 md:gap-3 px-2 md:px-3 py-3 text-center md:text-left hover:border-neutral-600 transition">
+                    <span class="ax-tile w-9 h-9 flex items-center justify-center shrink-0"><i data-lucide="arrow-up-right" class="w-[18px] h-[18px]"></i></span>
+                    <span class="text-[13px] font-medium">Withdraw</span>
+                </a>
+                <a href="referral.html" class="ax-card flex flex-col md:flex-row items-center gap-2 md:gap-3 px-2 md:px-3 py-3 text-center md:text-left hover:border-neutral-600 transition">
+                    <span class="ax-tile w-9 h-9 flex items-center justify-center shrink-0"><i data-lucide="users" class="w-[18px] h-[18px]"></i></span>
+                    <span class="text-[13px] font-medium">Team</span>
+                </a>
+                <a href="gift.html" class="ax-card flex flex-col md:flex-row items-center gap-2 md:gap-3 px-2 md:px-3 py-3 text-center md:text-left hover:border-neutral-600 transition">
+                    <span class="ax-tile w-9 h-9 flex items-center justify-center shrink-0"><i data-lucide="gift" class="w-[18px] h-[18px]"></i></span>
+                    <span class="text-[13px] font-medium">Gift</span>
+                </a>
+                <a href="transactions.html" class="ax-card flex flex-col md:flex-row items-center gap-2 md:gap-3 px-2 md:px-3 py-3 text-center md:text-left hover:border-neutral-600 transition">
+                    <span class="ax-tile w-9 h-9 flex items-center justify-center shrink-0"><i data-lucide="list" class="w-[18px] h-[18px]"></i></span>
+                    <span class="text-[13px] font-medium">History</span>
+                </a>
+            </nav>
 
-            <!-- ===== Compact Metrics Row ===== -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-                <div class="card p-5 rounded-2xl">
-                    <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
-                        <i data-lucide="wallet" class="w-3 h-3"></i> Wallet
-                    </p>
-                    <h4 id="walletBalance" class="text-lg heading-font font-semibold text-[var(--ink-text)]">₦0.00</h4>
+            <!-- ===== Stat grid (2x2 mobile / 4-col desktop, shared hairlines) ===== -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-px bg-neutral-800 border border-neutral-800 rounded-xl overflow-hidden mb-10">
+                <div class="bg-[var(--ax-s1)] p-4 md:p-5">
+                    <p class="text-[12px] text-[var(--ax-muted)] mb-2 flex items-center gap-1.5"><i data-lucide="wallet" class="w-3.5 h-3.5"></i> Wallet</p>
+                    <h4 id="walletBalance" class="text-[20px] md:text-[24px] mono font-semibold text-white leading-none">₦0.00</h4>
                 </div>
-                <div class="card p-5 rounded-2xl">
-                    <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
-                        <i data-lucide="gem" class="w-3 h-3"></i> Active Investment
-                    </p>
-                    <h4 id="activeInvestment" class="text-lg heading-font font-semibold text-[var(--ink-text)]">₦0.00</h4>
+                <div class="bg-[var(--ax-s1)] p-4 md:p-5">
+                    <p class="text-[12px] text-[var(--ax-muted)] mb-2 flex items-center gap-1.5"><i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Active investment</p>
+                    <h4 id="activeInvestment" class="text-[20px] md:text-[24px] mono font-semibold text-white leading-none">₦0.00</h4>
                 </div>
-                <div class="card p-5 rounded-2xl">
-                    <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
-                        <i data-lucide="zap" class="w-3 h-3"></i> Today's Earnings
-                    </p>
-                    <h4 id="todayEarnings" class="text-lg heading-font font-semibold text-[var(--ink-text)]">₦0.00</h4>
+                <div class="bg-[var(--ax-s1)] p-4 md:p-5">
+                    <p class="text-[12px] text-[var(--ax-muted)] mb-2 flex items-center gap-1.5"><i data-lucide="zap" class="w-3.5 h-3.5"></i> Today’s earnings</p>
+                    <h4 id="todayEarnings" class="text-[20px] md:text-[24px] mono font-semibold text-white leading-none">₦0.00</h4>
                 </div>
-                <div class="card p-5 rounded-2xl">
-                    <p class="text-[10px] font-semibold text-[var(--muted)] uppercase tracking-[0.12em] mb-1.5 flex items-center gap-1.5">
-                        <i data-lucide="bar-chart" class="w-3 h-3"></i> Total Earnings
-                    </p>
-                    <h4 id="totalEarnings" class="text-lg heading-font font-semibold text-[var(--ink-text)]">₦0.00</h4>
+                <div class="bg-[var(--ax-s1)] p-4 md:p-5">
+                    <p class="text-[12px] text-[var(--ax-muted)] mb-2 flex items-center gap-1.5"><i data-lucide="bar-chart-3" class="w-3.5 h-3.5"></i> Total earnings</p>
+                    <h4 id="totalEarnings" class="text-[20px] md:text-[24px] mono font-semibold text-white leading-none">₦0.00</h4>
                 </div>
             </div>
 
@@ -517,10 +265,10 @@
                     <!-- Earnings Performance -->
                     <div>
                         <div class="flex items-center justify-between mb-6">
-                            <h4 class="text-xl font-semibold heading-font italic">Earnings Overview</h4>
-                            <span class="text-[10px] uppercase tracking-[0.15em] text-[var(--muted)] font-semibold">Last 7 Days</span>
+                            <h4 class="text-xl font-semibold ax-display ">Earnings Overview</h4>
+                            <span class="text-[10px] uppercase tracking-[0.06em] text-[var(--muted)] font-semibold">Last 7 Days</span>
                         </div>
-                        <div class="card rounded-[28px] p-6">
+                        <div class="ax-card rounded-[14px] p-6">
                             <svg id="earningsChart" viewBox="0 0 560 180" class="w-full h-40" preserveAspectRatio="none"></svg>
                             <div id="earningsChartLabels" class="flex justify-between mt-3 px-1 text-[10px] text-[var(--muted)] font-semibold mono"></div>
                         </div>
@@ -529,10 +277,10 @@
                     <!-- Active Investments Overview -->
                     <div>
                         <div class="flex items-center justify-between mb-6">
-                            <h4 class="text-xl font-semibold heading-font italic">Active Investments</h4>
-                            <a href="invest.html" class="text-xs font-bold text-[var(--gold-deep)] hover:text-[var(--gold)] hover:underline uppercase tracking-wide">View Plans</a>
+                            <h4 class="text-xl font-semibold ax-display ">Active Investments</h4>
+                            <a href="invest.html" class="text-xs font-bold ax-accent hover:text-white hover:underline uppercase tracking-wide">View Plans</a>
                         </div>
-                        <div class="card rounded-[28px] overflow-hidden">
+                        <div class="ax-card rounded-[14px] overflow-hidden">
                             <div id="activeInvestmentsList" class="divide-y divide-black/[0.05]">
                                 <div class="p-10 text-center text-[var(--muted)] text-xs uppercase tracking-widest font-bold">Loading investments...</div>
                             </div>
@@ -542,21 +290,21 @@
                     <!-- Activity Feed -->
                     <div>
                         <div class="flex items-center justify-between mb-6">
-                            <h4 class="text-xl font-semibold heading-font italic">Recent Activity</h4>
-                            <a href="transactions.html" class="text-xs font-bold text-[var(--gold-deep)] hover:text-[var(--gold)] hover:underline uppercase tracking-wide">View All</a>
+                            <h4 class="text-xl font-semibold ax-display ">Recent Activity</h4>
+                            <a href="transactions.html" class="text-xs font-bold ax-accent hover:text-white hover:underline uppercase tracking-wide">View All</a>
                         </div>
-                        <div class="card rounded-[28px] overflow-hidden">
+                        <div class="ax-card rounded-[14px] overflow-hidden">
                             <div id="activityList" class="divide-y divide-black/[0.05]">
                                 <!-- Skeleton Item -->
                                 <div class="p-6 flex items-center justify-between animate-pulse">
                                     <div class="flex items-center gap-4">
-                                        <div class="w-12 h-12 bg-black/5 rounded-2xl"></div>
+                                        <div class="w-12 h-12 bg-black/5 rounded-[10px]"></div>
                                         <div>
                                             <div class="h-4 w-32 bg-black/5 rounded mb-2"></div>
                                             <div class="h-3 w-20 bg-black/5 rounded"></div>
                                         </div>
                                     </div>
-                                    <div class="h-6 w-16 bg-black/5 rounded-full"></div>
+                                    <div class="h-6 w-16 bg-black/5 rounded-lg"></div>
                                 </div>
                             </div>
                         </div>
@@ -567,10 +315,10 @@
                 <div class="space-y-8">
 
                     <!-- Portfolio Allocation -->
-                    <div class="card p-7 rounded-[28px]">
-                        <h4 class="font-semibold heading-font text-base mb-5">Portfolio Allocation</h4>
+                    <div class="ax-card p-7 rounded-[14px]">
+                        <h4 class="font-semibold ax-display text-base mb-5">Portfolio Allocation</h4>
                         <div class="h-2.5 w-full rounded-full overflow-hidden flex bg-black/5 mb-4">
-                            <div id="allocWalletBar" class="h-full" style="width:50%; background: linear-gradient(90deg, #C9A468, #8F6E3E);"></div>
+                            <div id="allocWalletBar" class="h-full" style="width:50%; background: #C6F432;"></div>
                             <div id="allocInvestBar" class="h-full" style="width:50%; background: #3A3A3A;"></div>
                         </div>
                         <div class="space-y-3">
@@ -590,39 +338,26 @@
                     </div>
 
                     <!-- Plan & Terms -->
-                    <div class="ink-gradient rounded-[28px] overflow-hidden">
-                        <div class="px-7 pt-7 pb-5 flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font text-xs font-semibold">A</div>
-                            <h4 class="font-semibold heading-font text-base text-white">Altivex Terms</h4>
+                    <div class="ax-card p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold ax-display text-base text-white">Platform terms</h4>
+                            <span class="ax-badge">Fixed</span>
                         </div>
-                        <div class="px-7 pb-7 grid grid-cols-2 gap-x-6 gap-y-4 text-xs">
-                            <div>
-                                <p class="text-white/35 uppercase tracking-wide text-[9px] font-bold mb-1">Daily ROI</p>
-                                <p class="text-white font-semibold mono">10%</p>
-                            </div>
-                            <div>
-                                <p class="text-white/35 uppercase tracking-wide text-[9px] font-bold mb-1">Min. Investment</p>
-                                <p class="text-white font-semibold mono">₦3,000</p>
-                            </div>
-                            <div>
-                                <p class="text-white/35 uppercase tracking-wide text-[9px] font-bold mb-1">Min. Withdrawal</p>
-                                <p class="text-white font-semibold mono">₦600</p>
-                            </div>
-                            <div>
-                                <p class="text-white/35 uppercase tracking-wide text-[9px] font-bold mb-1">Withdrawal Charge</p>
-                                <p class="text-[var(--gold-light)] font-semibold mono">15%</p>
-                            </div>
-                        </div>
+                        <dl>
+                            <div class="ax-kv"><dt>Daily ROI</dt><dd>10%</dd></div>
+                            <div class="ax-kv"><dt>Minimum investment</dt><dd>₦3,000</dd></div>
+                            <div class="ax-kv"><dt>Minimum withdrawal</dt><dd>₦600</dd></div>
+                            <div class="ax-kv"><dt>Withdrawal charge</dt><dd class="ax-accent">15%</dd></div>
+                        </dl>
                     </div>
 
                     <!-- Refer & Earn -->
-                    <div class="ink-gradient p-8 rounded-[28px] relative overflow-hidden">
-                        <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full" style="background: rgba(183,147,91,0.10);"></div>
-                        <h4 class="font-semibold heading-font text-lg text-white mb-3">Refer &amp; Earn</h4>
+                    <div class="ax-panel p-6 rounded-[14px] relative overflow-hidden">
+                        <h4 class="font-semibold ax-display text-lg text-white mb-2">Refer &amp; earn</h4>
                         <p class="text-white/45 text-xs mb-6 leading-relaxed">Earn commissions from every successful deposit your referrals make.</p>
-                        <div class="bg-white/[0.04] p-4 rounded-2xl flex items-center justify-between mb-4 border border-white/10">
-                            <span id="refCodeDisplay" class="mono text-sm font-semibold text-[var(--gold-light)]">...</span>
-                            <button id="copyRef" class="text-[var(--gold)] hover:text-[var(--gold-light)] transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                        <div class="bg-white/[0.04] p-4 rounded-[10px] flex items-center justify-between mb-4 border border-white/10">
+                            <span id="refCodeDisplay" class="mono text-sm font-semibold ax-accent">...</span>
+                            <button id="copyRef" class="ax-accent hover:text-white transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
                         </div>
                         <div class="flex justify-between items-center text-xs font-bold">
                             <span class="text-white/35 uppercase tracking-wide">Referral Earnings</span>
@@ -631,12 +366,12 @@
                     </div>
 
                     <!-- Telegram Community -->
-                    <a href="https://t.me/+s66HnQZjuCFhZTI0" target="_blank" class="card p-6 rounded-[28px] flex items-center gap-4 hover:-translate-y-0.5 transition">
-                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style="background: rgba(34,158,217,0.1);">
+                    <a href="https://t.me/+s66HnQZjuCFhZTI0" target="_blank" class="ax-card p-6 rounded-lg flex items-center gap-4 transition">
+                        <div class="w-12 h-12 rounded-[10px] flex items-center justify-center shrink-0" style="background: rgba(34,158,217,0.1);">
                             <i data-lucide="send" class="w-5 h-5 text-[#229ED9]"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h4 class="font-semibold heading-font text-sm">Join Our Telegram</h4>
+                            <h4 class="font-semibold ax-display text-sm">Join Our Telegram</h4>
                             <p class="text-[11px] text-[var(--muted)]">Live updates &amp; community support</p>
                         </div>
                         <i data-lucide="arrow-up-right" class="w-4 h-4 text-[var(--muted)] shrink-0"></i>
@@ -644,11 +379,11 @@
 
                     <!-- Deposits / Withdrawals Summary -->
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="card p-5 rounded-3xl text-center">
+                        <div class="ax-card p-5 rounded-[14px] text-center">
                             <p class="text-[10px] uppercase font-bold text-[var(--muted)] tracking-wide mb-1">Total Deposits</p>
                             <p id="totalDeposits" class="text-sm font-semibold mono">₦0.00</p>
                         </div>
-                        <div class="card p-5 rounded-3xl text-center">
+                        <div class="ax-card p-5 rounded-[14px] text-center">
                             <p class="text-[10px] uppercase font-bold text-[var(--muted)] tracking-wide mb-1">Total Withdrawals</p>
                             <p id="totalWithdrawals" class="text-sm font-semibold mono">₦0.00</p>
                         </div>
@@ -915,7 +650,7 @@
                 return `
                     <div class="p-6 flex items-center justify-between hover:bg-black/[0.015] transition">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-[var(--gold-deep)]" style="background: rgba(183,147,91,0.08);">
+                            <div class="w-12 h-12 rounded-[10px] flex items-center justify-center ax-accent" style="background: rgba(198, 244, 50,0.08);">
                                 <i data-lucide="gem" class="w-6 h-6"></i>
                             </div>
                             <div>
@@ -952,13 +687,13 @@
             svg.innerHTML = `
                 <defs>
                     <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#C9A468" stop-opacity="0.35"/>
-                        <stop offset="100%" stop-color="#C9A468" stop-opacity="0"/>
+                        <stop offset="0%" stop-color="#C6F432" stop-opacity="0.35"/>
+                        <stop offset="100%" stop-color="#C6F432" stop-opacity="0"/>
                     </linearGradient>
                 </defs>
                 <path d="${areaPath}" fill="url(#sparkFill)" stroke="none"/>
-                <path d="${linePath}" fill="none" stroke="#D8BE8A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                ${points.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="2.2" fill="#0C0E13" stroke="#D8BE8A" stroke-width="1.4"/>`).join('')}
+                <path d="${linePath}" fill="none" stroke="#C6F432" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                ${points.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="2.2" fill="#000" stroke="#C6F432" stroke-width="1.4"/>`).join('')}
             `;
 
             const labels = document.getElementById('sparklineLabels');
@@ -978,7 +713,7 @@
                 const y = h - padBottom - barH;
                 const isToday = i === values.length - 1;
                 return `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="6"
-                    fill="${isToday ? '#B7935B' : 'rgba(255,255,255,0.12)'}"></rect>`;
+                    fill="${isToday ? '#C6F432' : 'rgba(255,255,255,0.12)'}"></rect>`;
             }).join('');
 
             svg.innerHTML = bars;
@@ -1009,7 +744,7 @@
                 return `
                     <div class="p-6 flex items-center justify-between hover:bg-black/[0.015] transition cursor-default">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-2xl ${isPositive ? 'bg-emerald-50 text-emerald-700' : 'bg-black/5 text-[var(--ink-text)]'} flex items-center justify-center">
+                            <div class="w-12 h-12 rounded-[10px] ${isPositive ? 'bg-emerald-50 text-emerald-700' : 'bg-black/5 text-[var(--ink-text)]'} flex items-center justify-center">
                                 <i data-lucide="${iconMap[item.type] || 'circle'}" class="w-6 h-6"></i>
                             </div>
                             <div>

@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0A0A0A">
-    <title>Users | ALTIVEX Admin</title>
+    <meta name="theme-color" content="#000000">
+    <title>Users · Altivex Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
@@ -15,10 +16,10 @@
             --ink-soft: #171A22;
             --paper: #F6F4EF;
             --paper-card: #FFFFFF;
-            --gold: #B7935B;
-            --gold-deep: #8F6E3E;
-            --gold-light: #E7D9BC;
-            --line: rgba(183, 147, 91, 0.16);
+            --gold: #C6F432;
+            --gold-deep: #C6F432;
+            --gold-light: #C6F432;
+            --line: rgba(198, 244, 50, 0.16);
             --ink-text: #14161C;
             --muted: #7A7E88;
         }
@@ -28,21 +29,6 @@
             color: var(--ink-text);
             overflow-x: hidden;
         }
-        .heading-font { font-family: 'Fraunces', serif; font-feature-settings: "ss01"; }
-        .mono { font-family: 'IBM Plex Mono', monospace; }
-        .gold-gradient { background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%); }
-        .gold-text {
-            background: linear-gradient(135deg, #C9A468 0%, #8F6E3E 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .ink-gradient { background: linear-gradient(160deg, var(--ink) 0%, var(--ink-soft) 100%); }
-        .card {
-            background: var(--paper-card);
-            border: 1px solid rgba(20, 22, 28, 0.06);
-            box-shadow: 0 1px 2px rgba(12,14,19,0.03), 0 12px 24px -18px rgba(12,14,19,0.18);
-        }
-        .card-gold-edge { border-top: 2px solid var(--gold); }
         .field {
             background: #FAF9F6;
             border: 1px solid rgba(20,22,28,0.08);
@@ -50,302 +36,136 @@
         }
         .field:focus { outline: none; border-color: var(--gold); background: #fff; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-
-        /* ---------- Sidebar (desktop) ---------- */
-        #sidebar { background: var(--ink); }
-        #sidebar .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
-        .sidebar-item {
-            color: rgba(246, 244, 239, 0.55);
-            border-left: 2px solid transparent;
-            transition: color .18s ease, background .18s ease, border-color .18s ease;
-        }
-        .sidebar-item:hover {
-            background: linear-gradient(90deg, rgba(183,147,91,0.12) 0%, transparent 85%);
-            color: var(--gold-light);
-        }
-        .sidebar-active {
-            background: linear-gradient(90deg, rgba(183,147,91,0.16) 0%, transparent 85%);
-            color: var(--gold-light) !important;
-            border-left: 2px solid var(--gold);
-        }
-        .sidebar-item i { width: 17px; height: 17px; }
-
-        /* ---------- Mobile Island Navigation ---------- */
-        #islandNav {
-            background: rgba(12, 14, 19, 0.97);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(183, 147, 91, 0.22);
-            box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(183,147,91,0.05) inset;
-        }
-        .island-item {
-            position: relative; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; gap: 2px;
-            padding: 7px 4px; border-radius: 13px;
-            color: rgba(246, 244, 239, 0.4);
-            transition: color 0.2s ease, background 0.2s ease;
-        }
-        .island-item i { width: 16px; height: 16px; }
-        .island-item span { font-size: 8px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
-        .island-item.active {
-            color: var(--gold-light);
-            background: linear-gradient(135deg, rgba(183,147,91,0.22) 0%, rgba(143,110,62,0.10) 100%);
-        }
-        .island-item.active i { filter: drop-shadow(0 2px 6px rgba(183,147,91,0.45)); }
-
-        ::selection { background: var(--gold-light); color: var(--ink); }
-        :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-
-        /* ---------- Mobile Drawer Sidebar ---------- */
-        #drawerOverlay {
-            background: rgba(8, 9, 13, 0.55);
-            backdrop-filter: blur(2px);
-            opacity: 0; pointer-events: none;
-            transition: opacity .28s ease;
-        }
-        #drawerOverlay.open { opacity: 1; pointer-events: auto; }
-        #mobileDrawer {
-            background: var(--ink);
-            width: min(86vw, 320px);
-            transform: translateX(-100%);
-            transition: transform .32s cubic-bezier(.32,.72,0,1);
-            box-shadow: 24px 0 60px -20px rgba(0,0,0,0.5);
-        }
-        #mobileDrawer.open { transform: translateX(0); }
-        #mobileDrawer .brand-hair { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
-        .drawer-item {
-            color: rgba(246, 244, 239, 0.6);
-            border-left: 2px solid transparent;
-            transition: color .18s ease, background .18s ease, border-color .18s ease;
-        }
-        .drawer-item:active, .drawer-item:hover {
-            background: linear-gradient(90deg, rgba(183,147,91,0.14) 0%, transparent 85%);
-            color: var(--gold-light);
-        }
-        .drawer-active {
-            background: linear-gradient(90deg, rgba(183,147,91,0.18) 0%, transparent 85%);
-            color: var(--gold-light) !important;
-            border-left: 2px solid var(--gold);
-        }
-        .drawer-item i { width: 18px; height: 18px; }
-        #menuToggle {
-            width: 38px; height: 38px; border-radius: 11px;
-            display: flex; align-items: center; justify-content: center;
-            border: 1px solid rgba(20,22,28,0.08);
-            color: var(--ink-text);
-            transition: background .18s ease, border-color .18s ease;
-        }
-        #menuToggle:hover { background: rgba(183,147,91,0.08); border-color: rgba(183,147,91,0.3); }
-        #menuToggle i { width: 18px; height: 18px; }
     </style>
-    <link rel="stylesheet" href="/theme-dark.css">
+    <link rel="stylesheet" href="/altivex.css">
 </head>
 <body class="bg-[var(--paper)]">
 
     <!-- Auth Guard Loader -->
     <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
         <div class="text-center" id="loaderContent">
-            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(183,147,91,0.25); border-top-color: var(--gold);"></div>
-            <p class="heading-font gold-text text-2xl tracking-wide">ALTIVEX</p>
-            <p class="text-[10px] uppercase tracking-[0.3em] text-white/30 mt-2">Verifying Admin Access</p>
+            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(198, 244, 50,0.25); border-top-color: var(--gold);"></div>
+            <span class="ax-logo ax-logo-lg"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span>
+            <p class="text-[10px] uppercase tracking-[0.08em] text-white/30 mt-2">Verifying Admin Access</p>
         </div>
     </div>
 
-    <!-- Navigation Header -->
-    <header class="fixed top-0 right-0 left-0 h-20 bg-[var(--paper)]/85 backdrop-blur-md border-b border-black/[0.06] z-40 lg:left-64">
-        <div class="h-full flex items-center justify-between px-6">
-            <div class="flex items-center gap-3">
-                <button id="menuToggle" class="lg:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+    <!-- ============ Altivex admin shell: top bar ============ -->
+    <header class="ax-topbar ax-topbar-admin">
+        <div class="ax-topbar-inner">
+            <div class="flex items-center gap-3 min-w-0">
+                <button id="menuToggle" class="ax-icon-btn lg:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
                     <i data-lucide="menu"></i>
                 </button>
-                <div class="w-7 h-7 gold-gradient rounded-full flex items-center justify-center text-white heading-font text-xs lg:hidden">A</div>
-                <div>
-                    <h2 class="text-lg font-semibold heading-font hidden md:block tracking-tight">Client <span class="gold-text italic">Registry</span></h2>
-                    <h2 class="text-base font-semibold heading-font md:hidden">Users</h2>
-                    <p class="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] hidden md:block">Executive Terminal</p>
-                </div>
+                <a href="dashboard.html" class="lg:hidden" aria-label="Admin home"><span class="ax-logo ax-logo-sm"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span></a>
+                <span class="ax-admin-tag hidden sm:inline-flex lg:inline-flex">Admin</span>
+                <span class="ax-crumb">Users</span>
             </div>
-            <div class="flex items-center gap-6">
-                <div class="flex items-center gap-3 border-l border-black/[0.06] pl-6">
-                    <div class="text-right hidden sm:block">
-                        <p id="adminName" class="text-sm font-semibold">Admin</p>
-                        <p id="adminRole" class="text-[9px] gold-text font-bold uppercase tracking-widest">...</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold" id="adminInitials">A</div>
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block leading-tight">
+                    <p id="adminName" class="text-[13px] font-semibold text-white">Admin</p>
+                    <p id="adminRole" class="text-[11px] text-[var(--ax-muted)] uppercase tracking-[0.06em]">...</p>
                 </div>
+                <div class="ax-avatar" id="adminInitials">A</div>
             </div>
         </div>
     </header>
 
-    <!-- Sidebar Menu (Desktop only) -->
-    <aside id="sidebar" class="hidden lg:block fixed top-0 left-0 bottom-0 w-64 z-50">
-        <div class="p-8 h-full flex flex-col">
-            <div class="flex items-center gap-3 mb-2">
-                <div class="w-9 h-9 rounded-lg border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">A</div>
-                <h1 class="text-xl heading-font gold-text tracking-tight font-semibold">ALTIVEX ADMIN</h1>
-            </div>
-            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-8 ml-12 -mt-1">Executive Terminal</p>
-            <div class="h-px w-full brand-hair mb-8"></div>
-
-            <nav class="space-y-1 flex-1" id="sidebarNav">
-                <a href="dashboard.html" data-page="dashboard" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="layout-dashboard"></i> Dashboard
-                </a>
-                <a href="users.html" data-page="users" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="users"></i> Users
-                </a>
-                <a href="deposits.html" data-page="deposits" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="arrow-down-circle"></i> Deposits
-                </a>
-                <a href="withdrawals.html" data-page="withdrawals" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="arrow-up-circle"></i> Withdrawals
-                </a>
-                <a href="investments.html" data-page="investments" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="gem"></i> Investments
-                </a>
-                <a href="plans.html" data-page="plans" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="layers"></i> Plans
-                </a>
-                <a href="gift-codes.html" data-page="gift-codes" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="gift"></i> Gift Codes
-                </a>
-                <a href="support.html" data-page="support" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="headphones"></i> Support
-                </a>
-
-                <div class="pt-8 mt-8 border-t border-white/[0.06]">
-                    <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
-                        <i data-lucide="log-out" class="w-[17px] h-[17px]"></i> Logout
-                    </button>
-                </div>
-            </nav>
-
-            <div class="pt-6 border-t border-white/[0.06]">
-                <div class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/25">
-                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-[var(--gold)]"></i> Restricted Access
-                </div>
-            </div>
-        </div>
+    <!-- ============ Admin icon rail (id kept as "sidebar") ============ -->
+    <aside id="sidebar" class="ax-rail" aria-label="Admin navigation">
+        <a href="dashboard.html" class="ax-rail-brand ax-logo ax-mark-only" aria-label="Altivex admin"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg></a>
+        <nav id="sidebarNav">
+            <a href="dashboard.html" data-page="dashboard" class="sidebar-item" aria-label="Overview"><i data-lucide="layout-grid"></i><span class="ax-tip">Overview</span></a>
+            <a href="users.html" data-page="users" class="sidebar-item" aria-label="Users"><i data-lucide="users"></i><span class="ax-tip">Users</span></a>
+            <a href="deposits.html" data-page="deposits" class="sidebar-item" aria-label="Deposits"><i data-lucide="arrow-down-left"></i><span class="ax-tip">Deposits</span></a>
+            <a href="withdrawals.html" data-page="withdrawals" class="sidebar-item" aria-label="Withdrawals"><i data-lucide="arrow-up-right"></i><span class="ax-tip">Withdrawals</span></a>
+            <a href="investments.html" data-page="investments" class="sidebar-item" aria-label="Investments"><i data-lucide="trending-up"></i><span class="ax-tip">Investments</span></a>
+            <a href="plans.html" data-page="plans" class="sidebar-item" aria-label="Plans"><i data-lucide="layers"></i><span class="ax-tip">Plans</span></a>
+            <a href="gift-codes.html" data-page="gift-codes" class="sidebar-item" aria-label="Gift codes"><i data-lucide="gift"></i><span class="ax-tip">Gift codes</span></a>
+            <a href="support.html" data-page="support" class="sidebar-item" aria-label="Support"><i data-lucide="life-buoy"></i><span class="ax-tip">Support</span></a>
+            <span class="flex-1"></span>
+            <span class="ax-rail-sep"></span>
+            <button id="logoutBtn" class="sidebar-item ax-logout" aria-label="Log out"><i data-lucide="log-out"></i><span class="ax-tip">Log out</span></button>
+        </nav>
     </aside>
 
-    <!-- ============ Mobile Drawer Sidebar ============ -->
-    <div id="drawerOverlay" class="lg:hidden fixed inset-0 z-[60]"></div>
-    <aside id="mobileDrawer" class="lg:hidden fixed top-0 left-0 bottom-0 z-[70] overflow-y-auto">
-        <div class="p-7 min-h-full flex flex-col">
-            <div class="flex items-center justify-between mb-1">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-lg border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">A</div>
-                    <h1 class="text-lg heading-font gold-text tracking-tight font-semibold">ALTIVEX ADMIN</h1>
-                </div>
-                <button id="drawerClose" aria-label="Close menu" class="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-[var(--gold-light)] hover:bg-white/5 transition">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-6 ml-12 -mt-1">Executive Terminal</p>
-            <div class="h-px w-full brand-hair mb-6"></div>
-
-            <div class="flex items-center gap-3 p-3 mb-6 rounded-2xl bg-white/[0.04] border border-white/10">
-                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold shrink-0" id="drawerInitials">A</div>
-                <div class="min-w-0">
-                    <p id="drawerName" class="text-sm font-semibold text-white truncate">Admin</p>
-                    <p id="drawerRole" class="text-[10px] text-[var(--gold-light)] font-bold tracking-widest uppercase truncate">...</p>
-                </div>
-            </div>
-
-            <nav class="space-y-1 flex-1" id="drawerNav">
-                <a href="dashboard.html" data-page="dashboard" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="layout-dashboard"></i> Dashboard
-                </a>
-                <a href="users.html" data-page="users" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="users"></i> Users
-                </a>
-                <a href="deposits.html" data-page="deposits" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="arrow-down-circle"></i> Deposits
-                </a>
-                <a href="withdrawals.html" data-page="withdrawals" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="arrow-up-circle"></i> Withdrawals
-                </a>
-                <a href="investments.html" data-page="investments" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="gem"></i> Investments
-                </a>
-                <a href="plans.html" data-page="plans" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="layers"></i> Plans
-                </a>
-                <a href="gift-codes.html" data-page="gift-codes" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="gift"></i> Gift Codes
-                </a>
-                <a href="support.html" data-page="support" class="drawer-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium">
-                    <i data-lucide="headphones"></i> Support
-                </a>
-
-                <div class="pt-6 mt-6 border-t border-white/[0.06]">
-                    <button id="drawerLogoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400/80 hover:bg-red-500/10 hover:text-red-300 transition">
-                        <i data-lucide="log-out" class="w-[18px] h-[18px]"></i> Logout
-                    </button>
-                </div>
-            </nav>
+    <!-- ============ Mobile admin menu ============ -->
+    <div id="drawerOverlay"></div>
+    <aside id="mobileDrawer" class="ax-sheet-left" aria-label="Admin menu">
+        <div class="ax-sheet-head">
+            <span class="flex items-center gap-2"><span class="ax-logo ax-logo-sm"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span><span class="ax-admin-tag">Admin</span></span>
+            <button id="drawerClose" aria-label="Close menu" class="ax-icon-btn"><i data-lucide="x"></i></button>
         </div>
+        <div class="ax-sheet-account">
+            <span class="ax-avatar ax-avatar-lg" id="drawerInitials">A</span>
+            <div class="min-w-0">
+                <p id="drawerName" class="text-sm font-semibold text-white truncate">Admin</p>
+                <p id="drawerRole" class="text-[11px] text-[var(--ax-muted)] uppercase tracking-[0.06em] truncate">...</p>
+            </div>
+        </div>
+        <nav class="ax-sheet-nav" id="drawerNav">
+            <a href="dashboard.html" data-page="dashboard" class="drawer-item"><i data-lucide="layout-grid"></i><span>Overview</span></a>
+            <a href="users.html" data-page="users" class="drawer-item"><i data-lucide="users"></i><span>Users</span></a>
+            <a href="deposits.html" data-page="deposits" class="drawer-item"><i data-lucide="arrow-down-left"></i><span>Deposits</span></a>
+            <a href="withdrawals.html" data-page="withdrawals" class="drawer-item"><i data-lucide="arrow-up-right"></i><span>Withdrawals</span></a>
+            <a href="investments.html" data-page="investments" class="drawer-item"><i data-lucide="trending-up"></i><span>Investments</span></a>
+            <a href="plans.html" data-page="plans" class="drawer-item"><i data-lucide="layers"></i><span>Plans</span></a>
+            <a href="gift-codes.html" data-page="gift-codes" class="drawer-item"><i data-lucide="gift"></i><span>Gift codes</span></a>
+            <a href="support.html" data-page="support" class="drawer-item"><i data-lucide="life-buoy"></i><span>Support</span></a>
+            <div class="ax-divider my-2"></div>
+            <button id="drawerLogoutBtn" class="drawer-item ax-logout"><i data-lucide="log-out"></i><span>Log out</span></button>
+        </nav>
     </aside>
 
-    <!-- ============ Mobile Island Navigation ============ -->
-    <nav id="islandNav" class="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-[22px] flex items-center gap-1 px-2 py-1.5 w-[92%] max-w-sm">
-        <a href="dashboard.html" data-page="dashboard" class="island-item flex-1">
-            <i data-lucide="layout-dashboard"></i><span>Home</span>
-        </a>
-        <a href="users.html" data-page="users" class="island-item flex-1">
-            <i data-lucide="users"></i><span>Users</span>
-        </a>
-        <a href="deposits.html" data-page="deposits" class="island-item flex-1">
-            <i data-lucide="arrow-down-circle"></i><span>Deposits</span>
-        </a>
-        <a href="withdrawals.html" data-page="withdrawals" class="island-item flex-1">
-            <i data-lucide="arrow-up-circle"></i><span>Payouts</span>
-        </a>
-        <a href="support.html" data-page="support" class="island-item flex-1">
-            <i data-lucide="headphones"></i><span>Support</span>
-        </a>
+    <!-- ============ Mobile tab bar (id kept as "islandNav") ============ -->
+    <nav id="islandNav" class="ax-tabbar" aria-label="Tabs">
+        <a href="dashboard.html" data-page="dashboard" class="island-item"><i data-lucide="layout-grid"></i><span>Home</span></a>
+        <a href="users.html" data-page="users" class="island-item"><i data-lucide="users"></i><span>Users</span></a>
+        <a href="deposits.html" data-page="deposits" class="island-item"><i data-lucide="arrow-down-left"></i><span>Deposits</span></a>
+        <a href="withdrawals.html" data-page="withdrawals" class="island-item"><i data-lucide="arrow-up-right"></i><span>Payouts</span></a>
+        <a href="support.html" data-page="support" class="island-item"><i data-lucide="life-buoy"></i><span>Support</span></a>
     </nav>
 
     <!-- Main Content -->
-    <main class="lg:ml-64 pt-28 px-6 pb-24 lg:pb-12">
+    <main class="ax-main ax-main-admin">
         <div class="max-w-7xl mx-auto">
 
             <!-- Stats Grid -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6 mb-10">
-                <div class="card p-6 rounded-[28px]">
+                <div class="ax-card p-6 rounded-[14px]">
                     <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Total Users</p>
-                    <h3 id="statTotalUsers" class="text-2xl heading-font font-semibold mono">0</h3>
+                    <h3 id="statTotalUsers" class="text-2xl ax-display font-semibold mono">0</h3>
                 </div>
-                <div class="card p-6 rounded-[28px]">
+                <div class="ax-card p-6 rounded-[14px]">
                     <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">Verified Clients</p>
-                    <h3 id="statVerified" class="text-2xl heading-font font-semibold mono">0</h3>
+                    <h3 id="statVerified" class="text-2xl ax-display font-semibold mono">0</h3>
                 </div>
-                <div class="card p-6 rounded-[28px]">
+                <div class="ax-card p-6 rounded-[14px]">
                     <p class="text-[10px] text-[var(--muted)] uppercase font-bold tracking-widest mb-1">New This Week</p>
-                    <h3 id="statNewWeek" class="text-2xl heading-font font-semibold mono">0</h3>
+                    <h3 id="statNewWeek" class="text-2xl ax-display font-semibold mono">0</h3>
                 </div>
-                <div class="card card-gold-edge p-6 rounded-[28px]">
-                    <p class="text-[10px] text-[var(--gold-deep)] uppercase font-bold tracking-widest mb-1">Total Wallet Value</p>
-                    <h3 id="statWalletValue" class="text-2xl heading-font font-semibold gold-text mono">₦0</h3>
+                <div class="ax-card p-6 rounded-[14px]">
+                    <p class="text-[10px] ax-accent uppercase font-bold tracking-widest mb-1">Total Wallet Value</p>
+                    <h3 id="statWalletValue" class="text-2xl ax-display font-semibold ax-accent mono">₦0</h3>
                 </div>
             </div>
 
             <!-- Search -->
-            <div class="card rounded-[24px] p-4 mb-6 flex items-center gap-3">
+            <div class="ax-card rounded-[14px] p-4 mb-6 flex items-center gap-3">
                 <i data-lucide="search" class="w-4 h-4 text-[var(--muted)] ml-2"></i>
                 <input type="text" id="searchInput" placeholder="Search by name, phone, or referral code..." class="field flex-1 border-0 bg-transparent px-2 py-2 text-sm focus:ring-0">
             </div>
 
             <!-- Users Table -->
-            <div class="card rounded-[32px] overflow-hidden">
+            <div class="ax-card rounded-[14px] overflow-hidden">
                 <div class="p-6 md:p-8 border-b border-black/[0.05] flex justify-between items-center">
-                    <h4 class="text-lg font-semibold heading-font">Client Registry</h4>
-                    <span class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[9px] font-bold uppercase tracking-widest">Realtime Sync</span>
+                    <h4 class="text-lg font-semibold ax-display">Client Registry</h4>
+                    <span class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-[9px] font-bold uppercase tracking-widest">Realtime Sync</span>
                 </div>
 
                 <!-- Mobile: card list (no horizontal scroll, every field visible) -->
                 <div id="usersCards" class="md:hidden divide-y divide-black/[0.05]">
-                    <div class="p-10 text-center text-[var(--muted)] text-xs italic">Loading client registry...</div>
+                    <div class="p-10 text-center text-[var(--muted)] text-xs ">Loading client registry...</div>
                 </div>
 
                 <!-- Desktop/tablet: table -->
@@ -362,7 +182,7 @@
                             </tr>
                         </thead>
                         <tbody id="usersBody" class="divide-y divide-black/[0.05]">
-                            <tr><td colspan="6" class="p-12 text-center text-[var(--muted)] text-xs italic">Loading client registry...</td></tr>
+                            <tr><td colspan="6" class="p-12 text-center text-[var(--muted)] text-xs ">Loading client registry...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -373,14 +193,14 @@
 
     <!-- ============ Manage Client Modal ============ -->
     <div id="manageOverlay" class="fixed inset-0 z-[90] hidden items-end md:items-center justify-center md:p-4" style="background: rgba(8,9,13,0.55); backdrop-filter: blur(2px);">
-        <div class="card w-full md:max-w-md max-h-[90vh] overflow-y-auto rounded-t-[28px] md:rounded-[28px] pb-[env(safe-area-inset-bottom)]">
+        <div class="ax-card w-full md:max-w-md max-h-[90vh] overflow-y-auto rounded-t-[14px] md:rounded-[14px] pb-[env(safe-area-inset-bottom)]">
             <div class="w-10 h-1 bg-black/10 rounded-full mx-auto mt-3 mb-1 md:hidden"></div>
             <div class="p-6 border-b border-black/[0.06] flex items-center justify-between sticky top-0 bg-[var(--paper-card)] z-10">
                 <div>
-                    <h3 class="text-lg font-semibold heading-font" id="manageClientName">Client</h3>
+                    <h3 class="text-lg font-semibold ax-display" id="manageClientName">Client</h3>
                     <p class="text-[10px] text-[var(--muted)] mono" id="manageClientBalance">₦0</p>
                 </div>
-                <button onclick="closeManageModal()" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/5 transition">
+                <button onclick="closeManageModal()" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-black/5 transition">
                     <i data-lucide="x" class="w-4 h-4"></i>
                 </button>
             </div>
@@ -389,27 +209,27 @@
                 <!-- Funds -->
                 <div>
                     <p class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-3">Adjust Wallet</p>
-                    <input type="number" id="fundsAmount" placeholder="Amount (₦)" min="1" class="field w-full rounded-xl px-4 py-3 text-sm mb-2">
+                    <input type="number" id="fundsAmount" placeholder="Amount (₦)" min="1" class="field w-full rounded-lg px-4 py-3 text-sm mb-2">
                     <div class="flex gap-2">
-                        <button onclick="submitFundsAction('add_funds')" class="flex-1 px-3 py-3 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold uppercase hover:bg-emerald-100 transition">Add Funds</button>
-                        <button onclick="submitFundsAction('remove_funds')" class="flex-1 px-3 py-3 bg-amber-50 text-amber-700 rounded-xl text-xs font-bold uppercase hover:bg-amber-100 transition">Remove Funds</button>
+                        <button onclick="submitFundsAction('add_funds')" class="flex-1 px-3 py-3 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold uppercase hover:bg-emerald-100 transition">Add Funds</button>
+                        <button onclick="submitFundsAction('remove_funds')" class="flex-1 px-3 py-3 bg-amber-50 text-amber-700 rounded-lg text-xs font-bold uppercase hover:bg-amber-100 transition">Remove Funds</button>
                     </div>
                 </div>
 
                 <!-- Plan -->
                 <div class="pt-6 border-t border-black/[0.06]">
                     <p class="text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-3">Assign Plan</p>
-                    <select id="assignPlanSelect" class="field w-full rounded-xl px-4 py-3 text-sm mb-2">
+                    <select id="assignPlanSelect" class="field w-full rounded-lg px-4 py-3 text-sm mb-2">
                         <option value="">Select a plan...</option>
                     </select>
                     <p class="text-[10px] text-[var(--muted)] mb-3">Granted free — does not deduct from the client's wallet.</p>
-                    <button onclick="submitAssignPlan()" class="w-full px-3 py-3 bg-[rgba(183,147,91,0.12)] text-[var(--gold-deep)] rounded-xl text-xs font-bold uppercase hover:bg-[rgba(183,147,91,0.2)] transition">Assign Plan</button>
+                    <button onclick="submitAssignPlan()" class="w-full px-3 py-3 bg-[rgba(198,244,50,0.12)] ax-accent rounded-lg text-xs font-bold uppercase hover:bg-[rgba(198,244,50,0.2)] transition">Assign Plan</button>
                 </div>
 
                 <!-- Danger zone -->
                 <div class="pt-6 border-t border-black/[0.06]">
                     <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-3">Danger Zone</p>
-                    <button onclick="submitDeleteUser()" class="w-full px-3 py-3 bg-red-50 text-red-600 rounded-xl text-xs font-bold uppercase hover:bg-red-100 transition">Delete User Permanently</button>
+                    <button onclick="submitDeleteUser()" class="w-full px-3 py-3 bg-red-50 text-red-600 rounded-lg text-xs font-bold uppercase hover:bg-red-100 transition">Delete User Permanently</button>
                 </div>
             </div>
         </div>
@@ -505,7 +325,7 @@
                 console.error("Security Halt:", err);
                 document.getElementById('loaderContent').innerHTML = `
                     <p class="text-red-400 font-semibold mb-4">Access Denied or Connection Failure</p>
-                    <a href="login.html" class="px-6 py-2 gold-gradient text-white rounded-xl text-sm font-bold">Return to Login</a>
+                    <a href="login.html" class="px-6 py-2 ax-fill text-white rounded-lg text-sm font-bold">Return to Login</a>
                 `;
             }
         }
@@ -549,17 +369,17 @@
                 renderUsers(allUsers);
             } catch (err) {
                 console.error('Users fetch error:', err);
-                document.getElementById('usersBody').innerHTML = `<tr><td colspan="6" class="p-12 text-center text-red-400 text-xs italic">Could not load client registry — check console</td></tr>`;
+                document.getElementById('usersBody').innerHTML = `<tr><td colspan="6" class="p-12 text-center text-red-400 text-xs ">Could not load client registry — check console</td></tr>`;
             }
         }
 
         function roleBadge(role, isAdmin) {
-            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full ${isAdmin ? 'bg-[rgba(183,147,91,0.12)] text-[var(--gold-deep)]' : 'bg-black/5 text-[var(--ink-text)]'}">${role || 'client'}</span>`;
+            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${isAdmin ? 'bg-[rgba(198,244,50,0.12)] ax-accent' : 'bg-black/5 text-[var(--ink-text)]'}">${role || 'client'}</span>`;
         }
 
         function manageButton(u, isAdmin) {
-            if (isAdmin) return `<span class="text-[10px] text-[var(--muted)] italic">Admin — not editable here</span>`;
-            return `<button onclick="openManageModal('${u.id}')" class="w-full px-3 py-2.5 bg-black/5 hover:bg-black/10 rounded-xl text-[11px] font-bold uppercase transition">Manage Client</button>`;
+            if (isAdmin) return `<span class="text-[10px] text-[var(--muted)] ">Admin — not editable here</span>`;
+            return `<button onclick="openManageModal('${u.id}')" class="w-full px-3 py-2.5 bg-black/5 hover:bg-black/10 rounded-lg text-[11px] font-bold uppercase transition">Manage Client</button>`;
         }
 
         function renderUsers(list) {
@@ -567,8 +387,8 @@
             const body = document.getElementById('usersBody');
 
             if (list.length === 0) {
-                cards.innerHTML = `<div class="p-10 text-center text-[var(--muted)] text-xs italic">No matching clients found.</div>`;
-                body.innerHTML = `<tr><td colspan="6" class="p-12 text-center text-[var(--muted)] text-xs italic">No matching clients found.</td></tr>`;
+                cards.innerHTML = `<div class="p-10 text-center text-[var(--muted)] text-xs ">No matching clients found.</div>`;
+                body.innerHTML = `<tr><td colspan="6" class="p-12 text-center text-[var(--muted)] text-xs ">No matching clients found.</td></tr>`;
                 return;
             }
 
@@ -580,7 +400,7 @@
                     <div class="p-5">
                         <div class="flex items-start justify-between gap-3 mb-3">
                             <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-10 h-10 shrink-0 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold text-sm">${(u.full_name || '?').charAt(0).toUpperCase()}</div>
+                                <div class="w-10 h-10 shrink-0 rounded-lg ax-fill flex items-center justify-center text-white ax-display font-semibold text-sm">${(u.full_name || '?').charAt(0).toUpperCase()}</div>
                                 <div class="min-w-0">
                                     <p class="text-sm font-semibold text-[var(--ink-text)] truncate">${u.full_name || 'Unnamed'}</p>
                                     <p class="text-[10px] text-[var(--muted)] mono truncate">${u.phone || u.email || '—'}</p>
@@ -589,7 +409,7 @@
                             ${roleBadge(u.role, isAdmin)}
                         </div>
 
-                        <div class="bg-black/[0.02] rounded-2xl p-4 mb-3 space-y-2">
+                        <div class="bg-black/[0.02] rounded-[10px] p-4 mb-3 space-y-2">
                             <div class="flex justify-between items-baseline">
                                 <span class="text-[10px] font-bold text-[var(--muted)] uppercase">Wallet Balance</span>
                                 <span class="text-base font-bold mono">₦${Number(balance).toLocaleString()}</span>
@@ -617,7 +437,7 @@
                     <tr class="hover:bg-black/[0.015] transition">
                         <td class="px-8 py-5">
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold text-sm">${(u.full_name || '?').charAt(0).toUpperCase()}</div>
+                                <div class="w-9 h-9 rounded-lg ax-fill flex items-center justify-center text-white ax-display font-semibold text-sm">${(u.full_name || '?').charAt(0).toUpperCase()}</div>
                                 <div>
                                     <p class="text-sm font-semibold text-[var(--ink-text)]">${u.full_name || 'Unnamed'}</p>
                                     <p class="text-[10px] text-[var(--muted)] mono">${u.phone || u.email || '—'}</p>
@@ -631,7 +451,7 @@
                             ${roleBadge(u.role, isAdmin)}
                         </td>
                         <td class="px-8 py-5 text-right">
-                            ${isAdmin ? `<span class="text-[9px] text-[var(--muted)] italic">—</span>` : `<button onclick="openManageModal('${u.id}')" class="px-3 py-1.5 bg-black/5 hover:bg-black/10 rounded-lg text-[10px] font-bold uppercase transition">Manage</button>`}
+                            ${isAdmin ? `<span class="text-[9px] text-[var(--muted)] ">—</span>` : `<button onclick="openManageModal('${u.id}')" class="px-3 py-1.5 bg-black/5 hover:bg-black/10 rounded-lg text-[10px] font-bold uppercase transition">Manage</button>`}
                         </td>
                     </tr>
                 `;

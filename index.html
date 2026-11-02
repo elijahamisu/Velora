@@ -3,265 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0A0A0A">
-    <title>ALTIVEX | Luxury Investment Excellence</title>
+    <meta name="theme-color" content="#000000">
+    <title>Altivex · Put your money to work, daily</title>
+    <meta name="description" content="Altivex: pick an investment plan from ₦3,000, earn daily into your wallet, and withdraw to your bank.">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --gold: #D4AF37;
-            --gold-light: #F4E3AD;
-            --luxury-white: #FFFFFF;
-            --soft-gray: #F9F9F9;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--luxury-white);
-            color: #1a1a1a;
-            scroll-behavior: smooth;
-        }
-        .heading-font { font-family: 'Playfair Display', serif; }
-        .gold-gradient {
-            background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%);
-        }
-        .gold-text {
-            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .luxury-shadow {
-            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.1);
-        }
-        .border-gold { border: 1px solid #D4AF37; }
-        .btn-gold {
-            background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%);
-            color: white;
-            transition: all 0.3s ease;
-        }
-        .btn-gold:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
-        }
+        html { scroll-behavior: smooth; }
+        .hero-glowline { position: absolute; left: 0; right: 0; top: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(198,244,50,.6), transparent); }
+        .bento-big { min-height: 260px; }
+        .bar { background: #1E1E1E; border-radius: 2px; }
+        .bar.on { background: #C6F432; }
     </style>
-    <link rel="stylesheet" href="/theme-dark.css">
+    <link rel="stylesheet" href="/altivex.css">
 </head>
 <body>
 
-    <!-- Navigation -->
-    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <!-- ===== Top nav ===== -->
+    <header class="ax-nav">
+        <div class="ax-container h-full flex items-center justify-between gap-6">
+            <a href="/" aria-label="Altivex home"><span class="ax-logo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span></a>
+            <nav class="hidden md:flex items-center gap-8" aria-label="Primary">
+                <a href="#how-it-works" class="ax-navlink">How it works</a>
+                <a href="#features" class="ax-navlink">Features</a>
+                <a href="#plans" class="ax-navlink">Plans</a>
+                <a href="#faq" class="ax-navlink">FAQ</a>
+            </nav>
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 gold-gradient rounded-full flex items-center justify-center">
-                    <span class="text-white font-bold text-xl">A</span>
-                </div>
-                <span class="text-2xl font-bold tracking-tighter heading-font gold-text">ALTIVEX</span>
-            </div>
-            <div class="hidden md:flex gap-8 items-center font-medium text-sm tracking-wide">
-                <a href="#how-it-works" class="hover:text-[#D4AF37] transition">HOW IT WORKS</a>
-                <a href="#why-choose-us" class="hover:text-[#D4AF37] transition">BENEFITS</a>
-                <a href="login.html" class="px-6 py-2 border border-gold text-[#D4AF37] rounded-full hover:bg-gold-light transition">LOGIN</a>
-                <a href="register.html" class="px-6 py-2 btn-gold rounded-full">GET STARTED</a>
+                <a href="login.html" class="ax-btn ax-btn-sm ax-btn-ghost border-transparent hidden sm:inline-flex">Log in</a>
+                <a href="register.html" class="ax-btn ax-btn-sm ax-btn-primary">Get started</a>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <!-- Hero Section -->
-    <section class="pt-32 pb-20 px-6">
-        <div class="max-w-7xl mx-auto text-center">
-            <h1 class="text-5xl md:text-7xl heading-font mb-6 leading-tight">
-                Invest in <span class="gold-text italic">Elegance</span>,<br>Grow in Prosperity
-            </h1>
-            <p class="text-gray-500 max-w-2xl mx-auto text-lg mb-10">
-                Experience Nigeria's premier boutique investment platform. Designed for the elite, built for consistency. Start your journey with a premium welcome.
-            </p>
-            <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
-                <a href="register.html" class="w-full md:w-auto px-10 py-4 btn-gold rounded-full text-lg font-semibold flex items-center justify-center gap-2">
-                    Start Earning Now <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                </a>
-                <a href="login.html" class="w-full md:w-auto px-10 py-4 border border-gold rounded-full text-lg font-semibold text-[#D4AF37] hover:bg-gray-50">
-                    Client Login
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Essential Stats Card -->
-    <section class="px-6 -mt-10 mb-20">
-        <div class="max-w-5xl mx-auto bg-white rounded-3xl p-8 md:p-12 luxury-shadow grid grid-cols-2 md:grid-cols-4 gap-8 border border-gray-50">
-            <div class="text-center">
-                <p class="text-gray-400 text-xs uppercase tracking-widest mb-2">Welcome Bonus</p>
-                <p class="text-2xl font-bold gold-text">₦600</p>
-            </div>
-            <div class="text-center border-l border-gray-100">
-                <p class="text-gray-400 text-xs uppercase tracking-widest mb-2">Min Deposit</p>
-                <p class="text-2xl font-bold text-gray-800">₦3,000</p>
-            </div>
-            <div class="text-center border-l border-gray-100">
-                <p class="text-gray-400 text-xs uppercase tracking-widest mb-2">Min Payout</p>
-                <p class="text-2xl font-bold text-gray-800">₦600</p>
-            </div>
-            <div class="text-center border-l border-gray-100">
-                <p class="text-gray-400 text-xs uppercase tracking-widest mb-2">Charge</p>
-                <p class="text-2xl font-bold text-red-400">15%</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- How It Works -->
-    <section id="how-it-works" class="py-20 bg-gray-50 px-6">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl heading-font mb-4">Three Steps to Wealth</h2>
-                <div class="w-20 h-1 gold-gradient mx-auto"></div>
-            </div>
-            <div class="grid md:grid-cols-3 gap-12">
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 luxury-shadow border-gold">
-                        <i data-lucide="user-plus" class="text-[#D4AF37]"></i>
+    <main>
+        <!-- ===== Hero: split, left-aligned ===== -->
+        <section class="relative pt-[112px] pb-16 md:pt-[136px] md:pb-24 ax-grid-bg">
+            <div class="ax-container grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-16 items-center">
+                <div>
+                    <a href="register.html" class="inline-flex items-center gap-2 h-8 pl-1 pr-3 rounded-lg border border-neutral-800 bg-black text-[13px] text-[var(--ax-muted)] hover:text-white transition mb-7">
+                        <span class="ax-badge ax-badge-accent h-6">New</span> ₦600 welcome bonus on sign-up <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </a>
+                    <h1 class="ax-h1 text-[46px] sm:text-[60px] lg:text-[76px] text-white">Put your money<br>to work, <span class="ax-hl">daily.</span></h1>
+                    <p class="text-[var(--ax-muted)] text-[17px] md:text-[19px] leading-relaxed mt-6 max-w-xl">
+                        Altivex turns idle cash into daily earnings. Choose a plan from ₦3,000, watch returns land in your wallet every day, and withdraw straight to your bank.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-3 mt-9">
+                        <a href="register.html" class="ax-btn ax-btn-primary ax-btn-lg">Create free account <i data-lucide="arrow-right"></i></a>
+                        <a href="login.html" class="ax-btn ax-btn-lg">I already have an account</a>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">1. Create Account</h3>
-                    <p class="text-gray-500">Sign up in seconds and instantly receive your ₦600 welcome bonus to start your journey.</p>
-                </div>
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 luxury-shadow border-gold">
-                        <i data-lucide="gem" class="text-[#D4AF37]"></i>
+                    <div class="flex flex-wrap gap-x-6 gap-y-2 mt-8 text-[13px] text-[var(--ax-muted)]">
+                        <span class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 ax-accent"></i>Plans from ₦3,000</span>
+                        <span class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 ax-accent"></i>Earnings paid daily</span>
+                        <span class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 ax-accent"></i>Withdraw from ₦600</span>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">2. Choose a Plan</h3>
-                    <p class="text-gray-500">Select an investment tier that suits your goals. Minimum entry starts at just ₦3,000.</p>
                 </div>
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 luxury-shadow border-gold">
-                        <i data-lucide="wallet" class="text-[#D4AF37]"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-3">3. Withdraw Daily</h3>
-                    <p class="text-gray-400">Request your earnings once you hit ₦600. Fast processing directly to your bank.</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Why Choose Altivex -->
-    <section id="why-choose-us" class="py-20 px-6">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
-            <div class="md:w-1/2">
-                <h2 class="text-4xl heading-font mb-6 leading-tight">Why the Elite Choose <span class="gold-text">Altivex</span></h2>
-                <div class="space-y-6">
-                    <div class="flex gap-4">
-                        <div class="mt-1"><i data-lucide="shield-check" class="text-[#D4AF37]"></i></div>
-                        <div>
-                            <h4 class="font-bold">Uncompromising Security</h4>
-                            <p class="text-gray-500">Your funds and data are protected by bank-grade encryption and Supabase security protocols.</p>
+                <!-- Preview card -->
+                <div class="relative">
+                    <div class="ax-card bg-[var(--ax-s1)] overflow-hidden relative">
+                        <div class="hero-glowline"></div>
+                        <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
+                            <span class="flex items-center gap-2 text-[13px] text-[var(--ax-muted)]"><span class="w-2 h-2 bg-[#C6F432]"></span> Wallet</span>
+                            <span class="ax-badge">Example</span>
                         </div>
-                    </div>
-                    <div class="flex gap-4">
-                        <div class="mt-1"><i data-lucide="zap" class="text-[#D4AF37]"></i></div>
-                        <div>
-                            <h4 class="font-bold">Instant Activation</h4>
-                            <p class="text-gray-500">No waiting periods. Your investment starts generating returns the moment you confirm.</p>
+                        <div class="p-5">
+                            <p class="text-[13px] text-[var(--ax-muted)]">Available balance</p>
+                            <p class="mono text-[40px] md:text-[48px] font-bold leading-none mt-2">₦48,250<span class="text-[var(--ax-muted)]">.50</span></p>
+                            <span class="ax-badge ax-badge-pos mt-3"><i data-lucide="trending-up" class="w-3.5 h-3.5"></i>+₦3,500 today</span>
+                            <div class="flex items-end gap-1.5 h-20 mt-6">
+                                <span class="bar flex-1" style="height:28%"></span><span class="bar flex-1" style="height:34%"></span><span class="bar flex-1" style="height:31%"></span><span class="bar flex-1" style="height:46%"></span><span class="bar flex-1" style="height:52%"></span><span class="bar flex-1" style="height:58%"></span><span class="bar flex-1" style="height:66%"></span><span class="bar on flex-1" style="height:74%"></span><span class="bar on flex-1" style="height:86%"></span><span class="bar on flex-1" style="height:100%"></span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex gap-4">
-                        <div class="mt-1"><i data-lucide="headphones" class="text-[#D4AF37]"></i></div>
-                        <div>
-                            <h4 class="font-bold">24/7 Concierge Support</h4>
-                            <p class="text-gray-500">Dedicated support team available to assist with any inquiries or transactions.</p>
+                        <div class="border-t border-neutral-800">
+                            <div class="ax-row border-b border-neutral-800"><span class="flex items-center gap-3"><span class="ax-tile w-8 h-8 flex items-center justify-center"><i data-lucide="trending-up" class="w-4 h-4"></i></span><span class="text-sm">Growth plan</span></span><span class="mono text-sm">₦1,000 / day</span></div>
+                            <div class="ax-row"><span class="flex items-center gap-3"><span class="ax-tile w-8 h-8 flex items-center justify-center"><i data-lucide="arrow-up-right" class="w-4 h-4"></i></span><span class="text-sm">Withdrawal to bank</span></span><span class="ax-badge ax-badge-pos">Paid</span></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="md:w-1/2 bg-gray-100 h-80 w-full rounded-3xl gold-gradient opacity-10 flex items-center justify-center">
-                 <!-- Placeholder for luxury abstract image/graphic -->
-                 <i data-lucide="trending-up" class="w-32 h-32 text-white"></i>
-            </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- FAQ -->
-    <section class="py-20 bg-gray-50 px-6">
-        <div class="max-w-3xl mx-auto">
-            <h2 class="text-3xl heading-font text-center mb-12">Frequently Asked Questions</h2>
-            <div class="space-y-4">
-                <details class="group bg-white p-6 rounded-2xl luxury-shadow border border-gray-100">
-                    <summary class="list-none font-bold flex justify-between items-center cursor-pointer">
-                        How do I start?
-                        <i data-lucide="plus" class="w-5 h-5 transition group-open:rotate-45"></i>
-                    </summary>
-                    <p class="mt-4 text-gray-500">Register with your phone number, claim your ₦600 bonus, and choose an investment plan starting from ₦3,000.</p>
-                </details>
-                <details class="group bg-white p-6 rounded-2xl luxury-shadow border border-gray-100">
-                    <summary class="list-none font-bold flex justify-between items-center cursor-pointer">
-                        What is the withdrawal charge?
-                        <i data-lucide="plus" class="w-5 h-5 transition group-open:rotate-45"></i>
-                    </summary>
-                    <p class="mt-4 text-gray-500">To maintain the sustainability of our platform, a 15% maintenance fee is applied to all withdrawals.</p>
-                </details>
-                <details class="group bg-white p-6 rounded-2xl luxury-shadow border border-gray-100">
-                    <summary class="list-none font-bold flex justify-between items-center cursor-pointer">
-                        Is my money safe?
-                        <i data-lucide="plus" class="w-5 h-5 transition group-open:rotate-45"></i>
-                    </summary>
-                    <p class="mt-4 text-gray-500">Altivex uses automated smart-rebalancing to ensure all payouts are fulfilled promptly and securely.</p>
-                </details>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-100 pt-16 pb-8 px-6">
-        <div class="max-w-7xl mx-auto">
-            <div class="flex flex-col md:flex-row justify-between mb-12 gap-8">
-                <div class="max-w-xs">
-                    <div class="flex items-center gap-2 mb-4">
-                        <div class="w-6 h-6 gold-gradient rounded-full"></div>
-                        <span class="text-xl font-bold heading-font gold-text">ALTIVEX</span>
-                    </div>
-                    <p class="text-gray-400 text-sm italic">"The intersection of luxury and financial growth."</p>
+        <!-- ===== Stats strip ===== -->
+        <section class="border-y border-neutral-800 bg-[var(--ax-s1)]">
+            <div class="ax-container">
+                <div class="grid grid-cols-2 md:grid-cols-4 divide-neutral-800 md:divide-x">
+                    <div class="py-7 md:px-8 md:first:pl-0 border-b md:border-b-0 border-neutral-800"><p class="mono text-[30px] md:text-[36px] font-semibold ax-accent leading-none">₦600</p><p class="text-[13px] text-[var(--ax-muted)] mt-2">Welcome bonus</p></div>
+                    <div class="py-7 pl-5 md:px-8 border-b md:border-b-0 border-l md:border-l-0 border-neutral-800"><p class="mono text-[30px] md:text-[36px] font-semibold leading-none">₦3,000</p><p class="text-[13px] text-[var(--ax-muted)] mt-2">Minimum plan</p></div>
+                    <div class="py-7 md:px-8"><p class="mono text-[30px] md:text-[36px] font-semibold leading-none">₦600</p><p class="text-[13px] text-[var(--ax-muted)] mt-2">Minimum withdrawal</p></div>
+                    <div class="py-7 pl-5 md:px-8 border-l md:border-l-0 border-neutral-800"><p class="mono text-[30px] md:text-[36px] font-semibold leading-none">15%</p><p class="text-[13px] text-[var(--ax-muted)] mt-2">Withdrawal fee, shown upfront</p></div>
                 </div>
-                <div class="grid grid-cols-2 gap-12">
+            </div>
+        </section>
+
+        <!-- ===== How it works ===== -->
+        <section id="how-it-works" class="ax-section border-t-0">
+            <div class="ax-container">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
                     <div>
-                        <h5 class="font-bold mb-4">Links</h5>
-                        <ul class="text-gray-500 text-sm space-y-2">
-                            <li><a href="register.html" class="hover:text-[#D4AF37]">Join Us</a></li>
-                            <li><a href="login.html" class="hover:text-[#D4AF37]">Member Access</a></li>
-                        </ul>
+                        <p class="ax-eyebrow ax-eyebrow-dot mb-4">How it works</p>
+                        <h2 class="ax-h2 text-[34px] md:text-[48px] max-w-xl">From sign-up to first payout in three steps.</h2>
                     </div>
-                    <div>
-                        <h5 class="font-bold mb-4">Legal</h5>
-                        <ul class="text-gray-500 text-sm space-y-2">
-                            <li><a href="#" class="hover:text-[#D4AF37]">Terms of Service</a></li>
-                            <li><a href="#" class="hover:text-[#D4AF37]">Privacy Policy</a></li>
-                        </ul>
+                    <a href="register.html" class="ax-btn self-start md:self-auto">Get started <i data-lucide="arrow-right"></i></a>
+                </div>
+                <div class="grid md:grid-cols-3 gap-px bg-neutral-800 border border-neutral-800 rounded-xl overflow-hidden">
+                    <div class="bg-black p-7">
+                        <span class="ax-step-num">01</span>
+                        <h3 class="text-[20px] font-semibold mt-6 mb-2">Create your account</h3>
+                        <p class="text-[var(--ax-muted)] leading-relaxed">Sign up with your email and phone number. ₦600 lands in your wallet straight away.</p>
+                    </div>
+                    <div class="bg-black p-7">
+                        <span class="ax-step-num">02</span>
+                        <h3 class="text-[20px] font-semibold mt-6 mb-2">Fund and pick a plan</h3>
+                        <p class="text-[var(--ax-muted)] leading-relaxed">Deposit from ₦3,000 and activate the plan that fits your budget. It starts earning right away.</p>
+                    </div>
+                    <div class="bg-black p-7">
+                        <span class="ax-step-num">03</span>
+                        <h3 class="text-[20px] font-semibold mt-6 mb-2">Earn daily, withdraw</h3>
+                        <p class="text-[var(--ax-muted)] leading-relaxed">Earnings are credited every day. Once you reach ₦600, request a withdrawal to your bank.</p>
                     </div>
                 </div>
             </div>
-            <div class="text-center pt-8 border-t border-gray-50 text-gray-400 text-xs">
-                © 2024 ALTIVEX LUXURY INVESTMENTS. ALL RIGHTS RESERVED.
+        </section>
+
+        <!-- ===== Features: bento ===== -->
+        <section id="features" class="ax-section">
+            <div class="ax-container">
+                <p class="ax-eyebrow ax-eyebrow-dot mb-4">Features</p>
+                <h2 class="ax-h2 text-[34px] md:text-[48px] max-w-2xl mb-12">Everything you need to grow, nothing you don’t.</h2>
+                <div class="grid md:grid-cols-6 gap-3">
+                    <div class="ax-card bento-big md:col-span-4 p-7 flex flex-col justify-between relative overflow-hidden">
+                        <div>
+                            <i data-lucide="zap" class="w-6 h-6 ax-accent"></i>
+                            <h3 class="text-[24px] font-semibold mt-5">Daily earnings, automatically</h3>
+                            <p class="text-[var(--ax-muted)] mt-2 max-w-md leading-relaxed">Active plans credit your wallet every day. Track today’s earnings, your running total and a 7-day chart from the dashboard.</p>
+                        </div>
+                        <div class="flex items-end gap-1.5 h-16 mt-8 max-w-md">
+                            <span class="bar flex-1" style="height:40%"></span><span class="bar flex-1" style="height:40%"></span><span class="bar flex-1" style="height:40%"></span><span class="bar flex-1" style="height:40%"></span><span class="bar on flex-1" style="height:40%"></span><span class="bar on flex-1" style="height:40%"></span><span class="bar on flex-1" style="height:40%"></span>
+                        </div>
+                    </div>
+                    <div class="ax-card md:col-span-2 p-7">
+                        <i data-lucide="wallet" class="w-6 h-6 ax-accent"></i>
+                        <h3 class="text-[20px] font-semibold mt-5">One wallet</h3>
+                        <p class="text-[var(--ax-muted)] mt-2 leading-relaxed">Deposits, earnings, bonuses and referral income in a single balance.</p>
+                    </div>
+                    <div class="ax-card md:col-span-2 p-7">
+                        <i data-lucide="arrow-up-right" class="w-6 h-6 ax-accent"></i>
+                        <h3 class="text-[20px] font-semibold mt-5">Bank withdrawals</h3>
+                        <p class="text-[var(--ax-muted)] mt-2 leading-relaxed">Cash out from ₦600 to your Nigerian bank account. The fee is shown before you confirm.</p>
+                    </div>
+                    <div class="ax-card md:col-span-2 p-7">
+                        <i data-lucide="users" class="w-6 h-6 ax-accent"></i>
+                        <h3 class="text-[20px] font-semibold mt-5">Referral income</h3>
+                        <p class="text-[var(--ax-muted)] mt-2 leading-relaxed">Share your link and earn commission when the people you invite make deposits.</p>
+                    </div>
+                    <div class="ax-card md:col-span-2 p-7">
+                        <i data-lucide="life-buoy" class="w-6 h-6 ax-accent"></i>
+                        <h3 class="text-[20px] font-semibold mt-5">Real support</h3>
+                        <p class="text-[var(--ax-muted)] mt-2 leading-relaxed">Open a ticket in the app and chat with the team, plus a Telegram community for updates.</p>
+                    </div>
+                </div>
             </div>
+        </section>
+
+        <!-- ===== Plan teaser ===== -->
+        <section id="plans" class="ax-section">
+            <div class="ax-container grid lg:grid-cols-[0.8fr_1.2fr] gap-12 items-start">
+                <div>
+                    <p class="ax-eyebrow ax-eyebrow-dot mb-4">Plans</p>
+                    <h2 class="ax-h2 text-[34px] md:text-[48px]">Two tiers. Clear numbers.</h2>
+                    <p class="text-[var(--ax-muted)] mt-5 leading-relaxed max-w-md">Every plan shows its price, daily profit and duration before you commit. Live plans and prices are listed in your dashboard.</p>
+                    <a href="register.html" class="ax-btn ax-btn-primary mt-8">See live plans <i data-lucide="arrow-right"></i></a>
+                </div>
+                <div class="grid sm:grid-cols-2 gap-3">
+                    <div class="ax-card overflow-hidden">
+                        <div class="p-6 border-b border-neutral-800">
+                            <div class="flex items-center justify-between mb-4"><h3 class="font-semibold">Elite</h3><span class="ax-badge">Start here</span></div>
+                            <p class="mono text-[52px] font-bold leading-none">4<span class="text-[28px] text-[var(--ax-muted)]">× total</span></p>
+                        </div>
+                        <dl class="px-6 py-2">
+                            <div class="ax-kv"><dt>Entry from</dt><dd>₦3,000</dd></div>
+                            <div class="ax-kv"><dt>Payout</dt><dd>Daily</dd></div>
+                            <div class="ax-kv"><dt>Unlock</dt><dd>Open to all</dd></div>
+                        </dl>
+                    </div>
+                    <div class="ax-card overflow-hidden border-[#C6F432]/40">
+                        <div class="p-6 border-b border-neutral-800">
+                            <div class="flex items-center justify-between mb-4"><h3 class="font-semibold">Professional</h3><span class="ax-badge ax-badge-accent">Higher return</span></div>
+                            <p class="mono text-[52px] font-bold leading-none ax-accent">6<span class="text-[28px] text-[var(--ax-muted)]">× total</span></p>
+                        </div>
+                        <dl class="px-6 py-2">
+                            <div class="ax-kv"><dt>Entry from</dt><dd>See dashboard</dd></div>
+                            <div class="ax-kv"><dt>Payout</dt><dd>Daily</dd></div>
+                            <div class="ax-kv"><dt>Unlock</dt><dd>After 1 active plan</dd></div>
+                        </dl>
+                    </div>
+                    <p class="sm:col-span-2 text-[12px] text-[var(--ax-faint)]">“Total” is the full income paid over the plan’s duration, relative to the amount invested.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== FAQ ===== -->
+        <section id="faq" class="ax-section">
+            <div class="ax-container grid lg:grid-cols-[0.8fr_1.2fr] gap-12">
+                <div>
+                    <p class="ax-eyebrow ax-eyebrow-dot mb-4">FAQ</p>
+                    <h2 class="ax-h2 text-[34px] md:text-[48px]">Questions, answered.</h2>
+                    <p class="text-[var(--ax-muted)] mt-5">Still stuck? Open a support ticket from your dashboard.</p>
+                </div>
+                <div class="ax-faq">
+                    <details open>
+                        <summary>How do I start?<span class="ax-faq-icon"><i data-lucide="plus" class="w-4 h-4"></i></span></summary>
+                        <p>Register with your email and phone number, claim your ₦600 bonus, then fund your wallet and choose a plan starting from ₦3,000.</p>
+                    </details>
+                    <details>
+                        <summary>When are earnings paid?<span class="ax-faq-icon"><i data-lucide="plus" class="w-4 h-4"></i></span></summary>
+                        <p>Earnings from active plans are processed automatically once a day and credited to your wallet.</p>
+                    </details>
+                    <details>
+                        <summary>What does it cost to withdraw?<span class="ax-faq-icon"><i data-lucide="plus" class="w-4 h-4"></i></span></summary>
+                        <p>Withdrawals start from ₦600. A 15% fee is applied to each withdrawal to keep the platform running, and it’s shown before you confirm.</p>
+                    </details>
+                    <details>
+                        <summary>How do referrals work?<span class="ax-faq-icon"><i data-lucide="plus" class="w-4 h-4"></i></span></summary>
+                        <p>Share your personal link from the Referral page. When someone signs up with it and makes a deposit, you earn a commission in your wallet.</p>
+                    </details>
+                    <details>
+                        <summary>Is my money safe?<span class="ax-faq-icon"><i data-lucide="plus" class="w-4 h-4"></i></span></summary>
+                        <p>Your account is protected by secure sign-in, and every deposit, earning and withdrawal is recorded in your transaction history. Like any investment, returns carry risk, so only invest what you can afford.</p>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== CTA band ===== -->
+        <section class="ax-container pb-20">
+            <div class="rounded-[14px] bg-[#C6F432] text-black p-8 md:p-12 flex flex-col md:flex-row md:items-center justify-between gap-8 relative overflow-hidden">
+                <div>
+                    <h2 class="ax-h2 text-[34px] md:text-[48px] text-[#000]">Start with ₦3,000.</h2>
+                    <p class="text-[#000]/70 mt-3 text-[17px]">Open an account in a minute and get ₦600 to begin.</p>
+                </div>
+                <a href="register.html" class="ax-btn ax-btn-lg self-start md:self-auto" style="background:#000;border-color:#000;color:#fff;">Create free account <i data-lucide="arrow-right"></i></a>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===== Footer ===== -->
+    <footer class="border-t border-neutral-800">
+        <div class="ax-container py-14 grid md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-10">
+            <div>
+                <span class="ax-logo"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M0 0h13l7 7v13H0z" fill="#C6F432"/><path d="M5.5 14.5 12.5 7.5M8 7.5h4.5V12" stroke="#000" stroke-width="2" fill="none" stroke-linecap="square"/></svg><span>altivex</span></span>
+                <p class="text-[var(--ax-muted)] text-sm mt-4 max-w-xs">Daily-earning investment plans with a simple wallet and bank withdrawals.</p>
+            </div>
+            <div>
+                <h5 class="text-[13px] font-semibold mb-4">Product</h5>
+                <ul class="space-y-2.5 text-sm text-[var(--ax-muted)]">
+                    <li><a href="#how-it-works" class="hover:text-white">How it works</a></li>
+                    <li><a href="#plans" class="hover:text-white">Plans</a></li>
+                    <li><a href="#faq" class="hover:text-white">FAQ</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-[13px] font-semibold mb-4">Account</h5>
+                <ul class="space-y-2.5 text-sm text-[var(--ax-muted)]">
+                    <li><a href="register.html" class="hover:text-white">Create account</a></li>
+                    <li><a href="login.html" class="hover:text-white">Log in</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-[13px] font-semibold mb-4">Legal</h5>
+                <ul class="space-y-2.5 text-sm text-[var(--ax-muted)]">
+                    <li><a href="terms.html" class="hover:text-white">Terms of service</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="ax-container py-6 border-t border-neutral-800 flex flex-col sm:flex-row justify-between gap-2 text-[12px] text-[var(--ax-faint)]">
+            <span>© 2026 Altivex. All rights reserved.</span>
+            <span>Investing carries risk. Only invest what you can afford.</span>
         </div>
     </footer>
 
-    <script>
-        // Initialize Lucide Icons
-        lucide.createIcons();
+    <!-- Icons are initialised in their own script so they render even if the
+         placeholder Supabase snippet below fails to evaluate. -->
+    <script>lucide.createIcons();</script>
 
-        // Supabase Configuration Placeholder
-        const supabaseUrl = 'YOUR_SUPABASE_URL';
-        const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
-        const supabase = supabaseJs.createClient(supabaseUrl, supabaseKey);
-
-        // Logic to check if user is already logged in
-        async function checkSession() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                // If logged in, you might want to change "Register" to "Dashboard"
-                console.log("Active session found");
-            }
-        }
-        
-        // Uncomment when Supabase is configured
-        // checkSession();
-    </script>
 </body>
 </html>
