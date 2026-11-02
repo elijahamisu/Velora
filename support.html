@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Concierge | VELORA — Private Wealth</title>
+    <meta name="theme-color" content="#0A0A0A">
+    <title>Concierge | ALTIVEX — Private Wealth</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -165,6 +166,7 @@
         #menuToggle:hover { background: rgba(183,147,91,0.08); border-color: rgba(183,147,91,0.3); }
         #menuToggle i { width: 18px; height: 18px; }
     </style>
+    <link rel="stylesheet" href="/theme-dark.css">
 </head>
 <body class="bg-[var(--paper)]">
 
@@ -172,7 +174,7 @@
     <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
         <div class="text-center">
             <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(183,147,91,0.25); border-top-color: var(--gold);"></div>
-            <p class="heading-font gold-text text-2xl tracking-wide">VELORA</p>
+            <p class="heading-font gold-text text-2xl tracking-wide">ALTIVEX</p>
             <p class="text-[10px] uppercase tracking-[0.3em] text-white/30 mt-2">Verifying Access</p>
         </div>
     </div>
@@ -184,7 +186,7 @@
                 <button id="menuToggle" class="lg:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
                     <i data-lucide="menu"></i>
                 </button>
-                <div class="w-7 h-7 gold-gradient rounded-full flex items-center justify-center text-white heading-font text-xs lg:hidden">V</div>
+                <div class="w-7 h-7 gold-gradient rounded-full flex items-center justify-center text-white heading-font text-xs lg:hidden">A</div>
                 <div>
                     <h2 class="text-lg font-semibold heading-font hidden md:block tracking-tight">Concierge <span class="gold-text italic">Desk</span></h2>
                     <h2 class="text-base font-semibold heading-font md:hidden">Concierge</h2>
@@ -197,7 +199,7 @@
                     <i data-lucide="wallet" class="w-4 h-4 text-[var(--gold-deep)]"></i>
                     <span id="topBalance" class="text-xs font-bold mono">₦0.00</span>
                 </div>
-                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold" id="userInitials">V</div>
+                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold" id="userInitials">A</div>
             </div>
         </div>
     </header>
@@ -206,8 +208,8 @@
     <aside id="sidebar" class="hidden lg:block fixed top-0 left-0 bottom-0 w-64 z-50">
         <div class="p-8 h-full flex flex-col">
             <div class="flex items-center gap-3 mb-2">
-                <div class="w-9 h-9 rounded-full border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
-                <h1 class="text-2xl heading-font gold-text tracking-tight font-semibold">VELORA</h1>
+                <div class="w-9 h-9 rounded-full border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">A</div>
+                <h1 class="text-2xl heading-font gold-text tracking-tight font-semibold">ALTIVEX</h1>
             </div>
             <p class="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-8 ml-12 -mt-1">Private Wealth</p>
             <div class="h-px w-full brand-hair mb-8"></div>
@@ -265,8 +267,8 @@
         <div class="p-7 min-h-full flex flex-col">
             <div class="flex items-center justify-between mb-1">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">V</div>
-                    <h1 class="text-xl heading-font gold-text tracking-tight font-semibold">VELORA</h1>
+                    <div class="w-9 h-9 rounded-full border border-[var(--gold)]/40 flex items-center justify-center text-[var(--gold-light)] heading-font font-semibold">A</div>
+                    <h1 class="text-xl heading-font gold-text tracking-tight font-semibold">ALTIVEX</h1>
                 </div>
                 <button id="drawerClose" aria-label="Close menu" class="w-9 h-9 rounded-full flex items-center justify-center text-white/50 hover:text-[var(--gold-light)] hover:bg-white/5 transition">
                     <i data-lucide="x" class="w-5 h-5"></i>
@@ -277,7 +279,7 @@
 
             <!-- Account chip -->
             <div class="flex items-center gap-3 p-3 mb-6 rounded-2xl bg-white/[0.04] border border-white/10">
-                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold shrink-0" id="drawerInitials">V</div>
+                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold shrink-0" id="drawerInitials">A</div>
                 <div class="min-w-0">
                     <p id="drawerName" class="text-sm font-semibold text-white truncate">...</p>
                     <p id="drawerBalance" class="text-[10px] text-[var(--gold-light)] font-bold tracking-widest uppercase mono truncate">₦0.00</p>
@@ -457,7 +459,7 @@
                         <h4 class="text-xs font-bold text-[var(--muted)] uppercase tracking-widest mb-6">Inquiry Profile</h4>
                         <div class="space-y-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold" id="userInitialsStat">V</div>
+                                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-white heading-font font-semibold" id="userInitialsStat">A</div>
                                 <div>
                                     <p id="userName" class="text-sm font-semibold text-[var(--ink-text)]">...</p>
                                     <p id="userId" class="text-[10px] text-[var(--muted)] mono">ID: ...</p>
