@@ -64,7 +64,7 @@
             <p class="text-[var(--muted)] mb-8 text-sm">Stay updated with investment news, daily earnings updates and fast support.</p>
 
             <div class="space-y-3">
-                <a href="https://t.me/+s66HnQZjuCFhZTI0" target="_blank" id="dashboardTelegramLink" class="block w-full py-4 bg-[#D9C7A3] text-[#0A0F1C] font-bold rounded-lg hover:bg-[#E4D5B7] transition-colors">
+                <a href="https://t.me/+s66HnQZjuCFhZTI0" target="_blank" data-s-href="telegram_link" id="dashboardTelegramLink" class="block w-full py-4 bg-[#D9C7A3] text-[#0A0F1C] font-bold rounded-lg hover:bg-[#E4D5B7] transition-colors">
                     Join Telegram
                 </a>
                 <button id="skipTelegram" class="block w-full py-4 bg-black/[0.04] text-[var(--muted)] font-semibold rounded-lg hover:bg-black/[0.07] transition-colors">
@@ -346,8 +346,8 @@
                         <dl>
                             <div class="ax-kv"><dt>Daily ROI</dt><dd>10%</dd></div>
                             <div class="ax-kv"><dt>Minimum investment</dt><dd>₦3,000</dd></div>
-                            <div class="ax-kv"><dt>Minimum withdrawal</dt><dd>₦600</dd></div>
-                            <div class="ax-kv"><dt>Withdrawal charge</dt><dd class="ax-accent">15%</dd></div>
+                            <div class="ax-kv"><dt>Minimum withdrawal</dt><dd data-s="min_withdrawal">₦600</dd></div>
+                            <div class="ax-kv"><dt>Withdrawal charge</dt><dd class="ax-accent" data-s="withdrawal_fee_pct">15%</dd></div>
                         </dl>
                     </div>
 
@@ -366,7 +366,7 @@
                     </div>
 
                     <!-- Telegram Community -->
-                    <a href="https://t.me/+s66HnQZjuCFhZTI0" target="_blank" class="ax-card p-6 rounded-lg flex items-center gap-4 transition">
+                    <a href="https://t.me/+s66HnQZjuCFhZTI0" target="_blank" data-s-href="telegram_link" class="ax-card p-6 rounded-lg flex items-center gap-4 transition">
                         <div class="w-12 h-12 rounded-[10px] flex items-center justify-center shrink-0" style="background: rgba(34,158,217,0.1);">
                             <i data-lucide="send" class="w-5 h-5 text-[#AFC0DA]"></i>
                         </div>
@@ -396,6 +396,8 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import * as AX from './src/site-settings.js';
+        let siteSettings = AX.cachedSettings();
 
         lucide.createIcons();
 
@@ -464,6 +466,10 @@
                 return;
             }
             user = session.user;
+            // Site settings + account status (suspended/banned users are signed out; maintenance blocks non-admins)
+            const access = await AX.enforceAccess(supabase, user.id);
+            if (!access.ok) return;
+            siteSettings = access.settings;
             document.getElementById('authGuard').classList.add('hidden');
             loadDashboardData();
             showTelegramPopup();

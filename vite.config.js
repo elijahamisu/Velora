@@ -37,6 +37,8 @@ export default defineConfig({
          admin_giftCodes: resolve(__dirname, 'admin/gift-codes.html'),
          admin_support: resolve(__dirname, 'admin/support.html'),
          admin_plans: resolve(__dirname, 'admin/plans.html'),
+         admin_user: resolve(__dirname, 'admin/user.html'),
+         admin_settings: resolve(__dirname, 'admin/settings.html'),
       },
     },
   },

@@ -45,7 +45,7 @@
             <div class="ax-container grid lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-16 items-center">
                 <div>
                     <a href="register.html" class="inline-flex items-center gap-2 h-8 pl-1 pr-3 rounded-lg border border-neutral-800 bg-black text-[13px] text-[var(--ax-muted)] hover:text-white transition mb-7">
-                        <span class="ax-badge ax-badge-accent h-6">New</span> ₦600 welcome bonus on sign-up <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                        <span class="ax-badge ax-badge-accent h-6">New</span> <span data-s="welcome_bonus">₦600</span> welcome bonus on sign-up <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                     </a>
                     <h1 class="ax-h1 text-[46px] sm:text-[60px] lg:text-[76px] text-white">Put your money<br>to work, <span class="ax-hl">daily.</span></h1>
                     <p class="text-[var(--ax-muted)] text-[17px] md:text-[19px] leading-relaxed mt-6 max-w-xl">
@@ -58,7 +58,7 @@
                     <div class="flex flex-wrap gap-x-6 gap-y-2 mt-8 text-[13px] text-[var(--ax-muted)]">
                         <span class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 ax-accent"></i>Plans from ₦3,000</span>
                         <span class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 ax-accent"></i>Earnings paid daily</span>
-                        <span class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 ax-accent"></i>Withdraw from ₦600</span>
+                        <span class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 ax-accent"></i>Withdraw from <span data-s="min_withdrawal">₦600</span></span>
                     </div>
                 </div>
 
@@ -91,10 +91,10 @@
         <section class="border-y border-neutral-800 bg-[var(--ax-s1)]">
             <div class="ax-container">
                 <div class="grid grid-cols-2 md:grid-cols-4 divide-neutral-800 md:divide-x">
-                    <div class="py-7 md:px-8 md:first:pl-0 border-b md:border-b-0 border-neutral-800"><p class="mono text-[30px] md:text-[36px] font-semibold ax-accent leading-none">₦600</p><p class="text-[13px] text-[var(--ax-muted)] mt-2">Welcome bonus</p></div>
+                    <div class="py-7 md:px-8 md:first:pl-0 border-b md:border-b-0 border-neutral-800"><p class="mono text-[30px] md:text-[36px] font-semibold ax-accent leading-none" data-s="welcome_bonus">₦600</p><p class="text-[13px] text-[var(--ax-muted)] mt-2">Welcome bonus</p></div>
                     <div class="py-7 pl-5 md:px-8 border-b md:border-b-0 border-l md:border-l-0 border-neutral-800"><p class="mono text-[30px] md:text-[36px] font-semibold leading-none">₦3,000</p><p class="text-[13px] text-[var(--ax-muted)] mt-2">Minimum plan</p></div>
-                    <div class="py-7 md:px-8"><p class="mono text-[30px] md:text-[36px] font-semibold leading-none">₦600</p><p class="text-[13px] text-[var(--ax-muted)] mt-2">Minimum withdrawal</p></div>
-                    <div class="py-7 pl-5 md:px-8 border-l md:border-l-0 border-neutral-800"><p class="mono text-[30px] md:text-[36px] font-semibold leading-none">15%</p><p class="text-[13px] text-[var(--ax-muted)] mt-2">Withdrawal fee, shown upfront</p></div>
+                    <div class="py-7 md:px-8"><p class="mono text-[30px] md:text-[36px] font-semibold leading-none" data-s="min_withdrawal">₦600</p><p class="text-[13px] text-[var(--ax-muted)] mt-2">Minimum withdrawal</p></div>
+                    <div class="py-7 pl-5 md:px-8 border-l md:border-l-0 border-neutral-800"><p class="mono text-[30px] md:text-[36px] font-semibold leading-none" data-s="withdrawal_fee_pct">15%</p><p class="text-[13px] text-[var(--ax-muted)] mt-2">Withdrawal fee, shown upfront</p></div>
                 </div>
             </div>
         </section>
@@ -113,7 +113,7 @@
                     <div class="bg-black p-7">
                         <span class="ax-step-num">01</span>
                         <h3 class="text-[20px] font-semibold mt-6 mb-2">Create your account</h3>
-                        <p class="text-[var(--ax-muted)] leading-relaxed">Sign up with your email and phone number. ₦600 lands in your wallet straight away.</p>
+                        <p class="text-[var(--ax-muted)] leading-relaxed">Sign up with your email and phone number. <span data-s="welcome_bonus">₦600</span> lands in your wallet straight away.</p>
                     </div>
                     <div class="bg-black p-7">
                         <span class="ax-step-num">02</span>
@@ -123,7 +123,7 @@
                     <div class="bg-black p-7">
                         <span class="ax-step-num">03</span>
                         <h3 class="text-[20px] font-semibold mt-6 mb-2">Earn daily, withdraw</h3>
-                        <p class="text-[var(--ax-muted)] leading-relaxed">Earnings are credited every day. Once you reach ₦600, request a withdrawal to your bank.</p>
+                        <p class="text-[var(--ax-muted)] leading-relaxed">Earnings are credited every day. Once you reach <span data-s="min_withdrawal">₦600</span>, request a withdrawal to your bank.</p>
                     </div>
                 </div>
             </div>
@@ -153,7 +153,7 @@
                     <div class="ax-card md:col-span-2 p-7">
                         <i data-lucide="arrow-up-right" class="w-6 h-6 ax-accent"></i>
                         <h3 class="text-[20px] font-semibold mt-5">Bank withdrawals</h3>
-                        <p class="text-[var(--ax-muted)] mt-2 leading-relaxed">Cash out from ₦600 to your Nigerian bank account. The fee is shown before you confirm.</p>
+                        <p class="text-[var(--ax-muted)] mt-2 leading-relaxed">Cash out from <span data-s="min_withdrawal">₦600</span> to your Nigerian bank account. The fee is shown before you confirm.</p>
                     </div>
                     <div class="ax-card md:col-span-2 p-7">
                         <i data-lucide="users" class="w-6 h-6 ax-accent"></i>
@@ -163,7 +163,7 @@
                     <div class="ax-card md:col-span-2 p-7">
                         <i data-lucide="life-buoy" class="w-6 h-6 ax-accent"></i>
                         <h3 class="text-[20px] font-semibold mt-5">Real support</h3>
-                        <p class="text-[var(--ax-muted)] mt-2 leading-relaxed">Open a ticket in the app and chat with the team, plus a Telegram community for updates.</p>
+                        <p class="text-[var(--ax-muted)] mt-2 leading-relaxed">Open a ticket in the app and chat with the team, plus a <a href="https://t.me/+s66HnQZjuCFhZTI0" data-s-href="telegram_link" target="_blank" rel="noopener" class="ax-accent hover:text-white">Telegram community</a> for updates.</p>
                     </div>
                 </div>
             </div>
@@ -217,7 +217,7 @@
                 <div class="ax-faq">
                     <details open>
                         <summary>How do I start?<span class="ax-faq-icon"><i data-lucide="plus" class="w-4 h-4"></i></span></summary>
-                        <p>Register with your email and phone number, claim your ₦600 bonus, then fund your wallet and choose a plan starting from ₦3,000.</p>
+                        <p>Register with your email and phone number, claim your <span data-s="welcome_bonus">₦600</span> bonus, then fund your wallet and choose a plan starting from ₦3,000.</p>
                     </details>
                     <details>
                         <summary>When are earnings paid?<span class="ax-faq-icon"><i data-lucide="plus" class="w-4 h-4"></i></span></summary>
@@ -225,7 +225,7 @@
                     </details>
                     <details>
                         <summary>What does it cost to withdraw?<span class="ax-faq-icon"><i data-lucide="plus" class="w-4 h-4"></i></span></summary>
-                        <p>Withdrawals start from ₦600. A 15% fee is applied to each withdrawal to keep the platform running, and it’s shown before you confirm.</p>
+                        <p>Withdrawals start from <span data-s="min_withdrawal">₦600</span>. A <span data-s="withdrawal_fee_pct">15%</span> fee is applied to each withdrawal to keep the platform running, and it’s shown before you confirm.</p>
                     </details>
                     <details>
                         <summary>How do referrals work?<span class="ax-faq-icon"><i data-lucide="plus" class="w-4 h-4"></i></span></summary>
@@ -244,7 +244,7 @@
             <div class="ax-cta-band p-8 md:p-12 flex flex-col md:flex-row md:items-center justify-between gap-8 relative overflow-hidden">
                 <div>
                     <h2 class="ax-h2 text-[34px] md:text-[48px] text-[var(--ax-text)]">Start with ₦3,000.</h2>
-                    <p class="text-[var(--ax-muted)] mt-3 text-[17px]">Open an account in a minute and get ₦600 to begin.</p>
+                    <p class="text-[var(--ax-muted)] mt-3 text-[17px]">Open an account in a minute and get <span data-s="welcome_bonus">₦600</span> to begin.</p>
                 </div>
                 <a href="register.html" class="ax-btn ax-btn-primary ax-btn-lg self-start md:self-auto">Create free account <i data-lucide="arrow-right"></i></a>
             </div>
@@ -256,7 +256,7 @@
         <div class="ax-container py-14 grid md:grid-cols-[1.5fr_1fr_1fr_1fr] gap-10">
             <div>
                 <span class="ax-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span>
-                <p class="text-[var(--ax-muted)] text-sm mt-4 max-w-xs">Daily-earning investment plans with a simple wallet and bank withdrawals.</p>
+                <p class="text-[var(--ax-muted)] text-sm mt-4 max-w-xs"><span data-s="tagline" class="block text-white/80 mb-1">Put your money to work, daily.</span>Daily-earning investment plans with a simple wallet and bank withdrawals.</p>
             </div>
             <div>
                 <h5 class="text-[13px] font-semibold mb-4">Product</h5>
@@ -278,10 +278,17 @@
                 <ul class="space-y-2.5 text-sm text-[var(--ax-muted)]">
                     <li><a href="terms.html" class="hover:text-white">Terms of service</a></li>
                 </ul>
+                <h5 class="text-[13px] font-semibold mb-4 mt-8">Contact</h5>
+                <ul class="space-y-2.5 text-sm text-[var(--ax-muted)]">
+                    <li><a href="https://t.me/+s66HnQZjuCFhZTI0" data-s-href="telegram_link" target="_blank" rel="noopener" class="hover:text-white">Telegram</a></li>
+                    <li data-s-show="support_email" class="hidden"><a data-s-href="support_email" data-s-kind="mailto" data-s="support_email" class="hover:text-white break-all"></a></li>
+                    <li data-s-show="support_phone" class="hidden"><a data-s-href="support_phone" data-s-kind="tel" data-s="support_phone" class="hover:text-white"></a></li>
+                    <li data-s-show="support_whatsapp" class="hidden"><a data-s-href="support_whatsapp" data-s-kind="whatsapp" target="_blank" rel="noopener" class="hover:text-white">WhatsApp</a></li>
+                </ul>
             </div>
         </div>
         <div class="ax-container py-6 border-t border-neutral-800 flex flex-col sm:flex-row justify-between gap-2 text-[12px] text-[var(--ax-faint)]">
-            <span>© 2026 Altivex. All rights reserved.</span>
+            <span>© 2026 <span data-s="site_name">Altivex</span>. All rights reserved.</span>
             <span>Investing carries risk. Only invest what you can afford.</span>
         </div>
     </footer>
@@ -289,6 +296,10 @@
     <!-- Icons are initialised in their own script so they render even if the
          placeholder Supabase snippet below fails to evaluate. -->
     <script>lucide.createIcons();</script>
+    <script type="module">
+        import { initPublic } from './src/site-settings.js';
+        initPublic();
+    </script>
 
 </body>
 </html>

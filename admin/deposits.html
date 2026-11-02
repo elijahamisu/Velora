@@ -83,6 +83,7 @@
             <a href="plans.html" data-page="plans" class="sidebar-item" aria-label="Plans"><i data-lucide="layers"></i><span class="ax-tip">Plans</span></a>
             <a href="gift-codes.html" data-page="gift-codes" class="sidebar-item" aria-label="Gift codes"><i data-lucide="gift"></i><span class="ax-tip">Gift codes</span></a>
             <a href="support.html" data-page="support" class="sidebar-item" aria-label="Support"><i data-lucide="life-buoy"></i><span class="ax-tip">Support</span></a>
+            <a href="settings.html" data-page="settings" class="sidebar-item" aria-label="Settings"><i data-lucide="settings"></i><span class="ax-tip">Settings</span></a>
             <span class="flex-1"></span>
             <span class="ax-rail-sep"></span>
             <button id="logoutBtn" class="sidebar-item ax-logout" aria-label="Log out"><i data-lucide="log-out"></i><span class="ax-tip">Log out</span></button>
@@ -112,6 +113,7 @@
             <a href="plans.html" data-page="plans" class="drawer-item"><i data-lucide="layers"></i><span>Plans</span></a>
             <a href="gift-codes.html" data-page="gift-codes" class="drawer-item"><i data-lucide="gift"></i><span>Gift codes</span></a>
             <a href="support.html" data-page="support" class="drawer-item"><i data-lucide="life-buoy"></i><span>Support</span></a>
+            <a href="settings.html" data-page="settings" class="drawer-item"><i data-lucide="settings"></i><span>Settings</span></a>
             <div class="ax-divider my-2"></div>
             <button id="drawerLogoutBtn" class="drawer-item ax-logout"><i data-lucide="log-out"></i><span>Log out</span></button>
         </nav>
@@ -374,58 +376,14 @@
         }
 
         // --- 3. Actions ---
+        // Approve/reject run as one database transaction (admin_approve_deposit /
+        // admin_reject_deposit RPCs): mark approved, credit the wallet, pay the
+        // referrer the commission % from admin Settings, and notify the client.
         window.approveDeposit = async (id, amount, userId) => {
             if (!confirm(`Approve deposit of ₦${Number(amount).toLocaleString()}?`)) return;
             try {
-                const { error: depErr } = await supabase.from('deposits').update({ status: 'approved' }).eq('id', id);
-                if (depErr) throw depErr;
-
-                // Credit wallet — read-modify-write; for production, prefer an
-                // atomic RPC/increment to avoid a race with concurrent updates.
-                const { data: wallet } = await supabase.from('wallets').select('available_balance').eq('user_id', userId).single();
-                const newBalance = Number(wallet?.available_balance || 0) + Number(amount);
-                await supabase.from('wallets').update({ available_balance: newBalance }).eq('user_id', userId);
-
-                // NOTE: the previous version of this function also tried to
-                // update transactions.status, but `transactions` has no
-                // `status` column — that call was silently failing every
-                // time (error wasn't even checked) and has been removed.
-                // Deposit status lives only on `deposits.status`, already
-                // updated above.
-
-                // Referral bonus: 20% of every approved deposit is credited
-                // to the depositor's referrer (profiles.referred_by), if any.
-                const { data: depositorProfile } = await supabase.from('profiles')
-                    .select('referred_by')
-                    .eq('id', userId)
-                    .single();
-
-                if (depositorProfile?.referred_by) {
-                    const bonusAmount = Number(amount) * 0.20;
-                    const { data: referrerWallet } = await supabase.from('wallets')
-                        .select('available_balance')
-                        .eq('user_id', depositorProfile.referred_by)
-                        .single();
-                    const referrerNewBalance = Number(referrerWallet?.available_balance || 0) + bonusAmount;
-
-                    await supabase.from('wallets')
-                        .update({ available_balance: referrerNewBalance })
-                        .eq('user_id', depositorProfile.referred_by);
-
-                    await supabase.from('transactions').insert([{
-                        user_id: depositorProfile.referred_by,
-                        amount: bonusAmount,
-                        type: 'referral_bonus',
-                        description: `20% referral bonus from a downstream deposit of ₦${Number(amount).toLocaleString()}`
-                    }]);
-                }
-
-                await supabase.from('notifications').insert([{
-                    user_id: userId,
-                    title: 'Deposit Approved',
-                    message: `Your deposit of ₦${Number(amount).toLocaleString()} has been approved and credited to your wallet.`
-                }]);
-
+                const { error } = await supabase.rpc('admin_approve_deposit', { p_deposit: id });
+                if (error) throw error;
                 loadStats();
                 loadDeposits();
             } catch (err) {
@@ -436,7 +394,8 @@
         window.rejectDeposit = async (id) => {
             if (!confirm('Reject this deposit request?')) return;
             try {
-                await supabase.from('deposits').update({ status: 'rejected' }).eq('id', id);
+                const { error } = await supabase.rpc('admin_reject_deposit', { p_deposit: id });
+                if (error) throw error;
                 loadStats();
                 loadDeposits();
             } catch (err) {

@@ -152,7 +152,7 @@
                     </button>
 
                     <p class="text-[10px] text-[var(--muted)] text-center mt-4 flex items-center justify-center gap-1.5">
-                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Minimum deposit ₦3,000 · Bank-verified transfer
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Minimum deposit <span data-s="min_deposit">₦3,000</span><span id="maxDepositNote" class="hidden"> · Max <span data-s="max_deposit"></span></span> · Bank-verified transfer
                     </p>
                 </div>
 
@@ -210,19 +210,19 @@
                             <div class="border border-neutral-800 rounded-[10px] overflow-hidden">
                                 <div class="bg-black/[0.02] px-4 py-3 flex items-center justify-between border-b border-black/[0.05]">
                                     <span class="text-[10px] uppercase font-bold text-[var(--muted)] tracking-wide">Bank Name</span>
-                                    <span class="text-sm font-semibold" id="bankNameDisplay">FIDELITY BANK</span>
+                                    <span class="text-sm font-semibold" id="bankNameDisplay" data-s="bank_name">FIDELITY BANK</span>
                                 </div>
                                 <div class="px-4 py-3 flex items-center justify-between border-b border-black/[0.05]">
                                     <span class="text-[10px] uppercase font-bold text-[var(--muted)] tracking-wide">Account Name</span>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-sm font-semibold" id="accNameDisplay">AMISU ELIJAH</span>
+                                        <span class="text-sm font-semibold" id="accNameDisplay" data-s="bank_account_name">AMISU ELIJAH</span>
                                         <button class="copy-btn ax-accent" onclick="copyText('accNameDisplay')"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
                                     </div>
                                 </div>
                                 <div class="px-4 py-3 flex items-center justify-between">
                                     <span class="text-[10px] uppercase font-bold text-[var(--muted)] tracking-wide">Account Number</span>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-lg font-bold mono tracking-wider" id="accNumDisplay">4580003805</span>
+                                        <span class="text-lg font-bold mono tracking-wider" id="accNumDisplay" data-s="bank_account_number">4580003805</span>
                                         <button class="copy-btn ax-accent" onclick="copyText('accNumDisplay')"><i data-lucide="copy" class="w-4 h-4"></i></button>
                                     </div>
                                 </div>
@@ -318,6 +318,8 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import * as AX from './src/site-settings.js';
+        let siteSettings = AX.cachedSettings();
 
         lucide.createIcons();
 
@@ -365,7 +367,14 @@
         document.querySelectorAll('#drawerNav a[data-page]').forEach(a => a.addEventListener('click', closeDrawer));
 
         let user = null;
-        const MIN_DEPOSIT = 3000;
+        // Limits come from admin Settings (site_settings); 3000 is the fallback.
+        const minDeposit = () => Number(siteSettings.min_deposit || 3000);
+        const maxDeposit = () => (siteSettings.max_deposit ? Number(siteSettings.max_deposit) : null);
+        function depositLimitError(amount) {
+            if (!amount || amount < minDeposit()) return `Enter a valid amount (minimum ${AX.naira(minDeposit())})`;
+            if (maxDeposit() && amount > maxDeposit()) return `The maximum single deposit is ${AX.naira(maxDeposit())}`;
+            return null;
+        }
 
         // --- 1. Auth Guard ---
         async function checkAuth() {
@@ -375,8 +384,17 @@
                 return;
             }
             user = session.user;
+            // Site settings + account status (suspended/banned users are signed out; maintenance blocks non-admins)
+            const access = await AX.enforceAccess(supabase, user.id);
+            if (!access.ok) return;
+            siteSettings = access.settings;
+            const depInput = document.getElementById('depositAmount');
+            depInput.min = minDeposit();
+            depInput.placeholder = String(minDeposit());
+            if (maxDeposit()) { depInput.max = maxDeposit(); document.getElementById('maxDepositNote').classList.remove('hidden'); }
             document.getElementById('authGuard').classList.add('hidden');
-            // Bank details are set directly in the HTML above (Zap Account:
+            // Bank details are filled from admin Settings via data-s attributes,
+            // falling back to the values in the HTML above (Zap Account:
             // Fidelity Bank / AMISU ELIJAH / 4580003805) rather than pulled
             // from VITE_BANK_ACCOUNT_NAME/NUMBER env vars, so there's one
             // source of truth instead of two that can drift out of sync.
@@ -475,8 +493,9 @@
 
         document.getElementById('startCheckoutBtn').addEventListener('click', () => {
             const amount = parseFloat(document.getElementById('depositAmount').value);
-            if (!amount || amount < MIN_DEPOSIT) {
-                alert(`Enter a valid amount (minimum ₦${MIN_DEPOSIT})`);
+            const limitErr = depositLimitError(amount);
+            if (limitErr) {
+                alert(limitErr);
                 return;
             }
             document.getElementById('checkoutAmount').textContent = `₦${amount.toLocaleString()}`;
@@ -510,8 +529,9 @@
             const accountName = document.getElementById('accountName').value.trim();
             const bankName = document.getElementById('bankName').value.trim();
 
-            if (amount < MIN_DEPOSIT) {
-                alert(`Minimum deposit is ₦${MIN_DEPOSIT}`);
+            const limitErr = depositLimitError(amount);
+            if (limitErr) {
+                alert(limitErr);
                 return;
             }
             if (!accountName || !bankName) {

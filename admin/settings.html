@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0A0F1C">
+    <title>Settings · Altivex Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --ink: #0C0E13;
+            --ink-soft: #171A22;
+            --paper: #F6F4EF;
+            --paper-card: #FFFFFF;
+            --gold: #D9C7A3;
+            --gold-deep: #D9C7A3;
+            --gold-light: #D9C7A3;
+            --line: rgba(217, 199, 163, 0.16);
+            --ink-text: #14161C;
+            --muted: #7A7E88;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--paper);
+            color: var(--ink-text);
+            overflow-x: hidden;
+        }
+        .field {
+            background: #FAF9F6;
+            border: 1px solid rgba(20,22,28,0.08);
+            transition: border-color .18s ease, background .18s ease;
+        }
+        .field:focus { outline: none; border-color: var(--gold); background: #fff; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .lbl { display:block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 6px 2px; }
+        .hint { font-size: 10px; color: var(--muted); margin: 6px 0 0 2px; }
+        .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px; border-radius: 10px; background: rgba(255,255,255,0.02); }
+        .toggle-switch { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; inset: 0; background-color: rgba(255,255,255,0.12); transition: 0.2s; border-radius: 26px; }
+        .toggle-slider::before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: 0.2s; border-radius: 50%; }
+        .toggle-switch input:checked + .toggle-slider { background-color: var(--gold); }
+        .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+        .day-chip input { display: none; }
+        .day-chip span { display: inline-flex; align-items: center; justify-content: center; min-width: 46px; height: 38px; padding: 0 10px; border-radius: 10px; font-size: 12px; font-weight: 600; border: 1px solid var(--ax-border); color: var(--ax-muted); cursor: pointer; }
+        .day-chip input:checked + span { color: #0A0F1C; background: var(--ax-accent); border-color: var(--ax-accent); }
+        .section-nav a { white-space: nowrap; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; color: var(--ax-muted); }
+        .section-nav a:hover { color: var(--ax-accent); }
+        section[id] { scroll-margin-top: calc(var(--ax-top, 64px) + 16px); }
+    </style>
+    <link rel="stylesheet" href="/altivex.css">
+</head>
+<body class="bg-[var(--paper)]">
+
+    <!-- Auth Guard Loader -->
+    <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
+        <div class="text-center" id="loaderContent">
+            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(217, 199, 163,0.25); border-top-color: var(--gold);"></div>
+            <span class="ax-logo ax-logo-lg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span>
+            <p class="text-[10px] uppercase tracking-[0.08em] text-white/30 mt-2">Verifying Admin Access</p>
+        </div>
+    </div>
+
+    <!-- ============ Altivex admin shell: top bar ============ -->
+    <header class="ax-topbar ax-topbar-admin">
+        <div class="ax-topbar-inner">
+            <div class="flex items-center gap-3 min-w-0">
+                <button id="menuToggle" class="ax-icon-btn lg:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+                    <i data-lucide="menu"></i>
+                </button>
+                <a href="dashboard.html" class="lg:hidden" aria-label="Admin home"><span class="ax-logo ax-logo-sm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span></a>
+                <span class="ax-admin-tag hidden sm:inline-flex lg:inline-flex">Admin</span>
+                <span class="ax-crumb">Settings</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block leading-tight">
+                    <p id="adminName" class="text-[13px] font-semibold text-white">Admin</p>
+                    <p id="adminRole" class="text-[11px] text-[var(--ax-muted)] uppercase tracking-[0.06em]">...</p>
+                </div>
+                <div class="ax-avatar" id="adminInitials">A</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============ Admin icon rail (id kept as "sidebar") ============ -->
+    <aside id="sidebar" class="ax-rail" aria-label="Admin navigation">
+        <a href="dashboard.html" class="ax-rail-brand ax-logo ax-mark-only" aria-label="Altivex admin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <nav id="sidebarNav">
+            <a href="dashboard.html" data-page="dashboard" class="sidebar-item" aria-label="Overview"><i data-lucide="layout-grid"></i><span class="ax-tip">Overview</span></a>
+            <a href="users.html" data-page="users" class="sidebar-item" aria-label="Users"><i data-lucide="users"></i><span class="ax-tip">Users</span></a>
+            <a href="deposits.html" data-page="deposits" class="sidebar-item" aria-label="Deposits"><i data-lucide="arrow-down-left"></i><span class="ax-tip">Deposits</span></a>
+            <a href="withdrawals.html" data-page="withdrawals" class="sidebar-item" aria-label="Withdrawals"><i data-lucide="arrow-up-right"></i><span class="ax-tip">Withdrawals</span></a>
+            <a href="investments.html" data-page="investments" class="sidebar-item" aria-label="Investments"><i data-lucide="trending-up"></i><span class="ax-tip">Investments</span></a>
+            <a href="plans.html" data-page="plans" class="sidebar-item" aria-label="Plans"><i data-lucide="layers"></i><span class="ax-tip">Plans</span></a>
+            <a href="gift-codes.html" data-page="gift-codes" class="sidebar-item" aria-label="Gift codes"><i data-lucide="gift"></i><span class="ax-tip">Gift codes</span></a>
+            <a href="support.html" data-page="support" class="sidebar-item" aria-label="Support"><i data-lucide="life-buoy"></i><span class="ax-tip">Support</span></a>
+            <a href="settings.html" data-page="settings" class="sidebar-item" aria-label="Settings"><i data-lucide="settings"></i><span class="ax-tip">Settings</span></a>
+            <span class="flex-1"></span>
+            <span class="ax-rail-sep"></span>
+            <button id="logoutBtn" class="sidebar-item ax-logout" aria-label="Log out"><i data-lucide="log-out"></i><span class="ax-tip">Log out</span></button>
+        </nav>
+    </aside>
+
+    <!-- ============ Mobile admin menu ============ -->
+    <div id="drawerOverlay"></div>
+    <aside id="mobileDrawer" class="ax-sheet-left" aria-label="Admin menu">
+        <div class="ax-sheet-head">
+            <span class="flex items-center gap-2"><span class="ax-logo ax-logo-sm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span><span class="ax-admin-tag">Admin</span></span>
+            <button id="drawerClose" aria-label="Close menu" class="ax-icon-btn"><i data-lucide="x"></i></button>
+        </div>
+        <div class="ax-sheet-account">
+            <span class="ax-avatar ax-avatar-lg" id="drawerInitials">A</span>
+            <div class="min-w-0">
+                <p id="drawerName" class="text-sm font-semibold text-white truncate">Admin</p>
+                <p id="drawerRole" class="text-[11px] text-[var(--ax-muted)] uppercase tracking-[0.06em] truncate">...</p>
+            </div>
+        </div>
+        <nav class="ax-sheet-nav" id="drawerNav">
+            <a href="dashboard.html" data-page="dashboard" class="drawer-item"><i data-lucide="layout-grid"></i><span>Overview</span></a>
+            <a href="users.html" data-page="users" class="drawer-item"><i data-lucide="users"></i><span>Users</span></a>
+            <a href="deposits.html" data-page="deposits" class="drawer-item"><i data-lucide="arrow-down-left"></i><span>Deposits</span></a>
+            <a href="withdrawals.html" data-page="withdrawals" class="drawer-item"><i data-lucide="arrow-up-right"></i><span>Withdrawals</span></a>
+            <a href="investments.html" data-page="investments" class="drawer-item"><i data-lucide="trending-up"></i><span>Investments</span></a>
+            <a href="plans.html" data-page="plans" class="drawer-item"><i data-lucide="layers"></i><span>Plans</span></a>
+            <a href="gift-codes.html" data-page="gift-codes" class="drawer-item"><i data-lucide="gift"></i><span>Gift codes</span></a>
+            <a href="support.html" data-page="support" class="drawer-item"><i data-lucide="life-buoy"></i><span>Support</span></a>
+            <a href="settings.html" data-page="settings" class="drawer-item"><i data-lucide="settings"></i><span>Settings</span></a>
+            <div class="ax-divider my-2"></div>
+            <button id="drawerLogoutBtn" class="drawer-item ax-logout"><i data-lucide="log-out"></i><span>Log out</span></button>
+        </nav>
+    </aside>
+
+    <!-- ============ Mobile tab bar (id kept as "islandNav") ============ -->
+    <nav id="islandNav" class="ax-tabbar" aria-label="Tabs">
+        <a href="dashboard.html" data-page="dashboard" class="island-item"><i data-lucide="layout-grid"></i><span>Home</span></a>
+        <a href="users.html" data-page="users" class="island-item"><i data-lucide="users"></i><span>Users</span></a>
+        <a href="deposits.html" data-page="deposits" class="island-item"><i data-lucide="arrow-down-left"></i><span>Deposits</span></a>
+        <a href="withdrawals.html" data-page="withdrawals" class="island-item"><i data-lucide="arrow-up-right"></i><span>Payouts</span></a>
+        <a href="support.html" data-page="support" class="island-item"><i data-lucide="life-buoy"></i><span>Support</span></a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="ax-main ax-main-admin">
+        <div class="max-w-4xl mx-auto pb-28">
+
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
+                <div>
+                    <h1 class="text-3xl ax-display font-semibold">Site settings</h1>
+                    <p class="text-xs text-[var(--muted)] mt-1">Changes go live on every page as soon as you save.</p>
+                </div>
+                <p id="lastUpdated" class="text-[10px] text-[var(--muted)] mono"></p>
+            </div>
+
+            <nav class="section-nav ax-card rounded-[14px] p-1.5 mb-6 flex gap-1 overflow-x-auto no-scrollbar" aria-label="Settings sections">
+                <a href="#sec-status">Site status</a>
+                <a href="#sec-brand">Brand</a>
+                <a href="#sec-contact">Contact</a>
+                <a href="#sec-deposits">Deposits</a>
+                <a href="#sec-withdrawals">Withdrawals</a>
+                <a href="#sec-rewards">Rewards</a>
+            </nav>
+
+            <form id="settingsForm" class="space-y-6" novalidate>
+
+                <!-- Site status -->
+                <section id="sec-status" class="ax-card rounded-[14px] p-6 md:p-8">
+                    <h4 class="text-lg font-semibold ax-display mb-5 flex items-center gap-2"><i data-lucide="power" class="w-5 h-5 ax-accent"></i> Site status</h4>
+                    <div class="space-y-3">
+                        <div class="toggle-row">
+                            <div><p class="text-sm font-semibold">Maintenance mode</p><p class="hint !mt-1">Clients see the message below instead of the site. Admins keep full access.</p></div>
+                            <label class="toggle-switch"><input type="checkbox" name="maintenance_mode"><span class="toggle-slider"></span></label>
+                        </div>
+                        <div>
+                            <label class="lbl" for="maintenance_message">Maintenance message</label>
+                            <textarea id="maintenance_message" name="maintenance_message" rows="2" class="field w-full rounded-lg px-4 py-3 text-sm"></textarea>
+                        </div>
+                        <div class="toggle-row">
+                            <div><p class="text-sm font-semibold">Registration open</p><p class="hint !mt-1">When off, the sign-up form is disabled and new accounts are refused.</p></div>
+                            <label class="toggle-switch"><input type="checkbox" name="registration_open"><span class="toggle-slider"></span></label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Brand -->
+                <section id="sec-brand" class="ax-card rounded-[14px] p-6 md:p-8">
+                    <h4 class="text-lg font-semibold ax-display mb-5 flex items-center gap-2"><i data-lucide="gem" class="w-5 h-5 ax-accent"></i> Brand &amp; announcement</h4>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div><label class="lbl" for="site_name">Site name</label><input id="site_name" name="site_name" required maxlength="40" class="field w-full rounded-lg px-4 py-3 text-sm"></div>
+                        <div><label class="lbl" for="tagline">Tagline</label><input id="tagline" name="tagline" maxlength="120" class="field w-full rounded-lg px-4 py-3 text-sm"></div>
+                        <div class="md:col-span-2">
+                            <label class="lbl" for="announcement_text">Announcement banner</label>
+                            <textarea id="announcement_text" name="announcement_text" rows="2" maxlength="300" placeholder="Leave empty to hide the banner" class="field w-full rounded-lg px-4 py-3 text-sm"></textarea>
+                            <p class="hint">Shown at the top of every page until the visitor dismisses it.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Contact -->
+                <section id="sec-contact" class="ax-card rounded-[14px] p-6 md:p-8">
+                    <h4 class="text-lg font-semibold ax-display mb-5 flex items-center gap-2"><i data-lucide="headset" class="w-5 h-5 ax-accent"></i> Support &amp; community</h4>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div><label class="lbl" for="support_email">Support email</label><input id="support_email" name="support_email" type="email" placeholder="support@example.com" class="field w-full rounded-lg px-4 py-3 text-sm"></div>
+                        <div><label class="lbl" for="support_phone">Support phone</label><input id="support_phone" name="support_phone" type="tel" placeholder="+234…" class="field w-full rounded-lg px-4 py-3 text-sm"></div>
+                        <div><label class="lbl" for="support_whatsapp">WhatsApp number or link</label><input id="support_whatsapp" name="support_whatsapp" placeholder="2348012345678 or https://wa.me/…" class="field w-full rounded-lg px-4 py-3 text-sm"></div>
+                        <div><label class="lbl" for="telegram_link">Telegram community link</label><input id="telegram_link" name="telegram_link" type="url" placeholder="https://t.me/…" class="field w-full rounded-lg px-4 py-3 text-sm"><p class="hint">Used for the dashboard pop-up, landing page, and support page.</p></div>
+                        <div class="md:col-span-2"><label class="lbl" for="telegram_support_link">Telegram direct-support link</label><input id="telegram_support_link" name="telegram_support_link" type="url" placeholder="https://t.me/…" class="field w-full rounded-lg px-4 py-3 text-sm"></div>
+                    </div>
+                </section>
+
+                <!-- Deposits -->
+                <section id="sec-deposits" class="ax-card rounded-[14px] p-6 md:p-8">
+                    <h4 class="text-lg font-semibold ax-display mb-5 flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 ax-accent"></i> Deposits</h4>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div><label class="lbl" for="bank_name">Bank name</label><input id="bank_name" name="bank_name" required class="field w-full rounded-lg px-4 py-3 text-sm"></div>
+                        <div><label class="lbl" for="bank_account_name">Account name</label><input id="bank_account_name" name="bank_account_name" required class="field w-full rounded-lg px-4 py-3 text-sm"></div>
+                        <div><label class="lbl" for="bank_account_number">Account number</label><input id="bank_account_number" name="bank_account_number" required inputmode="numeric" maxlength="20" class="field w-full rounded-lg px-4 py-3 text-sm mono"></div>
+                        <div><label class="lbl" for="min_deposit">Minimum deposit (₦)</label><input id="min_deposit" name="min_deposit" type="number" min="0" step="1" required class="field w-full rounded-lg px-4 py-3 text-sm mono"></div>
+                        <div><label class="lbl" for="max_deposit">Maximum deposit (₦)</label><input id="max_deposit" name="max_deposit" type="number" min="0" step="1" placeholder="No limit" class="field w-full rounded-lg px-4 py-3 text-sm mono"><p class="hint">Leave empty for no limit.</p></div>
+                    </div>
+                </section>
+
+                <!-- Withdrawals -->
+                <section id="sec-withdrawals" class="ax-card rounded-[14px] p-6 md:p-8">
+                    <h4 class="text-lg font-semibold ax-display mb-5 flex items-center gap-2"><i data-lucide="arrow-up-right" class="w-5 h-5 ax-accent"></i> Withdrawals</h4>
+                    <div class="grid md:grid-cols-3 gap-4 mb-5">
+                        <div><label class="lbl" for="min_withdrawal">Minimum (₦)</label><input id="min_withdrawal" name="min_withdrawal" type="number" min="0" step="1" required class="field w-full rounded-lg px-4 py-3 text-sm mono"></div>
+                        <div><label class="lbl" for="max_withdrawal">Maximum (₦)</label><input id="max_withdrawal" name="max_withdrawal" type="number" min="0" step="1" placeholder="No limit" class="field w-full rounded-lg px-4 py-3 text-sm mono"></div>
+                        <div><label class="lbl" for="withdrawal_fee_pct">Fee (%)</label><input id="withdrawal_fee_pct" name="withdrawal_fee_pct" type="number" min="0" max="100" step="0.01" required class="field w-full rounded-lg px-4 py-3 text-sm mono"></div>
+                    </div>
+                    <p class="lbl">Open days (Lagos time)</p>
+                    <div class="flex flex-wrap gap-2 mb-5" id="dayChips">
+                        <label class="day-chip"><input type="checkbox" name="wd_day" value="1"><span>Mon</span></label>
+                        <label class="day-chip"><input type="checkbox" name="wd_day" value="2"><span>Tue</span></label>
+                        <label class="day-chip"><input type="checkbox" name="wd_day" value="3"><span>Wed</span></label>
+                        <label class="day-chip"><input type="checkbox" name="wd_day" value="4"><span>Thu</span></label>
+                        <label class="day-chip"><input type="checkbox" name="wd_day" value="5"><span>Fri</span></label>
+                        <label class="day-chip"><input type="checkbox" name="wd_day" value="6"><span>Sat</span></label>
+                        <label class="day-chip"><input type="checkbox" name="wd_day" value="0"><span>Sun</span></label>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="lbl" for="withdrawal_open_time">Opens at</label><input id="withdrawal_open_time" name="withdrawal_open_time" type="time" required class="field w-full rounded-lg px-4 py-3 text-sm mono"></div>
+                        <div><label class="lbl" for="withdrawal_close_time">Closes at</label><input id="withdrawal_close_time" name="withdrawal_close_time" type="time" required class="field w-full rounded-lg px-4 py-3 text-sm mono"></div>
+                    </div>
+                    <p class="hint" id="wdPreview"></p>
+                </section>
+
+                <!-- Rewards -->
+                <section id="sec-rewards" class="ax-card rounded-[14px] p-6 md:p-8">
+                    <h4 class="text-lg font-semibold ax-display mb-5 flex items-center gap-2"><i data-lucide="gift" class="w-5 h-5 ax-accent"></i> Rewards</h4>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div><label class="lbl" for="welcome_bonus">Welcome bonus (₦)</label><input id="welcome_bonus" name="welcome_bonus" type="number" min="0" step="1" required class="field w-full rounded-lg px-4 py-3 text-sm mono"><p class="hint">Credited to new accounts at sign-up. Existing users are not affected.</p></div>
+                        <div><label class="lbl" for="referral_commission_pct">Referral commission (%)</label><input id="referral_commission_pct" name="referral_commission_pct" type="number" min="0" max="100" step="0.01" required class="field w-full rounded-lg px-4 py-3 text-sm mono"><p class="hint">Paid to the referrer when you approve their invitee's deposit.</p></div>
+                    </div>
+                </section>
+            </form>
+        </div>
+    </main>
+
+    <!-- Sticky save bar -->
+    <div class="fixed left-0 right-0 bottom-[calc(64px+env(safe-area-inset-bottom))] lg:bottom-0 lg:left-[var(--ax-rail,76px)] z-[60] px-4 pb-3 lg:pb-5 pointer-events-none">
+        <div class="max-w-4xl mx-auto ax-card rounded-[14px] p-3 flex items-center justify-between gap-3 pointer-events-auto" style="background: var(--ax-s2);">
+            <p id="saveState" class="text-xs text-[var(--muted)] pl-2">No unsaved changes</p>
+            <div class="flex gap-2">
+                <button type="button" id="resetBtn" class="ax-btn ax-btn-sm">Discard</button>
+                <button type="submit" form="settingsForm" id="saveBtn" class="ax-btn ax-btn-primary ax-btn-sm">Save settings</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="hidden fixed left-1/2 -translate-x-1/2 top-20 z-[120] px-4 py-3 rounded-[10px] text-sm font-semibold shadow-lg"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { DEFAULTS, withdrawalWindowLabel } from '../src/site-settings.js';
+
+        lucide.createIcons();
+
+        const supabase = createClient(
+            import.meta.env.VITE_SUPABASE_URL,
+            import.meta.env.VITE_SUPABASE_ANON_KEY
+        );
+
+        // --- 0. Active nav state ---
+        function setActiveNav() {
+            const current = 'settings';
+            document.querySelectorAll('#sidebarNav a[data-page]').forEach(a => a.classList.toggle('sidebar-active', a.dataset.page === current));
+            document.querySelectorAll('#islandNav a[data-page]').forEach(a => a.classList.toggle('active', a.dataset.page === current));
+            document.querySelectorAll('#drawerNav a[data-page]').forEach(a => a.classList.toggle('drawer-active', a.dataset.page === current));
+        }
+
+        // --- 0b. Mobile drawer ---
+        const drawer = document.getElementById('mobileDrawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+        const drawerClose = document.getElementById('drawerClose');
+        function openDrawer() { drawer.classList.add('open'); drawerOverlay.classList.add('open'); menuToggle.setAttribute('aria-expanded', 'true'); document.body.style.overflow = 'hidden'; }
+        function closeDrawer() { drawer.classList.remove('open'); drawerOverlay.classList.remove('open'); menuToggle.setAttribute('aria-expanded', 'false'); document.body.style.overflow = ''; }
+        menuToggle.addEventListener('click', openDrawer);
+        drawerClose.addEventListener('click', closeDrawer);
+        drawerOverlay.addEventListener('click', closeDrawer);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+        document.querySelectorAll('#drawerNav a[data-page]').forEach(a => a.addEventListener('click', closeDrawer));
+
+        const form = document.getElementById('settingsForm');
+        const TEXT = ['site_name', 'tagline', 'announcement_text', 'support_email', 'support_phone', 'support_whatsapp', 'telegram_link',
+                      'telegram_support_link', 'bank_name', 'bank_account_name', 'bank_account_number', 'maintenance_message'];
+        const NUMS = ['min_deposit', 'min_withdrawal', 'withdrawal_fee_pct', 'welcome_bonus', 'referral_commission_pct'];
+        const OPTIONAL_NUMS = ['max_deposit', 'max_withdrawal'];
+        const BOOLS = ['maintenance_mode', 'registration_open'];
+        let saved = null;
+
+        function toast(msg, ok = true) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `fixed left-1/2 -translate-x-1/2 top-20 z-[120] px-4 py-3 rounded-[10px] text-sm font-semibold shadow-lg ${ok ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`;
+            clearTimeout(toast._t);
+            toast._t = setTimeout(() => t.classList.add('hidden'), 3500);
+        }
+
+        // --- 1. Init / admin guard ---
+        async function init() {
+            try {
+                const { data: { session }, error: authError } = await supabase.auth.getSession();
+                if (authError || !session) throw new Error('No valid session found.');
+                const { data: profile, error: profileError } = await supabase.from('profiles').select('role, full_name').eq('id', session.user.id).single();
+                if (profileError || !profile || !['admin', 'super_admin'].includes(profile.role)) {
+                    await supabase.auth.signOut();
+                    window.location.href = 'login.html?error=unauthorized';
+                    return;
+                }
+                const roleLabel = profile.role === 'super_admin' ? 'Super Admin' : 'Administrator';
+                document.getElementById('adminName').textContent = profile.full_name || 'Admin';
+                document.getElementById('adminInitials').textContent = (profile.full_name || 'A').charAt(0);
+                document.getElementById('drawerName').textContent = profile.full_name || 'Admin';
+                document.getElementById('drawerInitials').textContent = (profile.full_name || 'A').charAt(0);
+                document.getElementById('adminRole').textContent = roleLabel;
+                document.getElementById('drawerRole').textContent = roleLabel;
+                document.getElementById('authGuard').classList.add('hidden');
+                await load();
+            } catch (err) {
+                console.error('Security Halt:', err);
+                document.getElementById('loaderContent').innerHTML = `
+                    <p class="text-red-400 font-semibold mb-4">Access Denied or Connection Failure</p>
+                    <a href="login.html" class="px-6 py-2 ax-fill text-white rounded-lg text-sm font-bold">Return to Login</a>`;
+            }
+        }
+
+        // --- 2. Load ---
+        async function load() {
+            const { data, error } = await supabase.from('site_settings').select('*').eq('id', 1).maybeSingle();
+            if (error) { toast(`Could not load settings: ${error.message}`, false); }
+            saved = { ...DEFAULTS, ...(data || {}) };
+            fill(saved);
+            if (data?.updated_at) {
+                let who = '';
+                if (data.updated_by) {
+                    const { data: p } = await supabase.from('profiles').select('full_name').eq('id', data.updated_by).maybeSingle();
+                    if (p?.full_name) who = ` by ${p.full_name}`;
+                }
+                document.getElementById('lastUpdated').textContent = `Last saved ${new Date(data.updated_at).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}${who}`;
+            }
+            markDirty(false);
+        }
+
+        function fill(s) {
+            TEXT.forEach(k => { form.elements[k].value = s[k] ?? ''; });
+            NUMS.forEach(k => { form.elements[k].value = s[k] ?? ''; if (form.elements[k].value !== '') form.elements[k].value = Number(s[k]); });
+            OPTIONAL_NUMS.forEach(k => { form.elements[k].value = s[k] ? Number(s[k]) : ''; });
+            BOOLS.forEach(k => { form.elements[k].checked = !!s[k]; });
+            form.elements.withdrawal_open_time.value = String(s.withdrawal_open_time || '00:00').slice(0, 5);
+            form.elements.withdrawal_close_time.value = String(s.withdrawal_close_time || '23:59').slice(0, 5);
+            const days = (s.withdrawal_days || []).map(Number);
+            form.querySelectorAll('input[name="wd_day"]').forEach(c => { c.checked = days.includes(Number(c.value)); });
+            preview();
+        }
+
+        function collect() {
+            const out = {};
+            TEXT.forEach(k => { out[k] = form.elements[k].value.trim(); });
+            NUMS.forEach(k => { out[k] = Number(form.elements[k].value); });
+            OPTIONAL_NUMS.forEach(k => { const v = form.elements[k].value; out[k] = v === '' || Number(v) <= 0 ? null : Number(v); });
+            BOOLS.forEach(k => { out[k] = form.elements[k].checked; });
+            out.withdrawal_open_time = form.elements.withdrawal_open_time.value || '00:00';
+            out.withdrawal_close_time = form.elements.withdrawal_close_time.value || '23:59';
+            out.withdrawal_days = [...form.querySelectorAll('input[name="wd_day"]:checked')].map(c => Number(c.value)).sort();
+            return out;
+        }
+
+        function validate(s) {
+            if (!s.site_name) return 'Site name is required.';
+            if (!s.bank_name || !s.bank_account_name || !s.bank_account_number) return 'Fill in all three deposit bank fields.';
+            for (const k of NUMS) if (Number.isNaN(s[k]) || s[k] < 0) return 'Amounts and percentages must be zero or more.';
+            if (s.withdrawal_fee_pct > 100 || s.referral_commission_pct > 100) return 'Percentages cannot be more than 100.';
+            if (s.max_deposit !== null && s.max_deposit < s.min_deposit) return 'Maximum deposit must be at least the minimum.';
+            if (s.max_withdrawal !== null && s.max_withdrawal < s.min_withdrawal) return 'Maximum withdrawal must be at least the minimum.';
+            for (const k of ['telegram_link', 'telegram_support_link']) if (s[k] && !/^https?:\/\//i.test(s[k])) return 'Telegram links must start with https://';
+            if (s.support_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.support_email)) return 'Support email is not valid.';
+            if (s.maintenance_mode && !s.maintenance_message) return 'Add a maintenance message for clients.';
+            return null;
+        }
+
+        function preview() {
+            const s = collect();
+            document.getElementById('wdPreview').textContent = s.withdrawal_days.length
+                ? `Clients see: “${withdrawalWindowLabel(s)}”.`
+                : 'No days selected: withdrawals will be closed.';
+        }
+
+        function markDirty(dirty) {
+            const el = document.getElementById('saveState');
+            el.textContent = dirty ? 'Unsaved changes' : 'No unsaved changes';
+            el.classList.toggle('ax-accent', dirty);
+        }
+
+        form.addEventListener('input', () => { preview(); markDirty(true); });
+        form.addEventListener('change', () => { preview(); markDirty(true); });
+        document.getElementById('resetBtn').addEventListener('click', () => { if (saved) { fill(saved); markDirty(false); } });
+
+        // --- 3. Save ---
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const s = collect();
+            const err = validate(s);
+            if (err) { toast(err, false); return; }
+            if (s.maintenance_mode && !saved.maintenance_mode && !confirm('Turn on maintenance mode? Clients will not be able to use the site until you turn it off.')) return;
+            if (!s.registration_open && saved.registration_open && !confirm('Close registration? New sign-ups will be refused.')) return;
+
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true; btn.textContent = 'Saving…';
+            try {
+                const { error } = await supabase.from('site_settings').upsert({ id: 1, ...s }, { onConflict: 'id' });
+                if (error) throw error;
+                try { localStorage.removeItem('ax_site_settings_v1'); } catch {}
+                toast('Settings saved. Live on the site now.');
+                await load();
+            } catch (ex) {
+                console.error(ex);
+                toast(ex.message || 'Could not save settings', false);
+            } finally {
+                btn.disabled = false; btn.textContent = 'Save settings';
+            }
+        });
+
+        window.addEventListener('beforeunload', (e) => {
+            if (document.getElementById('saveState').textContent === 'Unsaved changes') { e.preventDefault(); e.returnValue = ''; }
+        });
+
+        document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+        document.getElementById('drawerLogoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+
+        setActiveNav();
+        init();
+    </script>
+</body>
+</html>

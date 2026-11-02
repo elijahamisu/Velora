@@ -149,10 +149,10 @@
                     </button>
                     <div class="section-body mt-4 text-gray-600 leading-relaxed space-y-4">
                         <h2 class="hidden md:block text-[20px] md:text-[22px] font-semibold ax-display text-white">5. Deposits & Withdrawals</h2>
-                        <p>Altivex exclusively uses Kuda Bank for manual deposit processing. Verification may take 2-24 hours.</p>
+                        <p>Altivex uses bank transfer to <span data-s="bank_name">FIDELITY BANK</span> for manual deposit processing. Verification may take 2-24 hours.</p>
                         <ul class="list-disc pl-5 space-y-2">
-                            <li>Minimum Withdrawal: ₦600.</li>
-                            <li>Withdrawal Charge: 15% (Flat fee for platform maintenance).</li>
+                            <li>Minimum Withdrawal: <span data-s="min_withdrawal">₦600</span>.</li>
+                            <li>Withdrawal Charge: <span data-s="withdrawal_fee_pct">15%</span> (Flat fee for platform maintenance).</li>
                             <li>Processing Time: Typically 2-48 hours.</li>
                         </ul>
                     </div>
@@ -178,7 +178,7 @@
                     </button>
                     <div class="section-body mt-4 text-gray-600 leading-relaxed space-y-4">
                         <h2 class="hidden md:block text-[20px] md:text-[22px] font-semibold ax-display text-white">7. Referral & Gift Codes</h2>
-                        <p>Welcome Bonus: ₦600 credited upon registration. Referral rewards are earned when a direct invitee makes a successful deposit. Gift codes are one-time use and subject to individual code terms.</p>
+                        <p>Welcome Bonus: <span data-s="welcome_bonus">₦600</span> credited upon registration. Referral rewards are earned when a direct invitee makes a successful deposit. Gift codes are one-time use and subject to individual code terms.</p>
                     </div>
                 </section>
 
@@ -214,7 +214,7 @@
                     </button>
                     <div class="section-body mt-4 text-gray-600 leading-relaxed space-y-4">
                         <h2 class="hidden md:block text-[20px] md:text-[22px] font-semibold ax-display text-white">10. Support & Contact</h2>
-                        <p>For inquiries, please use our in-app <a href="support.html" class="ax-accent font-semibold underline underline-offset-4">Support</a> or join our official Telegram community. Our team is available 24/7 to help.</p>
+                        <p>For inquiries, please use our in-app <a href="support.html" class="ax-accent font-semibold underline underline-offset-4">Support</a> or join our official <a href="https://t.me/+s66HnQZjuCFhZTI0" data-s-href="telegram_link" target="_blank" rel="noopener" class="ax-accent font-semibold underline underline-offset-4">Telegram community</a>. Our team is available 24/7 to help.</p>
                     </div>
                 </section>
 
@@ -248,6 +248,8 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import * as AX from './src/site-settings.js';
+        AX.initPublic({ blockOnMaintenance: false });
 
         lucide.createIcons();
 

@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0A0F1C">
+    <title>User Details · Altivex Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --ink: #0C0E13;
+            --ink-soft: #171A22;
+            --paper: #F6F4EF;
+            --paper-card: #FFFFFF;
+            --gold: #D9C7A3;
+            --gold-deep: #D9C7A3;
+            --gold-light: #D9C7A3;
+            --line: rgba(217, 199, 163, 0.16);
+            --ink-text: #14161C;
+            --muted: #7A7E88;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--paper);
+            color: var(--ink-text);
+            overflow-x: hidden;
+        }
+        .field {
+            background: #FAF9F6;
+            border: 1px solid rgba(20,22,28,0.08);
+            transition: border-color .18s ease, background .18s ease;
+        }
+        .field:focus { outline: none; border-color: var(--gold); background: #fff; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .tab-btn { white-space: nowrap; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; color: var(--ax-muted); border: 1px solid transparent; }
+        .tab-btn.active { color: var(--ax-accent); background: var(--ax-accent-soft); border-color: var(--ax-accent-line); }
+        .lbl { display:block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 6px 2px; }
+        .kv { display:flex; justify-content:space-between; gap: 12px; font-size: 12px; padding: 6px 0; }
+        .kv span:first-child { color: var(--muted); }
+    </style>
+    <link rel="stylesheet" href="/altivex.css">
+</head>
+<body class="bg-[var(--paper)]">
+
+    <!-- Auth Guard Loader -->
+    <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
+        <div class="text-center" id="loaderContent">
+            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(217, 199, 163,0.25); border-top-color: var(--gold);"></div>
+            <span class="ax-logo ax-logo-lg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span>
+            <p class="text-[10px] uppercase tracking-[0.08em] text-white/30 mt-2">Verifying Admin Access</p>
+        </div>
+    </div>
+
+    <!-- ============ Altivex admin shell: top bar ============ -->
+    <header class="ax-topbar ax-topbar-admin">
+        <div class="ax-topbar-inner">
+            <div class="flex items-center gap-3 min-w-0">
+                <button id="menuToggle" class="ax-icon-btn lg:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+                    <i data-lucide="menu"></i>
+                </button>
+                <a href="dashboard.html" class="lg:hidden" aria-label="Admin home"><span class="ax-logo ax-logo-sm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span></a>
+                <span class="ax-admin-tag hidden sm:inline-flex lg:inline-flex">Admin</span>
+                <span class="ax-crumb">Users / <span id="crumbName">Details</span></span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block leading-tight">
+                    <p id="adminName" class="text-[13px] font-semibold text-white">Admin</p>
+                    <p id="adminRole" class="text-[11px] text-[var(--ax-muted)] uppercase tracking-[0.06em]">...</p>
+                </div>
+                <div class="ax-avatar" id="adminInitials">A</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============ Admin icon rail (id kept as "sidebar") ============ -->
+    <aside id="sidebar" class="ax-rail" aria-label="Admin navigation">
+        <a href="dashboard.html" class="ax-rail-brand ax-logo ax-mark-only" aria-label="Altivex admin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <nav id="sidebarNav">
+            <a href="dashboard.html" data-page="dashboard" class="sidebar-item" aria-label="Overview"><i data-lucide="layout-grid"></i><span class="ax-tip">Overview</span></a>
+            <a href="users.html" data-page="users" class="sidebar-item" aria-label="Users"><i data-lucide="users"></i><span class="ax-tip">Users</span></a>
+            <a href="deposits.html" data-page="deposits" class="sidebar-item" aria-label="Deposits"><i data-lucide="arrow-down-left"></i><span class="ax-tip">Deposits</span></a>
+            <a href="withdrawals.html" data-page="withdrawals" class="sidebar-item" aria-label="Withdrawals"><i data-lucide="arrow-up-right"></i><span class="ax-tip">Withdrawals</span></a>
+            <a href="investments.html" data-page="investments" class="sidebar-item" aria-label="Investments"><i data-lucide="trending-up"></i><span class="ax-tip">Investments</span></a>
+            <a href="plans.html" data-page="plans" class="sidebar-item" aria-label="Plans"><i data-lucide="layers"></i><span class="ax-tip">Plans</span></a>
+            <a href="gift-codes.html" data-page="gift-codes" class="sidebar-item" aria-label="Gift codes"><i data-lucide="gift"></i><span class="ax-tip">Gift codes</span></a>
+            <a href="support.html" data-page="support" class="sidebar-item" aria-label="Support"><i data-lucide="life-buoy"></i><span class="ax-tip">Support</span></a>
+            <a href="settings.html" data-page="settings" class="sidebar-item" aria-label="Settings"><i data-lucide="settings"></i><span class="ax-tip">Settings</span></a>
+            <span class="flex-1"></span>
+            <span class="ax-rail-sep"></span>
+            <button id="logoutBtn" class="sidebar-item ax-logout" aria-label="Log out"><i data-lucide="log-out"></i><span class="ax-tip">Log out</span></button>
+        </nav>
+    </aside>
+
+    <!-- ============ Mobile admin menu ============ -->
+    <div id="drawerOverlay"></div>
+    <aside id="mobileDrawer" class="ax-sheet-left" aria-label="Admin menu">
+        <div class="ax-sheet-head">
+            <span class="flex items-center gap-2"><span class="ax-logo ax-logo-sm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span><span class="ax-admin-tag">Admin</span></span>
+            <button id="drawerClose" aria-label="Close menu" class="ax-icon-btn"><i data-lucide="x"></i></button>
+        </div>
+        <div class="ax-sheet-account">
+            <span class="ax-avatar ax-avatar-lg" id="drawerInitials">A</span>
+            <div class="min-w-0">
+                <p id="drawerName" class="text-sm font-semibold text-white truncate">Admin</p>
+                <p id="drawerRole" class="text-[11px] text-[var(--ax-muted)] uppercase tracking-[0.06em] truncate">...</p>
+            </div>
+        </div>
+        <nav class="ax-sheet-nav" id="drawerNav">
+            <a href="dashboard.html" data-page="dashboard" class="drawer-item"><i data-lucide="layout-grid"></i><span>Overview</span></a>
+            <a href="users.html" data-page="users" class="drawer-item"><i data-lucide="users"></i><span>Users</span></a>
+            <a href="deposits.html" data-page="deposits" class="drawer-item"><i data-lucide="arrow-down-left"></i><span>Deposits</span></a>
+            <a href="withdrawals.html" data-page="withdrawals" class="drawer-item"><i data-lucide="arrow-up-right"></i><span>Withdrawals</span></a>
+            <a href="investments.html" data-page="investments" class="drawer-item"><i data-lucide="trending-up"></i><span>Investments</span></a>
+            <a href="plans.html" data-page="plans" class="drawer-item"><i data-lucide="layers"></i><span>Plans</span></a>
+            <a href="gift-codes.html" data-page="gift-codes" class="drawer-item"><i data-lucide="gift"></i><span>Gift codes</span></a>
+            <a href="support.html" data-page="support" class="drawer-item"><i data-lucide="life-buoy"></i><span>Support</span></a>
+            <a href="settings.html" data-page="settings" class="drawer-item"><i data-lucide="settings"></i><span>Settings</span></a>
+            <div class="ax-divider my-2"></div>
+            <button id="drawerLogoutBtn" class="drawer-item ax-logout"><i data-lucide="log-out"></i><span>Log out</span></button>
+        </nav>
+    </aside>
+
+    <!-- ============ Mobile tab bar (id kept as "islandNav") ============ -->
+    <nav id="islandNav" class="ax-tabbar" aria-label="Tabs">
+        <a href="dashboard.html" data-page="dashboard" class="island-item"><i data-lucide="layout-grid"></i><span>Home</span></a>
+        <a href="users.html" data-page="users" class="island-item"><i data-lucide="users"></i><span>Users</span></a>
+        <a href="deposits.html" data-page="deposits" class="island-item"><i data-lucide="arrow-down-left"></i><span>Deposits</span></a>
+        <a href="withdrawals.html" data-page="withdrawals" class="island-item"><i data-lucide="arrow-up-right"></i><span>Payouts</span></a>
+        <a href="support.html" data-page="support" class="island-item"><i data-lucide="life-buoy"></i><span>Support</span></a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="ax-main ax-main-admin">
+        <div class="max-w-6xl mx-auto">
+
+            <a href="users.html" class="inline-flex items-center gap-2 text-xs font-semibold text-[var(--muted)] hover:text-white mb-6"><i data-lucide="arrow-left" class="w-4 h-4"></i> All users</a>
+
+            <div id="notFound" class="hidden ax-card rounded-[14px] p-10 text-center">
+                <p class="text-sm text-[var(--muted)]">This user could not be found. They may have been deleted.</p>
+            </div>
+
+            <div id="userView" class="hidden">
+                <!-- Identity -->
+                <div class="ax-card rounded-[14px] p-6 md:p-8 mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center gap-5 md:justify-between">
+                        <div class="flex items-center gap-4 min-w-0">
+                            <div id="uAvatar" class="w-14 h-14 shrink-0 rounded-[12px] ax-fill flex items-center justify-center ax-display font-semibold text-xl overflow-hidden">?</div>
+                            <div class="min-w-0">
+                                <h1 id="uName" class="text-2xl ax-display font-semibold truncate">—</h1>
+                                <p id="uEmail" class="text-xs text-[var(--muted)] mono truncate">—</p>
+                                <div class="flex flex-wrap gap-1.5 mt-2" id="uBadges"></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-x-6 text-xs md:min-w-[280px]">
+                            <div class="kv"><span>Joined</span><span id="uJoined" class="mono">—</span></div>
+                            <div class="kv"><span>Code</span><span id="uCode" class="mono">—</span></div>
+                            <div class="kv col-span-2"><span>User ID</span><button id="uId" class="mono truncate max-w-[200px] hover:text-white" title="Copy ID">—</button></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Balances -->
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-6">
+                    <div class="ax-card p-5 rounded-[14px]"><p class="lbl">Available</p><h3 id="bAvail" class="text-xl ax-display font-semibold mono ax-accent">₦0</h3></div>
+                    <div class="ax-card p-5 rounded-[14px]"><p class="lbl">Invested</p><h3 id="bInvest" class="text-xl ax-display font-semibold mono">₦0</h3></div>
+                    <div class="ax-card p-5 rounded-[14px]"><p class="lbl">Bonus</p><h3 id="bBonus" class="text-xl ax-display font-semibold mono">₦0</h3></div>
+                    <div class="ax-card p-5 rounded-[14px]"><p class="lbl">Referral</p><h3 id="bRef" class="text-xl ax-display font-semibold mono">₦0</h3></div>
+                    <div class="ax-card p-5 rounded-[14px] col-span-2 md:col-span-1"><p class="lbl">Total earnings</p><h3 id="bEarn" class="text-xl ax-display font-semibold mono">₦0</h3></div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="ax-card rounded-[14px] p-1.5 mb-6 flex gap-1 overflow-x-auto no-scrollbar" id="tabs" role="tablist">
+                    <button class="tab-btn active" data-tab="profile">Profile</button>
+                    <button class="tab-btn" data-tab="wallet">Wallet</button>
+                    <button class="tab-btn" data-tab="account">Access</button>
+                    <button class="tab-btn" data-tab="investments">Investments <span id="cInv" class="opacity-60"></span></button>
+                    <button class="tab-btn" data-tab="deposits">Deposits <span id="cDep" class="opacity-60"></span></button>
+                    <button class="tab-btn" data-tab="withdrawals">Withdrawals <span id="cWd" class="opacity-60"></span></button>
+                    <button class="tab-btn" data-tab="transactions">Transactions <span id="cTx" class="opacity-60"></span></button>
+                    <button class="tab-btn" data-tab="referrals">Referrals <span id="cRef" class="opacity-60"></span></button>
+                    <button class="tab-btn" data-tab="notify">Notify</button>
+                </div>
+
+                <!-- ===== Profile ===== -->
+                <section data-panel="profile" class="ax-card rounded-[14px] p-6 md:p-8">
+                    <h4 class="text-lg font-semibold ax-display mb-6">Profile</h4>
+                    <form id="profileForm" class="grid md:grid-cols-2 gap-4">
+                        <div><label class="lbl" for="pName">Full name</label><input id="pName" class="field w-full rounded-lg px-4 py-3 text-sm" required></div>
+                        <div><label class="lbl" for="pEmail">Email (sign-in)</label><input id="pEmail" type="email" class="field w-full rounded-lg px-4 py-3 text-sm"></div>
+                        <div><label class="lbl" for="pPhone">Phone</label><input id="pPhone" class="field w-full rounded-lg px-4 py-3 text-sm"></div>
+                        <div><label class="lbl" for="pRole">Role</label>
+                            <select id="pRole" class="field w-full rounded-lg px-4 py-3 text-sm">
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                                <option value="super_admin">Super admin</option>
+                            </select>
+                        </div>
+                        <div><label class="lbl" for="pCode">Referral code</label><input id="pCode" class="field w-full rounded-lg px-4 py-3 text-sm mono uppercase"></div>
+                        <div><label class="lbl" for="pReferrer">Referred by (referrer's code)</label><input id="pReferrer" placeholder="Leave blank for none" class="field w-full rounded-lg px-4 py-3 text-sm mono uppercase">
+                            <p id="pReferrerName" class="text-[10px] text-[var(--muted)] mt-1.5 ml-1"></p></div>
+                        <div class="md:col-span-2"><label class="lbl" for="pAvatar">Avatar URL</label><input id="pAvatar" class="field w-full rounded-lg px-4 py-3 text-sm"></div>
+                        <div class="md:col-span-2 flex items-center justify-between gap-4 bg-black/[0.02] rounded-[10px] px-4 py-3">
+                            <label for="pTerms" class="text-sm">Accepted terms <span id="pTermsAt" class="text-[10px] text-[var(--muted)] mono ml-1"></span></label>
+                            <input id="pTerms" type="checkbox" class="w-5 h-5 accent-[#D9C7A3]">
+                        </div>
+                        <div class="md:col-span-2"><label class="lbl" for="pNotes">Admin notes (only admins see this)</label><textarea id="pNotes" rows="3" class="field w-full rounded-lg px-4 py-3 text-sm"></textarea></div>
+                        <div class="md:col-span-2 flex justify-end"><button type="submit" class="ax-btn ax-btn-primary">Save profile</button></div>
+                    </form>
+                </section>
+
+                <!-- ===== Wallet ===== -->
+                <section data-panel="wallet" class="hidden ax-card rounded-[14px] p-6 md:p-8">
+                    <h4 class="text-lg font-semibold ax-display mb-1">Wallet &amp; earnings</h4>
+                    <p class="text-xs text-[var(--muted)] mb-6">Set any balance directly. Every change is logged as a transaction on the client's history with your reason.</p>
+                    <div class="bg-black/[0.02] rounded-[10px] p-4 mb-6">
+                        <p class="lbl">Quick adjust available balance</p>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input id="qAmount" type="number" min="0" step="0.01" placeholder="Amount (₦)" class="field flex-1 rounded-lg px-4 py-3 text-sm">
+                            <div class="flex gap-2">
+                                <button type="button" id="qAdd" class="flex-1 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold uppercase">+ Add</button>
+                                <button type="button" id="qSub" class="flex-1 px-4 py-3 bg-amber-50 text-amber-700 rounded-lg text-xs font-bold uppercase">− Deduct</button>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-[var(--muted)] mt-2">Updates the Available field below; press Save to apply.</p>
+                    </div>
+                    <form id="walletForm" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div><label class="lbl" for="wAvail">Available</label><input id="wAvail" type="number" step="0.01" min="0" class="field w-full rounded-lg px-4 py-3 text-sm mono"></div>
+                        <div><label class="lbl" for="wInvest">Investment</label><input id="wInvest" type="number" step="0.01" min="0" class="field w-full rounded-lg px-4 py-3 text-sm mono"></div>
+                        <div><label class="lbl" for="wBonus">Bonus</label><input id="wBonus" type="number" step="0.01" min="0" class="field w-full rounded-lg px-4 py-3 text-sm mono"></div>
+                        <div><label class="lbl" for="wRef">Referral</label><input id="wRef" type="number" step="0.01" min="0" class="field w-full rounded-lg px-4 py-3 text-sm mono"></div>
+                        <div><label class="lbl" for="wTotal">Total earnings (wallet)</label><input id="wTotal" type="number" step="0.01" min="0" class="field w-full rounded-lg px-4 py-3 text-sm mono"></div>
+                        <div><label class="lbl" for="eToday">Today's earnings</label><input id="eToday" type="number" step="0.01" min="0" class="field w-full rounded-lg px-4 py-3 text-sm mono"></div>
+                        <div><label class="lbl" for="eTotal">Earnings total (stats)</label><input id="eTotal" type="number" step="0.01" min="0" class="field w-full rounded-lg px-4 py-3 text-sm mono"></div>
+                        <div class="col-span-2"><label class="lbl" for="wReason">Reason (required)</label><input id="wReason" required placeholder="e.g. Manual deposit correction" class="field w-full rounded-lg px-4 py-3 text-sm"></div>
+                        <div class="col-span-2 md:col-span-3 flex justify-end"><button type="submit" class="ax-btn ax-btn-primary">Save balances</button></div>
+                    </form>
+                </section>
+
+                <!-- ===== Access ===== -->
+                <section data-panel="account" class="hidden space-y-6">
+                    <div class="ax-card rounded-[14px] p-6 md:p-8">
+                        <h4 class="text-lg font-semibold ax-display mb-1">Account status</h4>
+                        <p class="text-xs text-[var(--muted)] mb-5">Suspended and banned users are signed out and cannot log in or use the dashboard.</p>
+                        <p id="selfNote" class="hidden text-xs text-amber-700 bg-amber-50 rounded-lg p-3 mb-4">This is your own admin account: status and deletion are locked.</p>
+                        <div class="grid sm:grid-cols-3 gap-2 mb-4" id="statusChoices">
+                            <label class="flex items-center gap-2 bg-black/[0.02] rounded-[10px] px-4 py-3 text-sm cursor-pointer"><input type="radio" name="uStatus" value="active" class="accent-[#D9C7A3]"> Active</label>
+                            <label class="flex items-center gap-2 bg-black/[0.02] rounded-[10px] px-4 py-3 text-sm cursor-pointer"><input type="radio" name="uStatus" value="suspended" class="accent-[#D9C7A3]"> Suspended</label>
+                            <label class="flex items-center gap-2 bg-black/[0.02] rounded-[10px] px-4 py-3 text-sm cursor-pointer"><input type="radio" name="uStatus" value="banned" class="accent-[#D9C7A3]"> Banned</label>
+                        </div>
+                        <label class="lbl" for="statusReason">Reason (shown to the user at login)</label>
+                        <input id="statusReason" class="field w-full rounded-lg px-4 py-3 text-sm mb-4" placeholder="Optional">
+                        <div class="flex justify-end"><button id="saveStatus" class="ax-btn ax-btn-primary">Update status</button></div>
+                    </div>
+
+                    <div class="ax-card rounded-[14px] p-6 md:p-8">
+                        <h4 class="text-lg font-semibold ax-display mb-1">Set a new password</h4>
+                        <p class="text-xs text-[var(--muted)] mb-5">The user will need this password the next time they sign in.</p>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input id="newPassword" type="text" minlength="6" autocomplete="off" placeholder="At least 6 characters" class="field flex-1 rounded-lg px-4 py-3 text-sm mono">
+                            <button id="savePassword" class="ax-btn ax-btn-primary">Set password</button>
+                        </div>
+                    </div>
+
+                    <div class="ax-card rounded-[14px] p-6 md:p-8">
+                        <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-3">Danger zone</p>
+                        <p class="text-xs text-[var(--muted)] mb-4">Deletes the sign-in account, wallet, investments and all history. This cannot be undone.</p>
+                        <button id="deleteUser" class="w-full sm:w-auto px-5 py-3 bg-red-50 text-red-600 rounded-lg text-xs font-bold uppercase">Delete user permanently</button>
+                    </div>
+                </section>
+
+                <!-- ===== Investments ===== -->
+                <section data-panel="investments" class="hidden space-y-6">
+                    <div class="ax-card rounded-[14px] p-6 md:p-8">
+                        <h4 class="text-lg font-semibold ax-display mb-4">Assign a plan</h4>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <select id="assignPlan" class="field flex-1 rounded-lg px-4 py-3 text-sm"><option value="">Select a plan…</option></select>
+                            <button id="assignPlanBtn" class="ax-btn ax-btn-primary">Assign free</button>
+                        </div>
+                        <p class="text-[10px] text-[var(--muted)] mt-2">Granted free: the client's wallet is not debited.</p>
+                    </div>
+                    <div class="ax-card rounded-[14px] overflow-hidden"><div id="invList" class="divide-y divide-black/[0.05]"></div></div>
+                </section>
+
+                <!-- ===== Deposits ===== -->
+                <section data-panel="deposits" class="hidden ax-card rounded-[14px] overflow-hidden"><div id="depList" class="divide-y divide-black/[0.05]"></div></section>
+
+                <!-- ===== Withdrawals ===== -->
+                <section data-panel="withdrawals" class="hidden ax-card rounded-[14px] overflow-hidden"><div id="wdList" class="divide-y divide-black/[0.05]"></div></section>
+
+                <!-- ===== Transactions ===== -->
+                <section data-panel="transactions" class="hidden space-y-6">
+                    <div class="ax-card rounded-[14px] p-6 md:p-8">
+                        <h4 class="text-lg font-semibold ax-display mb-1">Add a history entry</h4>
+                        <p class="text-xs text-[var(--muted)] mb-4">Adds a line to the client's transaction history only. Use the Wallet tab to move money.</p>
+                        <form id="txForm" class="grid sm:grid-cols-[1fr_1fr_2fr_auto] gap-2">
+                            <select id="txType" class="field rounded-lg px-4 py-3 text-sm">
+                                <option value="admin_credit">Admin credit</option>
+                                <option value="admin_debit">Admin debit</option>
+                                <option value="admin_adjustment">Adjustment</option>
+                                <option value="bonus">Bonus</option>
+                                <option value="deposit">Deposit</option>
+                                <option value="withdrawal">Withdrawal</option>
+                                <option value="daily_earning">Daily earning</option>
+                                <option value="referral_bonus">Referral bonus</option>
+                            </select>
+                            <input id="txAmount" type="number" step="0.01" min="0" required placeholder="Amount" class="field rounded-lg px-4 py-3 text-sm mono">
+                            <input id="txDesc" required placeholder="Description" class="field rounded-lg px-4 py-3 text-sm">
+                            <button class="ax-btn ax-btn-primary">Add</button>
+                        </form>
+                    </div>
+                    <div class="ax-card rounded-[14px] overflow-hidden"><div id="txList" class="divide-y divide-black/[0.05]"></div></div>
+                </section>
+
+                <!-- ===== Referrals ===== -->
+                <section data-panel="referrals" class="hidden space-y-6">
+                    <div class="ax-card rounded-[14px] p-6 md:p-8">
+                        <p class="lbl">Referred by</p>
+                        <p id="refBy" class="text-sm">—</p>
+                    </div>
+                    <div class="ax-card rounded-[14px] overflow-hidden">
+                        <div class="p-6 border-b border-black/[0.05]"><h4 class="text-lg font-semibold ax-display">People they invited</h4></div>
+                        <div id="refList" class="divide-y divide-black/[0.05]"></div>
+                    </div>
+                </section>
+
+                <!-- ===== Notify ===== -->
+                <section data-panel="notify" class="hidden space-y-6">
+                    <div class="ax-card rounded-[14px] p-6 md:p-8">
+                        <h4 class="text-lg font-semibold ax-display mb-4">Send an in-app notification</h4>
+                        <form id="notifyForm" class="space-y-3">
+                            <input id="nTitle" required placeholder="Title" class="field w-full rounded-lg px-4 py-3 text-sm">
+                            <textarea id="nMsg" required rows="3" placeholder="Message" class="field w-full rounded-lg px-4 py-3 text-sm"></textarea>
+                            <div class="flex justify-end"><button class="ax-btn ax-btn-primary">Send</button></div>
+                        </form>
+                    </div>
+                    <div class="ax-card rounded-[14px] overflow-hidden"><div id="nList" class="divide-y divide-black/[0.05]"></div></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast" class="hidden fixed left-1/2 -translate-x-1/2 bottom-24 lg:bottom-8 z-[120] px-4 py-3 rounded-[10px] text-sm font-semibold shadow-lg"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+        lucide.createIcons();
+
+        const supabase = createClient(
+            import.meta.env.VITE_SUPABASE_URL,
+            import.meta.env.VITE_SUPABASE_ANON_KEY
+        );
+
+        // --- 0. Active nav state (this page lives under Users) ---
+        function setActiveNav() {
+            const current = 'users';
+            document.querySelectorAll('#sidebarNav a[data-page]').forEach(a => a.classList.toggle('sidebar-active', a.dataset.page === current));
+            document.querySelectorAll('#islandNav a[data-page]').forEach(a => a.classList.toggle('active', a.dataset.page === current));
+            document.querySelectorAll('#drawerNav a[data-page]').forEach(a => a.classList.toggle('drawer-active', a.dataset.page === current));
+        }
+
+        // --- 0b. Mobile drawer ---
+        const drawer = document.getElementById('mobileDrawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+        const drawerClose = document.getElementById('drawerClose');
+        function openDrawer() { drawer.classList.add('open'); drawerOverlay.classList.add('open'); menuToggle.setAttribute('aria-expanded', 'true'); document.body.style.overflow = 'hidden'; }
+        function closeDrawer() { drawer.classList.remove('open'); drawerOverlay.classList.remove('open'); menuToggle.setAttribute('aria-expanded', 'false'); document.body.style.overflow = ''; }
+        menuToggle.addEventListener('click', openDrawer);
+        drawerClose.addEventListener('click', closeDrawer);
+        drawerOverlay.addEventListener('click', closeDrawer);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+        document.querySelectorAll('#drawerNav a[data-page]').forEach(a => a.addEventListener('click', closeDrawer));
+
+        // --- Helpers ---
+        const userId = new URLSearchParams(window.location.search).get('id');
+        let me = null;            // the signed-in admin
+        let profile = null;       // the user being edited
+        let wallet = null, earnings = null, plans = [];
+
+        const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const naira = (n) => '₦' + Number(n || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const when = (d) => d ? new Date(d).toLocaleString('en-NG', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+        const num = (id) => { const v = document.getElementById(id).value; return v === '' ? null : Number(v); };
+        const empty = (msg) => `<div class="p-10 text-center text-[var(--muted)] text-xs">${msg}</div>`;
+
+        function toast(msg, ok = true) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `fixed left-1/2 -translate-x-1/2 bottom-24 lg:bottom-8 z-[120] px-4 py-3 rounded-[10px] text-sm font-semibold shadow-lg ${ok ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`;
+            clearTimeout(toast._t);
+            toast._t = setTimeout(() => t.classList.add('hidden'), 3200);
+        }
+
+        function badge(text, tone) {
+            const cls = { gold: 'ax-badge ax-badge-accent', pos: 'ax-badge ax-badge-pos', neg: 'ax-badge ax-badge-neg', warn: 'ax-badge bg-amber-50 text-amber-700', plain: 'ax-badge' }[tone] || 'ax-badge';
+            return `<span class="${cls} text-[10px] uppercase font-bold">${esc(text)}</span>`;
+        }
+        const statusTone = (s) => ({ approved: 'pos', completed: 'pos', active: 'pos', pending: 'warn', rejected: 'neg', cancelled: 'neg', paused: 'warn', suspended: 'warn', banned: 'neg' }[s] || 'plain');
+
+        async function api(path, body) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = 'login.html'; return; }
+            const res = await fetch(path, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+                body: JSON.stringify(body)
+            });
+            const out = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(out.error || `Request failed (${res.status})`);
+            return out;
+        }
+
+        async function busy(btn, fn) {
+            const label = btn?.innerHTML;
+            if (btn) { btn.disabled = true; btn.innerHTML = 'Working…'; }
+            try { await fn(); }
+            catch (err) { console.error(err); toast(err.message || 'Something went wrong', false); }
+            finally { if (btn) { btn.disabled = false; btn.innerHTML = label; } }
+        }
+
+        // --- Tabs ---
+        document.querySelectorAll('#tabs .tab-btn').forEach(btn => btn.addEventListener('click', () => showTab(btn.dataset.tab)));
+        function showTab(name) {
+            document.querySelectorAll('#tabs .tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+            document.querySelectorAll('[data-panel]').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== name));
+            history.replaceState(null, '', `?id=${encodeURIComponent(userId)}#${name}`);
+        }
+
+        // --- 1. Init / admin guard ---
+        async function init() {
+            try {
+                const { data: { session }, error: authError } = await supabase.auth.getSession();
+                if (authError || !session) throw new Error('No valid session found.');
+                const { data: adminProfile, error: profileError } = await supabase.from('profiles').select('id, role, full_name').eq('id', session.user.id).single();
+                if (profileError || !adminProfile || !['admin', 'super_admin'].includes(adminProfile.role)) {
+                    await supabase.auth.signOut();
+                    window.location.href = 'login.html?error=unauthorized';
+                    return;
+                }
+                me = adminProfile;
+                const roleLabel = me.role === 'super_admin' ? 'Super Admin' : 'Administrator';
+                document.getElementById('adminName').textContent = me.full_name || 'Admin';
+                document.getElementById('adminInitials').textContent = (me.full_name || 'A').charAt(0);
+                document.getElementById('drawerName').textContent = me.full_name || 'Admin';
+                document.getElementById('drawerInitials').textContent = (me.full_name || 'A').charAt(0);
+                document.getElementById('adminRole').textContent = roleLabel;
+                document.getElementById('drawerRole').textContent = roleLabel;
+                document.getElementById('authGuard').classList.add('hidden');
+
+                if (!userId) { document.getElementById('notFound').classList.remove('hidden'); return; }
+                await loadAll();
+                const hash = window.location.hash.replace('#', '');
+                if (hash && document.querySelector(`[data-panel="${hash}"]`)) showTab(hash);
+            } catch (err) {
+                console.error('Security Halt:', err);
+                document.getElementById('loaderContent').innerHTML = `
+                    <p class="text-red-400 font-semibold mb-4">Access Denied or Connection Failure</p>
+                    <a href="login.html" class="px-6 py-2 ax-fill text-white rounded-lg text-sm font-bold">Return to Login</a>`;
+            }
+        }
+
+        // --- 2. Load everything about this user ---
+        async function loadAll() {
+            const { data: p, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+            if (error) { toast(error.message, false); }
+            if (!p) {
+                document.getElementById('userView').classList.add('hidden');
+                document.getElementById('notFound').classList.remove('hidden');
+                return;
+            }
+            profile = p;
+            document.getElementById('userView').classList.remove('hidden');
+            await Promise.all([loadWallet(), loadReferrer(), loadInvestments(), loadDeposits(), loadWithdrawals(), loadTransactions(), loadReferrals(), loadNotifications(), loadPlans()]);
+            renderIdentity();
+            fillProfileForm();
+            fillAccess();
+            lucide.createIcons();
+        }
+
+        let referrer = null;
+        async function loadReferrer() {
+            referrer = null;
+            if (profile.referred_by) {
+                const { data } = await supabase.from('profiles').select('id, full_name, email, referral_code').eq('id', profile.referred_by).maybeSingle();
+                referrer = data;
+            }
+            const refBy = document.getElementById('refBy');
+            refBy.innerHTML = referrer
+                ? `<a class="ax-accent font-semibold hover:underline" href="user.html?id=${encodeURIComponent(referrer.id)}">${esc(referrer.full_name || 'Unnamed')}</a> <span class="text-[var(--muted)] mono text-xs">${esc(referrer.referral_code || '')} · ${esc(referrer.email || '')}</span>`
+                : '<span class="text-[var(--muted)]">Nobody (signed up directly)</span>';
+        }
+
+        function renderIdentity() {
+            const name = profile.full_name || 'Unnamed';
+            document.getElementById('crumbName').textContent = name;
+            document.title = `${name} · Altivex Admin`;
+            document.getElementById('uName').textContent = name;
+            document.getElementById('uEmail').textContent = [profile.email, profile.phone].filter(Boolean).join(' · ') || '—';
+            const av = document.getElementById('uAvatar');
+            if (profile.avatar_url) av.innerHTML = `<img src="${esc(profile.avatar_url)}" alt="" class="w-full h-full object-cover">`;
+            else av.textContent = name.charAt(0).toUpperCase();
+            const status = profile.status || 'active';
+            document.getElementById('uBadges').innerHTML =
+                badge(profile.role || 'user', ['admin', 'super_admin'].includes(profile.role) ? 'gold' : 'plain') +
+                badge(status, statusTone(status)) +
+                (profile.terms_accepted ? badge('terms ✓', 'plain') : '');
+            document.getElementById('uJoined').textContent = new Date(profile.created_at).toLocaleDateString('en-NG');
+            document.getElementById('uCode').textContent = profile.referral_code || '—';
+            const idBtn = document.getElementById('uId');
+            idBtn.textContent = profile.id;
+            idBtn.onclick = () => { navigator.clipboard?.writeText(profile.id); toast('User ID copied'); };
+        }
+
+        // --- Profile ---
+        function fillProfileForm() {
+            document.getElementById('pName').value = profile.full_name || '';
+            document.getElementById('pEmail').value = profile.email || '';
+            document.getElementById('pPhone').value = profile.phone || '';
+            document.getElementById('pRole').value = profile.role || 'user';
+            document.getElementById('pCode').value = profile.referral_code || '';
+            document.getElementById('pReferrer').value = referrer?.referral_code || '';
+            document.getElementById('pReferrerName').textContent = referrer ? `Currently: ${referrer.full_name || 'Unnamed'}` : '';
+            document.getElementById('pAvatar').value = profile.avatar_url || '';
+            document.getElementById('pTerms').checked = !!profile.terms_accepted;
+            document.getElementById('pTermsAt').textContent = profile.terms_accepted_at ? when(profile.terms_accepted_at) : '';
+            document.getElementById('pNotes').value = profile.admin_notes || '';
+            // Only a super admin can grant super admin.
+            document.querySelector('#pRole option[value="super_admin"]').disabled = me.role !== 'super_admin' && profile.role !== 'super_admin';
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = e.submitter;
+            busy(btn, async () => {
+                const email = document.getElementById('pEmail').value.trim().toLowerCase();
+                const role = document.getElementById('pRole').value;
+                const code = document.getElementById('pCode').value.trim().toUpperCase();
+                const refCode = document.getElementById('pReferrer').value.trim().toUpperCase();
+                const terms = document.getElementById('pTerms').checked;
+
+                if (profile.id === me.id && role !== profile.role) throw new Error('You cannot change your own role.');
+                if (role !== profile.role && role !== 'user' && !confirm(`Give ${profile.full_name || 'this user'} ${role.replace('_', ' ')} access to this admin panel?`)) return;
+
+                let referredBy = null;
+                if (refCode) {
+                    if (refCode === code) throw new Error('A user cannot refer themselves.');
+                    const { data: ref, error } = await supabase.from('profiles').select('id').ilike('referral_code', refCode).maybeSingle();
+                    if (error) throw error;
+                    if (!ref) throw new Error(`No user has the referral code ${refCode}.`);
+                    if (ref.id === profile.id) throw new Error('A user cannot refer themselves.');
+                    referredBy = ref.id;
+                }
+
+                if (email && email !== (profile.email || '').toLowerCase()) {
+                    if (!confirm(`Change this user's sign-in email to ${email}?`)) return;
+                    await api('/api/admin/users', { action: 'update_auth', userId: profile.id, email });
+                }
+
+                const update = {
+                    full_name: document.getElementById('pName').value.trim(),
+                    phone: document.getElementById('pPhone').value.trim() || null,
+                    role,
+                    referral_code: code || null,
+                    referred_by: referredBy,
+                    avatar_url: document.getElementById('pAvatar').value.trim() || null,
+                    terms_accepted: terms,
+                    terms_accepted_at: terms ? (profile.terms_accepted_at || new Date().toISOString()) : null,
+                    admin_notes: document.getElementById('pNotes').value.trim() || null,
+                };
+                const { error } = await supabase.from('profiles').update(update).eq('id', profile.id);
+                if (error) throw new Error(error.code === '23505' ? 'That referral code is already taken.' : error.message);
+                toast('Profile saved');
+                await loadAll();
+            });
+        });
+
+        // --- Wallet ---
+        async function loadWallet() {
+            const [w, e] = await Promise.all([
+                supabase.from('wallets').select('*').eq('user_id', userId).maybeSingle(),
+                supabase.from('earnings').select('*').eq('user_id', userId).maybeSingle(),
+            ]);
+            wallet = w.data || {};
+            earnings = e.data || {};
+            document.getElementById('bAvail').textContent = naira(wallet.available_balance);
+            document.getElementById('bInvest').textContent = naira(wallet.investment_balance);
+            document.getElementById('bBonus').textContent = naira(wallet.bonus_balance);
+            document.getElementById('bRef').textContent = naira(wallet.referral_balance);
+            document.getElementById('bEarn').textContent = naira(wallet.total_earnings);
+            const set = (id, v) => { document.getElementById(id).value = Number(v || 0).toFixed(2); };
+            set('wAvail', wallet.available_balance); set('wInvest', wallet.investment_balance); set('wBonus', wallet.bonus_balance);
+            set('wRef', wallet.referral_balance); set('wTotal', wallet.total_earnings);
+            set('eToday', earnings.today_earnings); set('eTotal', earnings.total_earnings);
+        }
+
+        function quickAdjust(sign) {
+            const amt = Number(document.getElementById('qAmount').value);
+            if (!amt || amt <= 0) { toast('Enter an amount first', false); return; }
+            const input = document.getElementById('wAvail');
+            const next = Number(input.value || 0) + sign * amt;
+            if (next < 0) { toast('That would make the balance negative', false); return; }
+            input.value = next.toFixed(2);
+            if (!document.getElementById('wReason').value) document.getElementById('wReason').value = sign > 0 ? 'Funds added by admin' : 'Funds removed by admin';
+            document.getElementById('wReason').focus();
+        }
+        document.getElementById('qAdd').onclick = () => quickAdjust(1);
+        document.getElementById('qSub').onclick = () => quickAdjust(-1);
+
+        document.getElementById('walletForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            busy(e.submitter, async () => {
+                const vals = ['wAvail', 'wInvest', 'wBonus', 'wRef', 'wTotal', 'eToday', 'eTotal'].map(num);
+                if (vals.some(v => v !== null && (Number.isNaN(v) || v < 0))) throw new Error('Balances must be zero or more.');
+                const reason = document.getElementById('wReason').value.trim();
+                if (!reason) throw new Error('Add a reason for the change.');
+                if (!confirm('Save these balances? Each change is logged on the client\'s history.')) return;
+                const { error } = await supabase.rpc('admin_set_wallet', {
+                    p_user: userId,
+                    p_available: vals[0], p_investment: vals[1], p_bonus: vals[2], p_referral: vals[3], p_total_earnings: vals[4],
+                    p_today_earnings: vals[5], p_earnings_total: vals[6],
+                    p_reason: reason,
+                });
+                if (error) throw error;
+                document.getElementById('wReason').value = '';
+                document.getElementById('qAmount').value = '';
+                toast('Balances saved');
+                await Promise.all([loadWallet(), loadTransactions()]);
+            });
+        });
+
+        // --- Access: status, password, delete ---
+        function fillAccess() {
+            const status = profile.status || 'active';
+            document.querySelectorAll('input[name="uStatus"]').forEach(r => { r.checked = r.value === status; });
+            document.getElementById('statusReason').value = profile.status_reason || '';
+            const isSelf = profile.id === me.id;
+            document.getElementById('selfNote').classList.toggle('hidden', !isSelf);
+            ['saveStatus', 'deleteUser'].forEach(id => { const b = document.getElementById(id); b.disabled = isSelf; b.classList.toggle('opacity-50', isSelf); });
+            document.querySelectorAll('input[name="uStatus"]').forEach(r => { r.disabled = isSelf; });
+        }
+
+        document.getElementById('saveStatus').addEventListener('click', (e) => busy(e.currentTarget, async () => {
+            const status = document.querySelector('input[name="uStatus"]:checked')?.value;
+            if (!status) throw new Error('Pick a status.');
+            const reason = document.getElementById('statusReason').value.trim();
+            if (status !== 'active' && !confirm(`${status === 'banned' ? 'Ban' : 'Suspend'} ${profile.full_name || 'this user'}? They will be signed out and unable to log in.`)) return;
+            await api('/api/admin/users', { action: 'set_status', userId: profile.id, status, reason });
+            toast(status === 'active' ? 'Account reactivated' : `Account ${status}`);
+            await loadAll();
+        }));
+
+        document.getElementById('savePassword').addEventListener('click', (e) => busy(e.currentTarget, async () => {
+            const password = document.getElementById('newPassword').value;
+            if (password.length < 6) throw new Error('Password must be at least 6 characters.');
+            if (!confirm('Replace this user\'s password?')) return;
+            await api('/api/admin/users', { action: 'update_auth', userId: profile.id, password });
+            document.getElementById('newPassword').value = '';
+            toast('Password updated');
+        }));
+
+        document.getElementById('deleteUser').addEventListener('click', (e) => busy(e.currentTarget, async () => {
+            const typed = prompt(`This permanently deletes ${profile.full_name || 'this user'}'s account, wallet, and history. It cannot be undone.\n\nType DELETE to confirm.`);
+            if (typed !== 'DELETE') return;
+            await api('/api/admin/users', { action: 'delete_user', userId: profile.id });
+            window.location.href = 'users.html';
+        }));
+
+        // --- Investments ---
+        async function loadPlans() {
+            const { data } = await supabase.from('investment_plans').select('id, name, price, is_active').order('sort_order', { ascending: true });
+            plans = data || [];
+            document.getElementById('assignPlan').innerHTML = '<option value="">Select a plan…</option>' +
+                plans.filter(p => p.is_active).map(p => `<option value="${p.id}">${esc(p.name)} · ${naira(p.price)}</option>`).join('');
+        }
+
+        async function loadInvestments() {
+            const { data } = await supabase.from('investments').select('*, investment_plans(name)').eq('user_id', userId).order('created_at', { ascending: false });
+            const rows = data || [];
+            document.getElementById('cInv').textContent = rows.length || '';
+            document.getElementById('invList').innerHTML = rows.length ? rows.map(inv => `
+                <div class="p-5 md:p-6" data-inv="${inv.id}">
+                    <div class="flex items-start justify-between gap-3 mb-4">
+                        <div>
+                            <p class="text-sm font-semibold">${esc(inv.investment_plans?.name || 'Plan')}</p>
+                            <p class="text-[10px] text-[var(--muted)] mono">${when(inv.created_at)} · last paid ${inv.last_paid_at ? when(inv.last_paid_at) : 'never'}</p>
+                        </div>
+                        <p class="text-base font-semibold mono">${naira(inv.amount_invested)}</p>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 items-end">
+                        <div><label class="lbl">Status</label><select class="field w-full rounded-lg px-3 py-2.5 text-sm" data-f="status">
+                            ${['active', 'paused', 'completed', 'cancelled'].map(s => `<option value="${s}" ${inv.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
+                        <div><label class="lbl">Daily earning</label><input class="field w-full rounded-lg px-3 py-2.5 text-sm mono" type="number" step="0.01" min="0" data-f="daily_earning_amount" value="${Number(inv.daily_earning_amount || 0)}"></div>
+                        <div><label class="lbl">Days left</label><input class="field w-full rounded-lg px-3 py-2.5 text-sm mono" type="number" min="0" step="1" data-f="remaining_days" value="${Number(inv.remaining_days || 0)}"></div>
+                        <div class="flex gap-2">
+                            <button class="flex-1 px-3 py-2.5 ax-fill rounded-lg text-[11px] font-bold uppercase" onclick="saveInvestment('${inv.id}', this)">Save</button>
+                            <button class="px-3 py-2.5 bg-red-50 text-red-600 rounded-lg text-[11px] font-bold uppercase" onclick="deleteInvestment('${inv.id}', this)" aria-label="Delete investment"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </div>
+                    </div>
+                </div>`).join('') : empty('No investments yet.');
+            lucide.createIcons();
+        }
+
+        window.saveInvestment = (id, btn) => busy(btn, async () => {
+            const row = document.querySelector(`[data-inv="${id}"]`);
+            const get = (f) => row.querySelector(`[data-f="${f}"]`).value;
+            const { error } = await supabase.from('investments').update({
+                status: get('status'),
+                daily_earning_amount: Number(get('daily_earning_amount')),
+                remaining_days: parseInt(get('remaining_days'), 10),
+            }).eq('id', id);
+            if (error) throw error;
+            toast('Investment updated');
+            await loadInvestments();
+        });
+
+        window.deleteInvestment = (id, btn) => busy(btn, async () => {
+            if (!confirm('Delete this investment? Balances are not changed.')) return;
+            const { error } = await supabase.from('investments').delete().eq('id', id);
+            if (error) throw error;
+            toast('Investment deleted');
+            await loadInvestments();
+        });
+
+        document.getElementById('assignPlanBtn').addEventListener('click', (e) => busy(e.currentTarget, async () => {
+            const planId = document.getElementById('assignPlan').value;
+            if (!planId) throw new Error('Select a plan first.');
+            const plan = plans.find(p => p.id === planId);
+            if (!confirm(`Grant the "${plan?.name}" plan for free? The wallet is not debited.`)) return;
+            await api('/api/admin/users', { action: 'assign_plan', userId: profile.id, planId });
+            toast('Plan assigned');
+            await Promise.all([loadInvestments(), loadTransactions()]);
+        }));
+
+        // --- Deposits ---
+        async function loadDeposits() {
+            const { data } = await supabase.from('deposits').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+            const rows = data || [];
+            document.getElementById('cDep').textContent = rows.length || '';
+            document.getElementById('depList').innerHTML = rows.length ? rows.map(d => `
+                <div class="p-5 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <p class="text-base font-semibold mono">${naira(d.amount)}</p>
+                        <p class="text-[11px] text-[var(--muted)]">${esc(d.account_name || '—')} · ${esc(d.bank_name || '—')}</p>
+                        <p class="text-[10px] text-[var(--muted)] mono">${when(d.created_at)}</p>
+                    </div>
+                    ${d.status === 'pending' ? `<div class="flex gap-2">
+                        <button class="flex-1 px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-lg text-[11px] font-bold uppercase" onclick="depositAction('${d.id}', 'approve', this)">Approve</button>
+                        <button class="flex-1 px-4 py-2.5 bg-red-50 text-red-600 rounded-lg text-[11px] font-bold uppercase" onclick="depositAction('${d.id}', 'reject', this)">Reject</button>
+                    </div>` : badge(d.status, statusTone(d.status))}
+                </div>`).join('') : empty('No deposits yet.');
+        }
+
+        window.depositAction = (id, action, btn) => busy(btn, async () => {
+            if (!confirm(action === 'approve' ? 'Approve and credit this deposit (and pay any referral commission)?' : 'Reject this deposit?')) return;
+            const { error } = await supabase.rpc(action === 'approve' ? 'admin_approve_deposit' : 'admin_reject_deposit', { p_deposit: id });
+            if (error) throw error;
+            toast(action === 'approve' ? 'Deposit approved' : 'Deposit rejected');
+            await Promise.all([loadDeposits(), loadWallet(), loadTransactions(), loadNotifications()]);
+        });
+
+        // --- Withdrawals ---
+        async function loadWithdrawals() {
+            const { data } = await supabase.from('withdrawals').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+            const rows = data || [];
+            document.getElementById('cWd').textContent = rows.length || '';
+            document.getElementById('wdList').innerHTML = rows.length ? rows.map(w => `
+                <div class="p-5 md:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <p class="text-base font-semibold mono">${naira(w.amount)} <span class="text-[10px] text-[var(--muted)] font-normal">fee ${naira(w.charge)} · pays ${naira(Number(w.amount) - Number(w.charge || 0))}</span></p>
+                        <p class="text-[11px] text-[var(--muted)]">${esc(w.account_name || '—')} · ${esc(w.bank_name || '—')} · <span class="mono">${esc(w.account_number || '')}</span></p>
+                        <p class="text-[10px] text-[var(--muted)] mono">${when(w.created_at)}${w.processed_at ? ` · processed ${when(w.processed_at)}` : ''}</p>
+                    </div>
+                    ${w.status === 'pending' ? `<div class="flex gap-2">
+                        <button class="flex-1 px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-lg text-[11px] font-bold uppercase" onclick="withdrawalAction('${w.id}', 'complete', this)">Mark paid</button>
+                        <button class="flex-1 px-4 py-2.5 bg-red-50 text-red-600 rounded-lg text-[11px] font-bold uppercase" onclick="withdrawalAction('${w.id}', 'reject', this)">Reject &amp; refund</button>
+                    </div>` : badge(w.status === 'approved' ? 'paid' : w.status, statusTone(w.status))}
+                </div>`).join('') : empty('No withdrawals yet.');
+        }
+
+        window.withdrawalAction = (id, action, btn) => busy(btn, async () => {
+            if (!confirm(action === 'complete' ? 'Mark this withdrawal as paid?' : 'Reject and refund this withdrawal to the wallet?')) return;
+            await api('/api/admin/withdrawals', { id, action });
+            toast(action === 'complete' ? 'Marked as paid' : 'Rejected and refunded');
+            await Promise.all([loadWithdrawals(), loadWallet()]);
+        });
+
+        // --- Transactions ---
+        async function loadTransactions() {
+            const { data } = await supabase.from('transactions').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(200);
+            const rows = data || [];
+            document.getElementById('cTx').textContent = rows.length || '';
+            document.getElementById('txList').innerHTML = rows.length ? rows.map(t => `
+                <div class="p-4 md:px-6 flex items-center justify-between gap-3">
+                    <div class="min-w-0">
+                        <p class="text-sm font-semibold truncate">${esc(t.description || t.type)}</p>
+                        <p class="text-[10px] text-[var(--muted)] mono truncate">${esc(t.type)} · ${esc(t.reference || '')} · ${when(t.created_at)}</p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="text-sm font-semibold mono">${naira(t.amount)}</span>
+                        <button class="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--muted)] hover:text-red-500 hover:bg-red-50" onclick="deleteTx('${t.id}', this)" aria-label="Delete entry"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </div>
+                </div>`).join('') : empty('No transactions yet.');
+            lucide.createIcons();
+        }
+
+        window.deleteTx = (id, btn) => busy(btn, async () => {
+            if (!confirm('Remove this entry from the history? Balances are not changed.')) return;
+            const { error } = await supabase.from('transactions').delete().eq('id', id);
+            if (error) throw error;
+            toast('Entry removed');
+            await loadTransactions();
+        });
+
+        document.getElementById('txForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            busy(e.submitter, async () => {
+                const { error } = await supabase.from('transactions').insert([{
+                    user_id: userId,
+                    type: document.getElementById('txType').value,
+                    amount: Number(document.getElementById('txAmount').value),
+                    description: document.getElementById('txDesc').value.trim(),
+                }]);
+                if (error) throw error;
+                e.target.reset();
+                toast('Entry added');
+                await loadTransactions();
+            });
+        });
+
+        // --- Referrals ---
+        async function loadReferrals() {
+            const { data } = await supabase.from('profiles').select('id, full_name, email, created_at, status, wallets(available_balance)').eq('referred_by', userId).order('created_at', { ascending: false });
+            const rows = data || [];
+            document.getElementById('cRef').textContent = rows.length || '';
+            document.getElementById('refList').innerHTML = rows.length ? rows.map(r => {
+                const bal = r.wallets?.[0]?.available_balance ?? r.wallets?.available_balance ?? 0;
+                return `<a href="user.html?id=${encodeURIComponent(r.id)}" class="p-4 md:px-6 flex items-center justify-between gap-3 hover:bg-black/[0.02]">
+                    <div class="min-w-0"><p class="text-sm font-semibold truncate">${esc(r.full_name || 'Unnamed')}</p>
+                    <p class="text-[10px] text-[var(--muted)] mono truncate">${esc(r.email || '')} · joined ${new Date(r.created_at).toLocaleDateString('en-NG')}</p></div>
+                    <div class="flex items-center gap-2 shrink-0">${r.status && r.status !== 'active' ? badge(r.status, statusTone(r.status)) : ''}<span class="text-sm mono">${naira(bal)}</span><i data-lucide="chevron-right" class="w-4 h-4 text-[var(--muted)]"></i></div>
+                </a>`;
+            }).join('') : empty('Nobody has signed up with their code yet.');
+        }
+
+        // --- Notifications ---
+        async function loadNotifications() {
+            const { data } = await supabase.from('notifications').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(30);
+            const rows = data || [];
+            document.getElementById('nList').innerHTML = rows.length ? rows.map(n => `
+                <div class="p-4 md:px-6">
+                    <div class="flex items-center justify-between gap-3"><p class="text-sm font-semibold">${esc(n.title || 'Notification')}</p>${n.is_read ? '' : badge('unread', 'gold')}</div>
+                    <p class="text-xs text-[var(--muted)] mt-1">${esc(n.message || '')}</p>
+                    <p class="text-[10px] text-[var(--muted)] mono mt-1">${when(n.created_at)}</p>
+                </div>`).join('') : empty('No notifications sent yet.');
+        }
+
+        document.getElementById('notifyForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            busy(e.submitter, async () => {
+                const { error } = await supabase.from('notifications').insert([{
+                    user_id: userId,
+                    title: document.getElementById('nTitle').value.trim(),
+                    message: document.getElementById('nMsg').value.trim(),
+                }]);
+                if (error) throw error;
+                e.target.reset();
+                toast('Notification sent');
+                await loadNotifications();
+            });
+        });
+
+        document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+        document.getElementById('drawerLogoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+
+        setActiveNav();
+        init();
+    </script>
+</body>
+</html>

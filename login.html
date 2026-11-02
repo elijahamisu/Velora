@@ -45,7 +45,7 @@
                 </div>
             </div>
             <div class="flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-[var(--ax-muted)]">
-                <span class="flex items-center gap-2"><i data-lucide="gift" class="w-4 h-4 ax-accent"></i>₦600 welcome bonus</span>
+                <span class="flex items-center gap-2"><i data-lucide="gift" class="w-4 h-4 ax-accent"></i><span data-s="welcome_bonus">₦600</span> welcome bonus</span>
                 <span class="flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4 ax-accent"></i>Plans from ₦3,000</span>
                 <span class="flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4 ax-accent"></i>Daily earnings</span>
             </div>
@@ -113,6 +113,8 @@
     <!-- Scripting -->
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import * as AX from './src/site-settings.js';
+        AX.initPublic();
 
         // Initialization
         lucide.createIcons();
@@ -166,7 +168,11 @@
                     password,
                 });
 
-                if (error) throw error;
+                if (error) {
+                    // Supabase Auth refuses banned users before a session exists.
+                    if (/banned/i.test(error.message || '')) throw new Error(AX.blockedMessage('suspended'));
+                    throw error;
+                }
 
                 // 2. Fetch User Profile & Data (Verify existence)
                 const { data: profile, error: profileError } = await supabase
@@ -176,6 +182,12 @@
                     .single();
 
                 if (profileError) throw new Error("Profile not found. Please contact support.");
+
+                // 2b. Suspended / banned accounts may not sign in.
+                if (profile.status && profile.status !== 'active' && !['admin', 'super_admin'].includes(profile.role)) {
+                    await supabase.auth.signOut();
+                    throw new Error(AX.blockedMessage(profile.status, profile.status_reason));
+                }
 
                 // 3. Success State
                 successMessage.classList.remove('hidden');
@@ -189,6 +201,10 @@
                 setLoading(false);
             }
         });
+
+        // Redirected here because the account was suspended/banned
+        const blockedParam = new URLSearchParams(window.location.search).get('blocked');
+        if (blockedParam) showError(AX.blockedMessage(blockedParam));
 
         // Helpers
         function setLoading(isLoading) {

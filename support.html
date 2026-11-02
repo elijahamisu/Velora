@@ -227,8 +227,11 @@
                             <h4 class="text-xl ax-display font-semibold mb-3">Community &amp; Support</h4>
                             <p class="text-xs text-white/45 mb-8 leading-relaxed">Join our private Telegram community for instant updates and dedicated live agent support.</p>
                             <div class="space-y-3">
-                                <a id="tgCommunity" href="#" target="_blank" class="block w-full py-3 bg-[#D9C7A3] text-[#0A0F1C] font-bold rounded-lg text-xs hover:brightness-110 transition">Join Channel</a>
-                                <a id="tgSupport" href="#" target="_blank" class="block w-full py-3 border border-white/15 text-white font-bold rounded-lg text-xs hover:bg-white/5 transition">Direct Support</a>
+                                <a id="tgCommunity" href="https://t.me/+s66HnQZjuCFhZTI0" data-s-href="telegram_link" target="_blank" class="block w-full py-3 bg-[#D9C7A3] text-[#0A0F1C] font-bold rounded-lg text-xs hover:brightness-110 transition">Join Channel</a>
+                                <a data-s-show="support_whatsapp" data-s-href="support_whatsapp" data-s-kind="whatsapp" target="_blank" rel="noopener" class="hidden block w-full py-3 border border-white/15 text-white font-bold rounded-lg text-xs hover:bg-white/5 transition">WhatsApp</a>
+                                <a data-s-show="support_email" data-s-href="support_email" data-s-kind="mailto" class="hidden block w-full py-3 border border-white/15 text-white font-bold rounded-lg text-xs hover:bg-white/5 transition">Email <span data-s="support_email"></span></a>
+                                <a data-s-show="support_phone" data-s-href="support_phone" data-s-kind="tel" class="hidden block w-full py-3 border border-white/15 text-white font-bold rounded-lg text-xs hover:bg-white/5 transition">Call <span data-s="support_phone"></span></a>
+                                <a id="tgSupport" href="https://t.me/+s66HnQZjuCFhZTI0" data-s-href="telegram_support_link" target="_blank" class="block w-full py-3 border border-white/15 text-white font-bold rounded-lg text-xs hover:bg-white/5 transition">Direct Support</a>
                             </div>
                         </div>
                     </div>
@@ -287,6 +290,8 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import * as AX from './src/site-settings.js';
+        let siteSettings = AX.cachedSettings();
 
         lucide.createIcons();
 
@@ -341,10 +346,11 @@
         let activeTicketId = null;
 
         // FAQs
-        const faqs = [
-            { q: "How do I deposit funds?", a: "Go to the Deposit page, copy our Kuda Bank details, transfer the amount (min ₦3,000), and submit your reference number for verification." },
-            { q: "What is the minimum withdrawal?", a: "The minimum withdrawal amount is ₦600. A 15% charge is applied to all withdrawals." },
-            { q: "How long does payout take?", a: "Once approved by our admin, payments are usually credited to your Kuda account within 2-24 hours." },
+        // Built on demand so figures follow admin Settings.
+        const faqList = () => [
+            { q: "How do I deposit funds?", a: `Go to the Deposit page, copy our ${siteSettings.bank_name} details, transfer the amount (min ${AX.naira(siteSettings.min_deposit)}), and submit your reference number for verification.` },
+            { q: "What is the minimum withdrawal?", a: `The minimum withdrawal amount is ${AX.naira(siteSettings.min_withdrawal)}. A ${AX.pct(siteSettings.withdrawal_fee_pct)} charge is applied to all withdrawals. Withdrawals are open ${AX.withdrawalWindowLabel(siteSettings)}.` },
+            { q: "How long does payout take?", a: "Once approved by our admin, payments are usually credited to your bank account within 2-24 hours." },
             { q: "How do daily earnings work?", a: "Earnings are automatically calculated and credited to your wallet every midnight based on your active investments." },
             { q: "How do I redeem a Gift Code?", a: "Enter the code in the Gift Code page. If valid, the reward is instantly credited to your wallet balance." }
         ];
@@ -357,6 +363,10 @@
                 return;
             }
             user = session.user;
+            // Site settings + account status (suspended/banned users are signed out; maintenance blocks non-admins)
+            const access = await AX.enforceAccess(supabase, user.id);
+            if (!access.ok) return;
+            siteSettings = access.settings;
             document.getElementById('authGuard').classList.add('hidden');
 
             loadProfile();
@@ -384,9 +394,7 @@
                 document.getElementById('drawerBalance').textContent = `₦${Number(wallet.available_balance||0).toLocaleString()}`;
             }
 
-            // Env Links
-            document.getElementById('tgCommunity').href = import.meta.env.VITE_TELEGRAM_LINK;
-            document.getElementById('tgSupport').href = import.meta.env.VITE_TELEGRAM_SUPPORT_LINK;
+            // Telegram / contact links are filled from admin Settings (data-s-href).
         }
 
         async function loadTickets() {
@@ -506,7 +514,7 @@
         // --- 4. Search & UI Helpers ---
         function renderFAQ(filter = '') {
             const container = document.getElementById('faqContainer');
-            const filtered = faqs.filter(f => f.q.toLowerCase().includes(filter.toLowerCase()));
+            const filtered = faqList().filter(f => f.q.toLowerCase().includes(filter.toLowerCase()));
 
             container.innerHTML = filtered.map(f => `
                 <details class="faq-details group border border-black/[0.06] rounded-[10px] bg-[var(--paper-card)] overflow-hidden">

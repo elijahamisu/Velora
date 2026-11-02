@@ -250,6 +250,8 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import * as AX from './src/site-settings.js';
+        let siteSettings = AX.cachedSettings();
 
         lucide.createIcons();
 
@@ -316,6 +318,10 @@
                 return;
             }
             user = session.user;
+            // Site settings + account status (suspended/banned users are signed out; maintenance blocks non-admins)
+            const access = await AX.enforceAccess(supabase, user.id);
+            if (!access.ok) return;
+            siteSettings = access.settings;
             document.getElementById('authGuard').classList.add('hidden');
 
             loadWalletData();
