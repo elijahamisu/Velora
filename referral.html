@@ -416,30 +416,13 @@
         }
 
         // --- Load Referral Data ---
+        // Referred users' profile rows are private. The my_referrals() RPC
+        // returns only a masked name, join date, activity flags and the
+        // commission this user earned from each referral.
         async function loadReferralData() {
             try {
-                // `profiles` has no `referral_code_used` column — the real
-                // column (written by the handle_new_user trigger) is
-                // `referred_by`, a uuid pointing at the referrer's own id.
-                const { data: refs, error: refsErr } = await supabase.from('profiles')
-                    .select('*')
-                    .eq('referred_by', user.id)
-                    .order('created_at', { ascending: false });
+                const { data: refs, error: refsErr } = await supabase.rpc('my_referrals');
                 if (refsErr) console.error('Referrals load error:', refsErr.message);
-
-                // `profiles` has no `is_active` column. "Active" here means
-                // the referred user currently has at least one active
-                // investment — fetched separately and merged in below.
-                const refIds = (refs || []).map(r => r.id);
-                let activeInvestorIds = new Set();
-                if (refIds.length > 0) {
-                    const { data: activeInvestments } = await supabase.from('investments')
-                        .select('user_id')
-                        .in('user_id', refIds)
-                        .eq('status', 'active');
-                    activeInvestorIds = new Set((activeInvestments || []).map(inv => inv.user_id));
-                }
-                const refsWithActivity = (refs || []).map(r => ({ ...r, is_active: activeInvestorIds.has(r.id) }));
 
                 // Get earnings — real type value is 'referral_bonus', not 'referral'.
                 const { data: bonuses, error: bonusErr } = await supabase.from('transactions')
@@ -448,44 +431,22 @@
                     .eq('type', 'referral_bonus');
                 if (bonusErr) console.error('Bonuses load error:', bonusErr.message);
 
-                updateUI(refsWithActivity, bonuses || []);
-                loadTeamTiers(refsWithActivity);
+                updateUI(refs || [], bonuses || []);
+                loadTeamTiers();
             } catch (err) {
                 console.error(err);
             }
         }
 
         // --- Team Performance tiers ---
-        // Level 1 (Direct) is the `refs` list already fetched above via
-        // referred_by = user.id. Level 2 (Secondary) and Level 3 (Tertiary)
-        // are computed by chaining referred_by against each prior level's
-        // own id (uuid), matching the real schema.
-        async function loadTeamTiers(directRefs) {
-            document.getElementById('directCount').textContent = directRefs.length;
-
-            const directIds = directRefs.map(r => r.id).filter(Boolean);
-            if (directIds.length === 0) {
-                document.getElementById('secondaryCount').textContent = 0;
-                document.getElementById('tertiaryCount').textContent = 0;
-                return;
-            }
-
-            const { data: secondaryRefs } = await supabase.from('profiles')
-                .select('id')
-                .in('referred_by', directIds);
-            const secondary = secondaryRefs || [];
-            document.getElementById('secondaryCount').textContent = secondary.length;
-
-            const secondaryIds = secondary.map(r => r.id).filter(Boolean);
-            if (secondaryIds.length === 0) {
-                document.getElementById('tertiaryCount').textContent = 0;
-                return;
-            }
-
-            const { data: tertiaryRefs } = await supabase.from('profiles')
-                .select('id')
-                .in('referred_by', secondaryIds);
-            document.getElementById('tertiaryCount').textContent = (tertiaryRefs || []).length;
+        // Counts only (no identities) for levels 1-3, from my_referral_tiers().
+        async function loadTeamTiers() {
+            const { data, error } = await supabase.rpc('my_referral_tiers');
+            if (error) console.error('Tiers load error:', error.message);
+            const t = (Array.isArray(data) ? data[0] : data) || {};
+            document.getElementById('directCount').textContent = t.direct_count || 0;
+            document.getElementById('secondaryCount').textContent = t.secondary_count || 0;
+            document.getElementById('tertiaryCount').textContent = t.tertiary_count || 0;
         }
 
         async function loadWallet() {
@@ -499,10 +460,10 @@
 
         // --- Update UI ---
         function updateUI(refs, bonuses) {
-            const totalEarned = bonuses.reduce((acc, curr) => acc + curr.amount, 0);
+            const totalEarned = bonuses.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
             const today = new Date().setHours(0,0,0,0);
             const todayEarned = bonuses.filter(b => new Date(b.created_at).setHours(0,0,0,0) === today)
-                                       .reduce((acc, curr) => acc + curr.amount, 0);
+                                       .reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
 
             document.getElementById('totalBonus').textContent = `₦${totalEarned.toLocaleString()}`;
             document.getElementById('todayBonus').textContent = `₦${todayEarned.toLocaleString()}`;
@@ -510,7 +471,7 @@
             document.getElementById('todayBonusMetric').textContent = `₦${todayEarned.toLocaleString()}`;
             document.getElementById('totalRefCount').textContent = refs.length;
 
-            const activeRefs = refs.filter(r => r.is_active); // Custom logic for active status
+            const activeRefs = refs.filter(r => r.is_active); // has at least one active investment
             document.getElementById('activeRefCount').textContent = activeRefs.length;
 
             const tbody = document.getElementById('refTable');
@@ -519,23 +480,21 @@
                 return;
             }
 
+            const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
             tbody.innerHTML = refs.map(r => `
                 <tr class="hover:bg-black/[0.015] transition">
                     <td class="px-8 py-6">
-                        <p class="text-sm font-semibold text-[var(--ink-text)]">${r.full_name}</p>
-                        <p class="text-[10px] text-[var(--muted)] uppercase font-medium">Verified User</p>
+                        <p class="text-sm font-semibold text-[var(--ink-text)]">${esc(r.display_name)}</p>
+                        <p class="text-[10px] text-[var(--muted)] uppercase font-medium">${r.has_invested ? 'Investor' : 'Verified User'}</p>
                     </td>
-                    <td class="px-8 py-6 text-xs text-[var(--muted)] font-medium mono">${new Date(r.created_at).toLocaleDateString()}</td>
+                    <td class="px-8 py-6 text-xs text-[var(--muted)] font-medium mono">${new Date(r.joined_at).toLocaleDateString()}</td>
                     <td class="px-8 py-6">
                         <span class="text-[9px] uppercase font-bold px-2 py-1 rounded-lg ${r.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-black/5 text-[var(--ink-text)]'}">
                             ${r.is_active ? 'Active' : 'Joined'}
                         </span>
                     </td>
                     <td class="px-8 py-6 text-right font-semibold text-[var(--ink-text)] mono">
-                        <!-- transactions has no ref_id column linking a bonus to a
-                             specific downstream referral, so per-referral bonus
-                             attribution isn't tracked in the current schema. -->
-                        —
+                        ${Number(r.commission_earned) > 0 ? `₦${Number(r.commission_earned).toLocaleString()}` : '—'}
                     </td>
                 </tr>
             `).join('');
@@ -577,7 +536,7 @@
         // --- Realtime Sync ---
         function setupRealtime() {
             supabase.channel('network-updates')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, () => {
                     loadReferralData();
                 })
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transactions', filter: `user_id=eq.${user.id}` }, () => {

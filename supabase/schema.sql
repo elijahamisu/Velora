@@ -1252,3 +1252,214 @@ grant execute on function public.user_request_withdrawal(numeric,text,text,text,
 grant execute on function public.user_invest(uuid,numeric) to authenticated;
 grant execute on function public.user_redeem_gift_code(text,boolean) to authenticated;
 grant execute on function public.user_create_deposit(numeric,text,text) to authenticated;
+
+-- =====================================================================
+-- Privacy: referrers no longer read referred users' profile rows.
+-- * profiles SELECT is own-row only (admins keep full access via admin_all).
+-- * investments.referral_active dropped (leaked referred users' investments).
+-- * Referral page reads a masked summary via SECURITY DEFINER RPCs.
+-- * admin_notes moves to an admin-only table (users can't read their own notes).
+-- * Referral bonus transactions now carry reference = 'referral:<referred uuid>'
+--   so commission can be attributed per referral.
+-- =====================================================================
+
+drop policy if exists own_select on public.profiles;
+create policy own_select on public.profiles for select using (id = auth.uid());
+
+drop policy if exists referral_active on public.investments;
+
+-- ---------- Admin-only notes ----------
+create table if not exists public.profile_admin_notes (
+  user_id uuid primary key references public.profiles(id) on delete cascade,
+  notes text,
+  updated_at timestamptz not null default now(),
+  updated_by uuid default auth.uid()
+);
+alter table public.profile_admin_notes enable row level security;
+drop policy if exists admin_all on public.profile_admin_notes;
+create policy admin_all on public.profile_admin_notes for all using (public.is_admin()) with check (public.is_admin());
+revoke all on public.profile_admin_notes from anon;
+grant select, insert, update, delete on public.profile_admin_notes to authenticated;
+
+do $$
+begin
+  if exists (select 1 from information_schema.columns
+             where table_schema = 'public' and table_name = 'profiles' and column_name = 'admin_notes') then
+    insert into public.profile_admin_notes (user_id, notes)
+    select id, admin_notes from public.profiles where admin_notes is not null
+    on conflict (user_id) do update set notes = excluded.notes;
+  end if;
+end $$;
+
+create or replace function public.protect_role() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is not null and not public.is_admin() then
+    new.id := old.id;
+    new.role := old.role;
+    new.status := old.status;
+    new.status_reason := old.status_reason;
+    new.status_changed_at := old.status_changed_at;
+    new.email := old.email;
+    new.referral_code := old.referral_code;
+    new.referred_by := old.referred_by;
+    new.created_at := old.created_at;
+  end if;
+  if new.status is distinct from old.status then
+    new.status_changed_at := now();
+  end if;
+  new.updated_at := now();
+  return new;
+end; $$;
+
+alter table public.profiles drop column if exists admin_notes;
+
+-- ---------- Referral RPCs (masked, caller's own network only) ----------
+create or replace function public.mask_name(p_name text) returns text
+language sql immutable set search_path = public as $$
+  select case
+    when coalesce(trim(p_name), '') = '' then 'Member'
+    when array_length(regexp_split_to_array(trim(p_name), '\s+'), 1) = 1 then trim(p_name)
+    else (regexp_split_to_array(trim(p_name), '\s+'))[1] || ' ' ||
+         upper(left((regexp_split_to_array(trim(p_name), '\s+'))[array_length(regexp_split_to_array(trim(p_name), '\s+'), 1)], 1)) || '.'
+  end;
+$$;
+
+create or replace function public.my_referrals()
+returns table (display_name text, joined_at timestamptz, is_active boolean, has_invested boolean, commission_earned numeric)
+language sql stable security definer set search_path = public as $$
+  select public.mask_name(p.full_name),
+         p.created_at,
+         exists (select 1 from public.investments i where i.user_id = p.id and i.status = 'active'),
+         exists (select 1 from public.investments i where i.user_id = p.id),
+         coalesce((select sum(t.amount) from public.transactions t
+                    where t.user_id = auth.uid() and t.type = 'referral_bonus'
+                      and t.reference = 'referral:' || p.id::text), 0)
+    from public.profiles p
+   where auth.uid() is not null and p.referred_by = auth.uid()
+   order by p.created_at desc;
+$$;
+
+create or replace function public.my_referral_tiers()
+returns table (direct_count int, secondary_count int, tertiary_count int)
+language sql stable security definer set search_path = public as $$
+  with l1 as (select id from public.profiles where auth.uid() is not null and referred_by = auth.uid()),
+       l2 as (select id from public.profiles where referred_by in (select id from l1)),
+       l3 as (select id from public.profiles where referred_by in (select id from l2))
+  select (select count(*) from l1)::int, (select count(*) from l2)::int, (select count(*) from l3)::int;
+$$;
+
+revoke execute on function public.my_referrals() from public, anon;
+revoke execute on function public.my_referral_tiers() from public, anon;
+grant execute on function public.my_referrals() to authenticated;
+grant execute on function public.my_referral_tiers() to authenticated;
+
+-- Referral bonuses carry the referred user's id in transactions.reference
+CREATE OR REPLACE FUNCTION public.admin_approve_deposit(p_deposit uuid)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare d public.deposits; ref uuid; pct numeric; bonus numeric;
+begin
+  if not public.is_admin() then raise exception 'Admin privileges required'; end if;
+  update public.deposits set status = 'approved', credited_amount = amount, processed_at = now()
+   where id = p_deposit and status = 'pending' and method = 'manual' returning * into d;
+  if not found then raise exception 'Deposit not found, already processed, or paid through the gateway'; end if;
+
+  update public.wallets set available_balance = available_balance + d.amount, updated_at = now() where user_id = d.user_id;
+
+  select referred_by into ref from public.profiles where id = d.user_id;
+  if ref is not null then
+    pct := coalesce((select referral_commission_pct from public.site_settings where id = 1), 20);
+    bonus := round(d.amount * pct / 100, 2);
+    if bonus > 0 then
+      update public.wallets set available_balance = available_balance + bonus, updated_at = now() where user_id = ref;
+      insert into public.transactions (user_id, amount, type, reference, description)
+      values (ref, bonus, 'referral_bonus', 'referral:' || d.user_id::text,
+              trim(to_char(pct,'FM990.##')) || '% referral bonus from a downstream deposit of ₦' || to_char(d.amount,'FM999,999,999,990'));
+    end if;
+  end if;
+
+  insert into public.notifications (user_id, title, message)
+  values (d.user_id, 'Deposit Approved',
+          'Your deposit of ₦' || to_char(d.amount,'FM999,999,999,990') || ' has been approved and credited to your wallet.');
+end; $function$;
+
+CREATE OR REPLACE FUNCTION public.gateway_apply_payin(p_order_sn text, p_platform_osn text, p_status integer, p_amount_paid numeric, p_message text, p_utr text, p_payload jsonb)
+ RETURNS text
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare d public.deposits; credit numeric; ref uuid; pct numeric; bonus numeric;
+begin
+  select * into d from public.deposits where order_sn = p_order_sn and method = 'gateway' for update;
+  if not found then return 'not_found'; end if;
+  if d.platform_osn is not null and p_platform_osn is not null and d.platform_osn <> p_platform_osn then
+    return 'osn_mismatch';
+  end if;
+  if d.status = 'approved' then return 'duplicate'; end if;
+
+  if p_status is distinct from 1 then
+    update public.deposits
+       set status = case when status = 'pending' then 'failed' else status end,
+           platform_osn = coalesce(platform_osn, p_platform_osn),
+           gateway_status = p_status, gateway_message = p_message, utr = coalesce(p_utr, utr),
+           amount_paid = coalesce(p_amount_paid, amount_paid),
+           callback_payload = p_payload, processed_at = now()
+     where id = d.id;
+    if d.status = 'pending' then
+      insert into public.notifications (user_id, title, message)
+      values (d.user_id, 'Deposit Not Completed',
+              'Your deposit of ₦' || to_char(d.amount,'FM999,999,999,990') || ' was not completed by the payment gateway. No money was added to your wallet.');
+      return 'failed_recorded';
+    end if;
+    return 'ignored';
+  end if;
+
+  credit := case
+              when p_amount_paid is null then d.amount
+              when p_amount_paid >= d.amount then d.amount
+              else round(p_amount_paid, 2)
+            end;
+  if credit <= 0 then
+    update public.deposits set status = 'failed', gateway_status = p_status,
+           gateway_message = coalesce(p_message, '') || ' (paid amount was zero)',
+           platform_osn = coalesce(platform_osn, p_platform_osn), amount_paid = p_amount_paid,
+           callback_payload = p_payload, processed_at = now()
+     where id = d.id;
+    return 'failed_recorded';
+  end if;
+
+  update public.deposits
+     set status = 'approved', credited_amount = credit, amount_paid = p_amount_paid,
+         platform_osn = coalesce(platform_osn, p_platform_osn),
+         gateway_status = p_status, gateway_message = p_message, utr = p_utr,
+         callback_payload = p_payload, processed_at = now()
+   where id = d.id;
+
+  update public.wallets set available_balance = available_balance + credit, updated_at = now() where user_id = d.user_id;
+  insert into public.transactions (user_id, amount, type, description, reference)
+  values (d.user_id, credit, 'deposit',
+          'Gateway deposit' || case when credit < d.amount then ' (partial payment of ₦' || to_char(d.amount,'FM999,999,999,990.00') || ' order)' else '' end,
+          d.order_sn);
+
+  select referred_by into ref from public.profiles where id = d.user_id;
+  if ref is not null then
+    pct := coalesce((select referral_commission_pct from public.site_settings where id = 1), 20);
+    bonus := round(credit * pct / 100, 2);
+    if bonus > 0 then
+      update public.wallets set available_balance = available_balance + bonus, updated_at = now() where user_id = ref;
+      insert into public.transactions (user_id, amount, type, reference, description)
+      values (ref, bonus, 'referral_bonus', 'referral:' || d.user_id::text,
+              trim(to_char(pct,'FM990.##')) || '% referral bonus from a downstream deposit of ₦' || to_char(credit,'FM999,999,999,990'));
+    end if;
+  end if;
+
+  insert into public.notifications (user_id, title, message)
+  values (d.user_id, 'Deposit Successful',
+          'Your deposit of ₦' || to_char(credit,'FM999,999,999,990.00') || ' has been confirmed and credited to your wallet.');
+  return 'credited';
+end; $function$;

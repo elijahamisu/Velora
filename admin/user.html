@@ -476,6 +476,9 @@
                 return;
             }
             profile = p;
+            // Admin notes live in the admin-only profile_admin_notes table (hidden from the user).
+            const { data: note } = await supabase.from('profile_admin_notes').select('notes').eq('user_id', userId).maybeSingle();
+            profile.admin_notes = note?.notes || '';
             document.getElementById('userView').classList.remove('hidden');
             await Promise.all([loadWallet(), loadReferrer(), loadInvestments(), loadDeposits(), loadWithdrawals(), loadTransactions(), loadReferrals(), loadNotifications(), loadPlans()]);
             renderIdentity();
@@ -572,10 +575,15 @@
                     avatar_url: document.getElementById('pAvatar').value.trim() || null,
                     terms_accepted: terms,
                     terms_accepted_at: terms ? (profile.terms_accepted_at || new Date().toISOString()) : null,
-                    admin_notes: document.getElementById('pNotes').value.trim() || null,
                 };
                 const { error } = await supabase.from('profiles').update(update).eq('id', profile.id);
                 if (error) throw new Error(error.code === '23505' ? 'That referral code is already taken.' : error.message);
+                const notes = document.getElementById('pNotes').value.trim() || null;
+                if (notes !== (profile.admin_notes || null)) {
+                    const { error: noteErr } = await supabase.from('profile_admin_notes')
+                        .upsert({ user_id: profile.id, notes, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+                    if (noteErr) throw new Error('Profile saved, but notes failed: ' + noteErr.message);
+                }
                 toast('Profile saved');
                 await loadAll();
             });
