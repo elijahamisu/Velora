@@ -211,6 +211,10 @@
                     <span class="text-[var(--muted)]">Duration</span>
                     <span id="investModalDuration" class="font-bold mono">0 Days</span>
                 </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-[var(--muted)]">Total Earnings</span>
+                    <span id="investModalTotalEarn" class="font-bold text-emerald-600 mono">₦0.00</span>
+                </div>
                 <div class="flex justify-between text-sm border-t border-black/[0.05] pt-3">
                     <span class="text-[var(--muted)]">Wallet Balance After</span>
                     <span id="investModalNewBalance" class="font-bold mono">₦0.00</span>
@@ -315,6 +319,7 @@
                     dailyRoiPct: Number(p.daily_roi_pct),
                     minInvest: Number(p.price),
                     dailyProfitNaira: (Number(p.price) * Number(p.daily_roi_pct)) / 100,
+                    totalEarnNaira: ((Number(p.price) * Number(p.daily_roi_pct)) / 100) * Number(p.duration_days),
                     durationDays: p.duration_days,
                     popular: !!p.is_popular
                 }));
@@ -452,6 +457,7 @@
                     <dl class="px-5 md:px-6 py-2">
                         <div class="ax-kv"><dt>Investment amount</dt><dd>${naira(plan.minInvest)}</dd></div>
                         <div class="ax-kv"><dt>Duration</dt><dd>${esc(plan.durationDays)} days</dd></div>
+                        <div class="ax-kv"><dt>Total earnings in ${esc(plan.durationDays)} days</dt><dd class="ax-accent font-semibold">${naira(plan.totalEarnNaira)}</dd></div>
                     </dl>
                     <div class="p-5 md:p-6 pt-3">
                     ${locked ? `
@@ -497,6 +503,7 @@
             document.getElementById('investModalAmount').textContent = naira(amount);
             document.getElementById('investModalDailyRoi').textContent = naira(amount * plan.dailyRoiPct / 100);
             document.getElementById('investModalDuration').textContent = `${plan.durationDays} Days`;
+            document.getElementById('investModalTotalEarn').textContent = naira((amount * plan.dailyRoiPct / 100) * plan.durationDays);
             document.getElementById('investModalNewBalance').textContent = naira(Math.max(currentBalance - amount, 0));
 
             const errorBox = document.getElementById('investModalError');
