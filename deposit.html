@@ -139,20 +139,31 @@
                         <i data-lucide="credit-card" class="w-7 h-7 ax-accent"></i>
                     </div>
                     <h4 class="text-xl font-semibold ax-display mb-1">Fund Your Wallet</h4>
-                    <p class="text-xs text-[var(--muted)] mb-6">Enter an amount to begin a secure bank transfer.</p>
+                    <p id="depositSubtitle" class="text-xs text-[var(--muted)] mb-6">Enter an amount to begin a secure bank transfer.</p>
 
                     <label class="block text-xs font-bold text-[var(--muted)] uppercase mb-2 ml-1 tracking-wide">Amount to Deposit (₦)</label>
                     <input type="number" id="depositAmount" placeholder="3000" required min="3000"
                         class="field w-full px-6 py-5 rounded-[10px] font-semibold mono text-2xl mb-4">
 
+                    <!-- Gateway mode only: shown when the profile has no phone number (the checkout requires one) -->
+                    <div id="phoneWrap" class="hidden mb-4">
+                        <label for="depositPhone" class="block text-xs font-bold text-[var(--muted)] uppercase mb-2 ml-1 tracking-wide">Phone number</label>
+                        <input type="tel" id="depositPhone" placeholder="080..." inputmode="tel" autocomplete="tel"
+                            class="field w-full px-5 py-4 rounded-[10px] font-semibold mono">
+                        <p class="text-[10px] text-[var(--muted)] mt-1.5 ml-1">Required by the payment checkout. Saved to your profile.</p>
+                    </div>
+
+                    <div id="gatewayError" class="hidden mb-4 p-3 rounded-lg bg-red-50 border border-red-100 text-[11px] text-red-700 leading-relaxed" role="alert"></div>
+
                     <button type="button" id="startCheckoutBtn"
                         class="w-full py-5 ax-fill text-white font-bold rounded-lg flex items-center justify-center gap-3 transition">
                         <i data-lucide="lock" class="w-4 h-4"></i>
-                        <span>Continue to Secure Payment</span>
+                        <span id="startCheckoutLabel">Continue to Secure Payment</span>
+                        <div id="startLoader" class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin hidden"></div>
                     </button>
 
                     <p class="text-[10px] text-[var(--muted)] text-center mt-4 flex items-center justify-center gap-1.5">
-                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Minimum deposit <span data-s="min_deposit">₦3,000</span><span id="maxDepositNote" class="hidden"> · Max <span data-s="max_deposit"></span></span> · Bank-verified transfer
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Minimum deposit <span data-s="min_deposit">₦3,000</span><span id="maxDepositNote" class="hidden"> · Max <span data-s="max_deposit"></span></span> · <span id="depositModeNote">Bank-verified transfer</span>
                     </p>
                 </div>
 
@@ -367,6 +378,8 @@
         document.querySelectorAll('#drawerNav a[data-page]').forEach(a => a.addEventListener('click', closeDrawer));
 
         let user = null;
+        let profilePhone = '';
+        const isGateway = () => (siteSettings.payment_mode || 'manual') === 'gateway';
         // Limits come from admin Settings (site_settings); 3000 is the fallback.
         const minDeposit = () => Number(siteSettings.min_deposit || 3000);
         const maxDeposit = () => (siteSettings.max_deposit ? Number(siteSettings.max_deposit) : null);
@@ -392,6 +405,7 @@
             depInput.min = minDeposit();
             depInput.placeholder = String(minDeposit());
             if (maxDeposit()) { depInput.max = maxDeposit(); document.getElementById('maxDepositNote').classList.remove('hidden'); }
+            applyPaymentMode();
             document.getElementById('authGuard').classList.add('hidden');
             // Bank details are filled from admin Settings via data-s attributes,
             // falling back to the values in the HTML above (Zap Account:
@@ -417,6 +431,8 @@
                     document.getElementById('drawerBalance').textContent = `₦${bal.toLocaleString()}`;
                 }
                 if (profileRes.data) {
+                    profilePhone = profileRes.data.phone || '';
+                    document.getElementById('phoneWrap').classList.toggle('hidden', !(isGateway() && !profilePhone));
                     document.getElementById('userInitials').textContent = profileRes.data.full_name.charAt(0);
                     document.getElementById('drawerInitials').textContent = profileRes.data.full_name.charAt(0);
                 }
@@ -491,13 +507,66 @@
 
         window.showPayStep = showPayStep;
 
+        // --- 4a. Gateway mode (Afrstar): server creates the order, we redirect to its checkout ---
+        function applyPaymentMode() {
+            if (!isGateway()) return;
+            document.getElementById('depositSubtitle').textContent = 'Pay securely through our payment partner. Your wallet is credited automatically once the payment is confirmed.';
+            document.getElementById('startCheckoutLabel').textContent = 'Continue to Payment';
+            document.getElementById('depositModeNote').textContent = 'Credited automatically';
+        }
+
+        function showGatewayError(msg) {
+            const el = document.getElementById('gatewayError');
+            el.textContent = msg || '';
+            el.classList.toggle('hidden', !msg);
+        }
+
+        async function startGatewayDeposit(amount) {
+            const btn = document.getElementById('startCheckoutBtn');
+            const phoneInput = document.getElementById('depositPhone');
+            const phone = phoneInput.value.trim();
+            if (!profilePhone && phone.replace(/\D/g, '').length < 10) {
+                document.getElementById('phoneWrap').classList.remove('hidden');
+                showGatewayError('Enter your phone number to continue.');
+                phoneInput.focus();
+                return;
+            }
+            showGatewayError('');
+            btn.disabled = true;
+            document.getElementById('startLoader').classList.remove('hidden');
+            document.getElementById('startCheckoutLabel').textContent = 'Opening secure checkout…';
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) { window.location.href = 'login.html'; return; }
+                const res = await fetch('/api/deposits/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+                    body: JSON.stringify({ amount, phone: phone || undefined })
+                });
+                const body = await res.json().catch(() => ({}));
+                if (!res.ok || !body.pay_url) {
+                    if (body.code === 'phone_required') document.getElementById('phoneWrap').classList.remove('hidden');
+                    throw new Error(body.error || `Could not start the payment (${res.status}).`);
+                }
+                try { sessionStorage.setItem('ax_last_deposit', body.order_sn); } catch {}
+                window.location.href = body.pay_url;
+            } catch (err) {
+                showGatewayError(err.message);
+                btn.disabled = false;
+                document.getElementById('startLoader').classList.add('hidden');
+                document.getElementById('startCheckoutLabel').textContent = 'Continue to Payment';
+                loadData();
+            }
+        }
+
         document.getElementById('startCheckoutBtn').addEventListener('click', () => {
             const amount = parseFloat(document.getElementById('depositAmount').value);
             const limitErr = depositLimitError(amount);
             if (limitErr) {
-                alert(limitErr);
+                if (isGateway()) showGatewayError(limitErr); else alert(limitErr);
                 return;
             }
+            if (isGateway()) { startGatewayDeposit(amount); return; }
             document.getElementById('checkoutAmount').textContent = `₦${amount.toLocaleString()}`;
             showPayStep();
             document.getElementById('checkoutModal').classList.remove('hidden');
@@ -594,15 +663,21 @@
 
             tbody.innerHTML = data.map(row => `
                 <tr class="hover:bg-black/[0.015] transition">
-                    <td class="px-8 py-6 font-semibold text-[var(--ink-text)] mono">₦${row.amount.toLocaleString()}</td>
+                    <td class="px-8 py-6 font-semibold text-[var(--ink-text)] mono">₦${Number(row.amount).toLocaleString()}</td>
                     <td class="px-8 py-6 text-xs text-[var(--muted)] font-medium mono">${new Date(row.created_at).toLocaleDateString()}</td>
                     <td class="px-8 py-6 text-center text-[10px] mono text-[var(--muted)]">
-                        ${row.account_name ? `${row.account_name}<br><span class="opacity-70">${row.bank_name || ''}</span>` : '—'}
+                        ${row.method === 'gateway'
+                            ? `<span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded bg-black/[0.05] text-[var(--ink-text)]">Gateway</span>`
+                              + (row.status === 'pending' && row.pay_url && (Date.now() - new Date(row.created_at).getTime()) < 60 * 60 * 1000
+                                  ? `<br><a href="${row.pay_url}" class="ax-accent underline font-semibold">Continue payment</a>` : '')
+                              + (row.status === 'approved' && row.credited_amount != null && Number(row.credited_amount) !== Number(row.amount)
+                                  ? `<br><span class="opacity-70">Credited ₦${Number(row.credited_amount).toLocaleString()}</span>` : '')
+                            : (row.account_name ? `${row.account_name}<br><span class="opacity-70">${row.bank_name || ''}</span>` : '—')}
                     </td>
                     <td class="px-8 py-6 text-right">
-                        <span class="text-[9px] uppercase font-bold px-3 py-1 rounded-lg ${getStatusStyle(row.status)}">
-                            ${row.status}
-                        </span>
+                        <a ${row.order_sn ? `href="deposit-result.html?ref=${encodeURIComponent(row.order_sn)}"` : ''} class="text-[9px] uppercase font-bold px-3 py-1 rounded-lg ${getStatusStyle(row.status)}">
+                            ${row.method === 'gateway' && row.status === 'approved' ? 'credited' : row.status}
+                        </a>
                     </td>
                 </tr>
             `).join('');

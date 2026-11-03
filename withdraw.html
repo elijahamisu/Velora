@@ -177,13 +177,17 @@
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-xs font-bold text-[var(--muted)] uppercase mb-2 ml-1 tracking-wide">Bank Name</label>
-                                    <input type="text" id="bankName" placeholder="e.g. Kuda Bank" required
-                                        class="field w-full px-6 py-4 rounded-[10px] text-sm font-semibold">
+                                    <label for="bankCode" class="block text-xs font-bold text-[var(--muted)] uppercase mb-2 ml-1 tracking-wide">Bank</label>
+                                    <select id="bankCode" required
+                                        class="field w-full px-5 py-4 rounded-[10px] text-sm font-semibold">
+                                        <option value="">Select bank</option>
+                                    </select>
+                                    <input type="text" id="bankNameOther" placeholder="Type your bank name"
+                                        class="field w-full px-6 py-4 rounded-[10px] text-sm font-semibold mt-2 hidden">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-[var(--muted)] uppercase mb-2 ml-1 tracking-wide">Account Number</label>
-                                    <input type="number" id="accNumber" placeholder="10 Digits" required
+                                    <input type="text" id="accNumber" placeholder="10 Digits" required inputmode="numeric" maxlength="10" pattern="[0-9]{10}"
                                         class="field w-full px-6 py-4 rounded-[10px] text-sm font-semibold mono">
                                 </div>
                             </div>
@@ -281,6 +285,7 @@
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
         import * as AX from './src/site-settings.js';
+        import { bankOptionsHtml, bankByCode } from './src/ng-banks.js';
         let siteSettings = AX.cachedSettings();
 
         lucide.createIcons();
@@ -357,6 +362,7 @@
             if (!access.ok) return;
             siteSettings = access.settings;
             document.getElementById('withdrawAmount').placeholder = `Min. ${minWithdrawal().toLocaleString()}`;
+            fillBankSelect();
             if (maxWithdrawal()) document.getElementById('maxWithdrawNote').classList.remove('hidden');
             if (!AX.isWithdrawalOpen(siteSettings)) document.getElementById('withdrawClosedBanner').classList.remove('hidden');
             document.getElementById('authGuard').classList.add('hidden');
@@ -418,7 +424,7 @@
 
         // --- Calc Payout Summary ---
         function calculateSummary(history) {
-            const pending = history.filter(w => w.status === 'pending').reduce((acc, curr) => acc + toNum(curr.amount), 0);
+            const pending = history.filter(w => w.status === 'pending' || w.status === 'processing').reduce((acc, curr) => acc + toNum(curr.amount), 0);
             const completed = history.filter(w => w.status === 'approved').reduce((acc, curr) => acc + toNum(curr.amount), 0);
             document.getElementById('pendingWithdrawal').textContent = naira(pending);
             document.getElementById('completedWithdrawal').textContent = naira(completed);
@@ -460,13 +466,35 @@
                 case 'pending': return 'bg-amber-100 text-amber-700';
                 case 'approved': return 'bg-emerald-100 text-emerald-700';
                 case 'rejected': return 'bg-red-100 text-red-700';
+                case 'failed': return 'bg-red-100 text-red-700';
+                case 'processing': return 'bg-blue-50 text-blue-700';
                 default: return 'bg-black/5 text-[var(--ink-text)]';
             }
         }
 
         function getStatusLabel(status) {
-            return status === 'approved' ? 'Completed' : status;
+            if (status === 'approved') return 'Completed';
+            if (status === 'failed') return 'Failed · refunded';
+            return status;
         }
+
+        // --- Bank dropdown (Afrstar Nigeria bank codes) ---
+        // In Manual mode an "Other bank" option keeps free-text names possible;
+        // Gateway payouts need a code, so the option is hidden there.
+        const bankSelect = document.getElementById('bankCode');
+        const bankOther = document.getElementById('bankNameOther');
+        function fillBankSelect() {
+            const gateway = (siteSettings.payment_mode || 'manual') === 'gateway';
+            bankSelect.innerHTML = bankOptionsHtml({ placeholder: 'Select bank' }) + (gateway ? '' : '<option value="__other">Other bank (type the name)</option>');
+        }
+        fillBankSelect();
+        bankSelect.addEventListener('change', () => {
+            const other = bankSelect.value === '__other';
+            bankOther.classList.toggle('hidden', !other);
+            bankOther.required = other;
+            if (other) bankOther.focus();
+        });
+        document.getElementById('accNumber').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10); });
 
         // --- Form Logic ---
         const amountInput = document.getElementById('withdrawAmount');
@@ -481,9 +509,10 @@
         document.getElementById('withdrawForm').onsubmit = async (e) => {
             e.preventDefault();
             const amount = toNum(amountInput.value);
-            const bankName = document.getElementById('bankName').value;
-            const accNum = document.getElementById('accNumber').value;
-            const accName = document.getElementById('accName').value;
+            const bankCode = bankSelect.value === '__other' ? null : (bankByCode(bankSelect.value)?.code || null);
+            const bankName = bankCode ? bankByCode(bankCode).name : bankOther.value.trim();
+            const accNum = document.getElementById('accNumber').value.trim();
+            const accName = document.getElementById('accName').value.trim();
             const charge = amount * chargeRate();
 
             if (!hasActiveInvestment) {
@@ -506,6 +535,14 @@
                 alert('Insufficient wallet balance.');
                 return;
             }
+            if (!bankName) {
+                alert('Select your bank.');
+                return;
+            }
+            if (!/^\d{10}$/.test(accNum)) {
+                alert('Enter your 10-digit account number.');
+                return;
+            }
 
             setLoading(true);
 
@@ -519,6 +556,7 @@
                         amount: amount,
                         charge: charge,
                         bank_name: bankName,
+                        bank_code: bankCode,
                         account_number: accNum,
                         account_name: accName,
                         status: 'pending'

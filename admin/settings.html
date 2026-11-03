@@ -50,6 +50,14 @@
         .day-chip input:checked + span { color: #0A0F1C; background: var(--ax-accent); border-color: var(--ax-accent); }
         .section-nav a { white-space: nowrap; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; color: var(--ax-muted); }
         .section-nav a:hover { color: var(--ax-accent); }
+        .mode-card { display:block; position:relative; cursor:pointer; }
+        .mode-card input { position:absolute; opacity:0; pointer-events:none; }
+        .mode-card .mode-body { display:block; height:100%; padding:16px; border-radius:12px; border:1px solid var(--ax-border); background: rgba(255,255,255,0.02); transition: border-color .15s, background .15s; }
+        .mode-card input:checked + .mode-body { border-color: var(--ax-accent); background: var(--ax-accent-soft); }
+        .mode-card input:focus-visible + .mode-body { outline: 2px solid var(--ax-accent); outline-offset: 2px; }
+        .mode-dot { width:16px; height:16px; border-radius:50%; border:1.5px solid var(--ax-border-strong); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .mode-card input:checked + .mode-body .mode-dot { border-color: var(--ax-accent); }
+        .mode-card input:checked + .mode-body .mode-dot::after { content:''; width:8px; height:8px; border-radius:50%; background: var(--ax-accent); }
         section[id] { scroll-margin-top: calc(var(--ax-top, 64px) + 16px); }
     </style>
     <link rel="stylesheet" href="/altivex.css">
@@ -94,6 +102,7 @@
             <a href="users.html" data-page="users" class="sidebar-item" aria-label="Users"><i data-lucide="users"></i><span class="ax-tip">Users</span></a>
             <a href="deposits.html" data-page="deposits" class="sidebar-item" aria-label="Deposits"><i data-lucide="arrow-down-left"></i><span class="ax-tip">Deposits</span></a>
             <a href="withdrawals.html" data-page="withdrawals" class="sidebar-item" aria-label="Withdrawals"><i data-lucide="arrow-up-right"></i><span class="ax-tip">Withdrawals</span></a>
+            <a href="gateway.html" data-page="gateway" class="sidebar-item" aria-label="Gateway"><i data-lucide="zap"></i><span class="ax-tip">Gateway</span></a>
             <a href="investments.html" data-page="investments" class="sidebar-item" aria-label="Investments"><i data-lucide="trending-up"></i><span class="ax-tip">Investments</span></a>
             <a href="plans.html" data-page="plans" class="sidebar-item" aria-label="Plans"><i data-lucide="layers"></i><span class="ax-tip">Plans</span></a>
             <a href="gift-codes.html" data-page="gift-codes" class="sidebar-item" aria-label="Gift codes"><i data-lucide="gift"></i><span class="ax-tip">Gift codes</span></a>
@@ -124,6 +133,7 @@
             <a href="users.html" data-page="users" class="drawer-item"><i data-lucide="users"></i><span>Users</span></a>
             <a href="deposits.html" data-page="deposits" class="drawer-item"><i data-lucide="arrow-down-left"></i><span>Deposits</span></a>
             <a href="withdrawals.html" data-page="withdrawals" class="drawer-item"><i data-lucide="arrow-up-right"></i><span>Withdrawals</span></a>
+            <a href="gateway.html" data-page="gateway" class="drawer-item"><i data-lucide="zap"></i><span>Gateway</span></a>
             <a href="investments.html" data-page="investments" class="drawer-item"><i data-lucide="trending-up"></i><span>Investments</span></a>
             <a href="plans.html" data-page="plans" class="drawer-item"><i data-lucide="layers"></i><span>Plans</span></a>
             <a href="gift-codes.html" data-page="gift-codes" class="drawer-item"><i data-lucide="gift"></i><span>Gift codes</span></a>
@@ -159,6 +169,7 @@
                 <a href="#sec-status">Site status</a>
                 <a href="#sec-brand">Brand</a>
                 <a href="#sec-contact">Contact</a>
+                <a href="#sec-payments">Payments</a>
                 <a href="#sec-deposits">Deposits</a>
                 <a href="#sec-withdrawals">Withdrawals</a>
                 <a href="#sec-rewards">Rewards</a>
@@ -209,6 +220,29 @@
                         <div><label class="lbl" for="telegram_link">Telegram community link</label><input id="telegram_link" name="telegram_link" type="url" placeholder="https://t.me/…" class="field w-full rounded-lg px-4 py-3 text-sm"><p class="hint">Used for the dashboard pop-up, landing page, and support page.</p></div>
                         <div class="md:col-span-2"><label class="lbl" for="telegram_support_link">Telegram direct-support link</label><input id="telegram_support_link" name="telegram_support_link" type="url" placeholder="https://t.me/…" class="field w-full rounded-lg px-4 py-3 text-sm"></div>
                     </div>
+                </section>
+
+                <!-- Payments: manual vs gateway -->
+                <section id="sec-payments" class="ax-card rounded-[14px] p-6 md:p-8">
+                    <h4 class="text-lg font-semibold ax-display mb-1 flex items-center gap-2"><i data-lucide="zap" class="w-5 h-5 ax-accent"></i> Payment mode</h4>
+                    <p class="hint !mt-0 mb-5">How client deposits are collected and how approved withdrawals are paid out.</p>
+                    <div class="grid md:grid-cols-2 gap-3" role="radiogroup" aria-label="Payment mode">
+                        <label class="mode-card">
+                            <input type="radio" name="payment_mode" value="gateway">
+                            <span class="mode-body">
+                                <span class="flex items-center gap-2 mb-2"><span class="mode-dot"></span><span class="text-sm font-semibold">Gateway (automatic)</span></span>
+                                <span class="block text-[11px] text-[var(--muted)] leading-relaxed">Clients pay through the Afrstar checkout and are credited automatically. Withdrawals still need your approval, then you send them to the gateway with one tap.</span>
+                            </span>
+                        </label>
+                        <label class="mode-card">
+                            <input type="radio" name="payment_mode" value="manual">
+                            <span class="mode-body">
+                                <span class="flex items-center gap-2 mb-2"><span class="mode-dot"></span><span class="text-sm font-semibold">Manual</span></span>
+                                <span class="block text-[11px] text-[var(--muted)] leading-relaxed">Clients transfer to the bank account below and you approve or reject each deposit. You pay withdrawals yourself and mark them paid.</span>
+                            </span>
+                        </label>
+                    </div>
+                    <p class="hint" id="gatewayCallbackHint">Afrstar portal callback URLs: <span class="mono break-all" data-origin-path="/api/afrstar/payin-callback">/api/afrstar/payin-callback</span> (collection) and <span class="mono break-all" data-origin-path="/api/afrstar/payout-callback">/api/afrstar/payout-callback</span> (payout). Balance and admin withdrawals are on the <a href="gateway.html" class="ax-accent underline">Gateway</a> page.</p>
                 </section>
 
                 <!-- Deposits -->
@@ -371,6 +405,7 @@
             NUMS.forEach(k => { form.elements[k].value = s[k] ?? ''; if (form.elements[k].value !== '') form.elements[k].value = Number(s[k]); });
             OPTIONAL_NUMS.forEach(k => { form.elements[k].value = s[k] ? Number(s[k]) : ''; });
             BOOLS.forEach(k => { form.elements[k].checked = !!s[k]; });
+            form.querySelectorAll('input[name="payment_mode"]').forEach(r => { r.checked = r.value === (s.payment_mode || 'manual'); });
             form.elements.withdrawal_open_time.value = String(s.withdrawal_open_time || '00:00').slice(0, 5);
             form.elements.withdrawal_close_time.value = String(s.withdrawal_close_time || '23:59').slice(0, 5);
             const days = (s.withdrawal_days || []).map(Number);
@@ -384,6 +419,7 @@
             NUMS.forEach(k => { out[k] = Number(form.elements[k].value); });
             OPTIONAL_NUMS.forEach(k => { const v = form.elements[k].value; out[k] = v === '' || Number(v) <= 0 ? null : Number(v); });
             BOOLS.forEach(k => { out[k] = form.elements[k].checked; });
+            out.payment_mode = form.querySelector('input[name="payment_mode"]:checked')?.value || 'manual';
             out.withdrawal_open_time = form.elements.withdrawal_open_time.value || '00:00';
             out.withdrawal_close_time = form.elements.withdrawal_close_time.value || '23:59';
             out.withdrawal_days = [...form.querySelectorAll('input[name="wd_day"]:checked')].map(c => Number(c.value)).sort();
@@ -427,6 +463,12 @@
             const err = validate(s);
             if (err) { toast(err, false); return; }
             if (s.maintenance_mode && !saved.maintenance_mode && !confirm('Turn on maintenance mode? Clients will not be able to use the site until you turn it off.')) return;
+            if (s.payment_mode !== (saved.payment_mode || 'manual')) {
+                const msg = s.payment_mode === 'gateway'
+                    ? 'Switch to Gateway (automatic)? Clients will pay through the Afrstar checkout and be credited automatically. Make sure the AFRSTAR_MERCHANT_* keys are set in Vercel and the callback URLs are saved in the Afrstar portal.'
+                    : 'Switch to Manual? Clients will see your bank details and you will approve deposits and pay withdrawals yourself. Gateway payments already started still complete automatically.';
+                if (!confirm(msg)) return;
+            }
             if (!s.registration_open && saved.registration_open && !confirm('Close registration? New sign-ups will be refused.')) return;
 
             const btn = document.getElementById('saveBtn');
@@ -452,6 +494,7 @@
         document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
         document.getElementById('drawerLogoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
 
+        document.querySelectorAll('[data-origin-path]').forEach(el => { el.textContent = location.origin + el.dataset.originPath; });
         setActiveNav();
         init();
     </script>

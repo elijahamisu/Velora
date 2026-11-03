@@ -79,6 +79,7 @@
             <a href="users.html" data-page="users" class="sidebar-item" aria-label="Users"><i data-lucide="users"></i><span class="ax-tip">Users</span></a>
             <a href="deposits.html" data-page="deposits" class="sidebar-item" aria-label="Deposits"><i data-lucide="arrow-down-left"></i><span class="ax-tip">Deposits</span></a>
             <a href="withdrawals.html" data-page="withdrawals" class="sidebar-item" aria-label="Withdrawals"><i data-lucide="arrow-up-right"></i><span class="ax-tip">Withdrawals</span></a>
+            <a href="gateway.html" data-page="gateway" class="sidebar-item" aria-label="Gateway"><i data-lucide="zap"></i><span class="ax-tip">Gateway</span></a>
             <a href="investments.html" data-page="investments" class="sidebar-item" aria-label="Investments"><i data-lucide="trending-up"></i><span class="ax-tip">Investments</span></a>
             <a href="plans.html" data-page="plans" class="sidebar-item" aria-label="Plans"><i data-lucide="layers"></i><span class="ax-tip">Plans</span></a>
             <a href="gift-codes.html" data-page="gift-codes" class="sidebar-item" aria-label="Gift codes"><i data-lucide="gift"></i><span class="ax-tip">Gift codes</span></a>
@@ -109,6 +110,7 @@
             <a href="users.html" data-page="users" class="drawer-item"><i data-lucide="users"></i><span>Users</span></a>
             <a href="deposits.html" data-page="deposits" class="drawer-item"><i data-lucide="arrow-down-left"></i><span>Deposits</span></a>
             <a href="withdrawals.html" data-page="withdrawals" class="drawer-item"><i data-lucide="arrow-up-right"></i><span>Withdrawals</span></a>
+            <a href="gateway.html" data-page="gateway" class="drawer-item"><i data-lucide="zap"></i><span>Gateway</span></a>
             <a href="investments.html" data-page="investments" class="drawer-item"><i data-lucide="trending-up"></i><span>Investments</span></a>
             <a href="plans.html" data-page="plans" class="drawer-item"><i data-lucide="layers"></i><span>Plans</span></a>
             <a href="gift-codes.html" data-page="gift-codes" class="drawer-item"><i data-lucide="gift"></i><span>Gift codes</span></a>
@@ -157,10 +159,18 @@
                 <span class="text-xs font-bold text-[var(--muted)] uppercase tracking-wide ml-2">Filter:</span>
                 <select id="statusFilter" class="field px-4 py-2 rounded-lg text-sm font-semibold">
                     <option value="pending">Pending</option>
+                    <option value="processing">Processing (gateway)</option>
                     <option value="approved">Completed</option>
                     <option value="rejected">Rejected</option>
+                    <option value="failed">Failed (refunded)</option>
                     <option value="all">All</option>
                 </select>
+                <span id="modeChip" class="ml-auto text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]"></span>
+            </div>
+
+            <div id="gatewayBanner" class="hidden ax-card rounded-[14px] p-4 mb-6 text-[11px] text-[var(--muted)] leading-relaxed flex gap-3">
+                <i data-lucide="zap" class="w-4 h-4 ax-accent shrink-0 mt-0.5"></i>
+                <p>Gateway mode: <b class="text-[var(--ink-text)]">Send to gateway</b> pays the net amount (after the withdrawal fee) to the client's bank through Afrstar. It shows as Processing until the gateway confirms; a failed payout is refunded to the client automatically.</p>
             </div>
 
             <!-- Withdrawals: stacked cards on mobile, full table on wider screens -->
@@ -197,8 +207,38 @@
         </div>
     </main>
 
+    <!-- Send-to-gateway confirmation (bank code picker) -->
+    <div id="sendModal" class="fixed inset-0 z-[110] hidden items-end sm:items-center justify-center p-0 sm:p-4" style="background: rgba(5,8,16,0.7); backdrop-filter: blur(4px);" role="dialog" aria-modal="true" aria-labelledby="sendTitle">
+        <div class="ax-card w-full sm:max-w-md rounded-t-[16px] sm:rounded-[16px] p-6" style="background: var(--ax-s2);">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h3 id="sendTitle" class="text-lg font-semibold ax-display">Send to gateway</h3>
+                    <p class="text-[11px] text-[var(--muted)] mt-0.5">Afrstar bank payout</p>
+                </div>
+                <button type="button" class="ax-icon-btn" data-close-send aria-label="Close"><i data-lucide="x"></i></button>
+            </div>
+            <div class="bg-black/[0.02] rounded-[10px] p-4 space-y-2 mb-4 text-sm">
+                <div class="flex justify-between"><span class="text-[var(--muted)]">Client</span><span id="sClient" class="font-semibold text-right"></span></div>
+                <div class="flex justify-between"><span class="text-[var(--muted)]">Requested</span><span id="sAmount" class="mono"></span></div>
+                <div class="flex justify-between"><span class="text-[var(--muted)]">Fee</span><span id="sFee" class="mono text-red-500"></span></div>
+                <div class="flex justify-between border-t border-black/[0.06] pt-2"><span class="font-semibold">Payout (net)</span><span id="sNet" class="mono font-bold ax-accent"></span></div>
+                <div class="flex justify-between gap-3"><span class="text-[var(--muted)] shrink-0">Account</span><span id="sAccount" class="mono text-xs text-right"></span></div>
+                <div class="flex justify-between gap-3"><span class="text-[var(--muted)] shrink-0">Client typed</span><span id="sTyped" class="text-xs text-right"></span></div>
+            </div>
+            <label for="sBank" class="block text-[10px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1.5">Bank (gateway code)</label>
+            <select id="sBank" class="field w-full px-4 py-3 rounded-lg text-sm font-semibold mb-1"></select>
+            <p id="sBankHint" class="text-[10px] text-[var(--muted)] mb-4"></p>
+            <div id="sError" class="hidden mb-4 p-3 rounded-lg bg-red-50 text-red-600 text-[11px] leading-relaxed break-words" role="alert"></div>
+            <div class="flex gap-2">
+                <button type="button" class="flex-1 ax-btn" data-close-send>Cancel</button>
+                <button type="button" id="sConfirm" class="flex-1 ax-btn ax-btn-primary">Send payout</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { bankOptionsHtml, bankByCode, guessBankCode } from '../src/ng-banks.js';
 
         lucide.createIcons();
 
@@ -279,6 +319,7 @@
                 document.getElementById('drawerRole').textContent = roleLabel;
                 document.getElementById('authGuard').classList.add('hidden');
 
+                await loadMode();
                 loadStats();
                 loadWithdrawals();
                 setupRealtime();
@@ -294,14 +335,25 @@
 
         // --- 2. Data Fetching ---
         let currentFilter = 'pending';
+        let paymentMode = 'manual';
+        let rowsById = {};
+
+        async function loadMode() {
+            const { data } = await supabase.from('site_settings').select('payment_mode').eq('id', 1).maybeSingle();
+            paymentMode = data?.payment_mode || 'manual';
+            document.getElementById('modeChip').innerHTML = `Mode: <a href="settings.html#sec-payments" class="ax-accent">${paymentMode === 'gateway' ? 'Gateway (automatic)' : 'Manual'}</a>`;
+            document.getElementById('gatewayBanner').classList.toggle('hidden', paymentMode !== 'gateway');
+        }
+        const money = n => `₦${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        function escapeHtml(t) { return String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
         async function loadStats() {
             try {
                 const { data } = await supabase.from('withdrawals').select('amount, charge, status');
                 const rows = data || [];
-                document.getElementById('statPending').textContent = rows.filter(r => r.status === 'pending').length;
+                document.getElementById('statPending').textContent = rows.filter(r => r.status === 'pending' || r.status === 'processing').length;
                 document.getElementById('statCompleted').textContent = rows.filter(r => r.status === 'approved').length;
-                document.getElementById('statRejected').textContent = rows.filter(r => r.status === 'rejected').length;
+                document.getElementById('statRejected').textContent = rows.filter(r => r.status === 'rejected' || r.status === 'failed').length;
                 const fees = rows.filter(r => r.status === 'approved').reduce((acc, r) => acc + Number(r.charge || 0), 0);
                 document.getElementById('statFees').textContent = `₦${fees.toLocaleString()}`;
             } catch (err) { console.error("Stats fail:", err); }
@@ -321,12 +373,42 @@
         }
 
         function statusBadge(status) {
-            const label = status === 'approved' ? 'Completed' : status;
-            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${status === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}">${label}</span>`;
+            const label = status === 'approved' ? 'Completed' : status === 'failed' ? 'Failed · refunded' : status;
+            const cls = status === 'approved' ? 'bg-emerald-50 text-emerald-700'
+                : status === 'processing' ? 'bg-blue-50 text-blue-700'
+                : status === 'pending' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-600';
+            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${cls}">${label}</span>`;
         }
 
-        function actionButtons(w) {
+        function gatewayInfo(w) {
+            if (w.method !== 'gateway' && !w.gateway_message) return '';
+            const bits = [];
+            if (w.method === 'gateway') bits.push(`<span class="text-[9px] font-bold uppercase px-2 py-0.5 rounded" style="background: var(--ax-accent-soft); color: var(--ax-accent);">Gateway</span>`);
+            if (w.payout_amount != null) bits.push(`<span class="mono">${money(w.payout_amount)}</span>`);
+            if (w.order_sn) bits.push(`<span class="mono">${w.order_sn}</span>`);
+            const msg = w.gateway_message ? `<p class="mt-1 whitespace-normal ${w.status === 'failed' || (w.status === 'pending' && w.gateway_message) ? 'text-red-500' : ''}">${escapeHtml(w.gateway_message)}</p>` : '';
+            return `<div class="text-[9px] text-[var(--muted)] mt-2 leading-relaxed"><div class="flex flex-wrap items-center gap-1.5">${bits.join('')}</div>${msg}</div>`;
+        }
+
+        function actionButtons(w, compact = false) {
+            const sz = compact ? 'px-3 py-1.5 text-[10px]' : 'flex-1 px-3 py-2.5 text-[11px]';
+            if (w.status === 'processing' && !w.platform_osn) {
+                return `<div class="flex items-center gap-2 ${compact ? 'justify-end' : ''}">${statusBadge('processing')}
+                    <button onclick="rejectWithdrawal('${w.id}', ${w.amount}, '${w.user_id}', true)" class="${sz} bg-red-50 text-red-600 rounded-lg font-bold uppercase hover:bg-red-100 transition" title="Only if the Afrstar portal shows no payout for ${w.order_sn}">Reject &amp; refund</button></div>`;
+            }
             if (w.status !== 'pending') return statusBadge(w.status);
+            if (paymentMode === 'gateway') {
+                return `
+                <div class="flex items-center gap-2 ${compact ? 'justify-end' : ''}">
+                    <button onclick="openSend('${w.id}')" class="${sz} rounded-lg font-bold uppercase transition ax-fill text-white inline-flex items-center justify-center gap-1"><i data-lucide="zap" class="w-3 h-3"></i>Send to gateway</button>
+                    <button onclick="rejectWithdrawal('${w.id}', ${w.amount}, '${w.user_id}')" class="${sz} bg-red-50 text-red-600 rounded-lg font-bold uppercase hover:bg-red-100 transition">Reject</button>
+                </div>`;
+            }
+            if (compact) return `
+                <div class="flex items-center justify-end gap-2">
+                    <button onclick="approveWithdrawal('${w.id}')" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-bold uppercase hover:bg-emerald-100 transition">Mark Paid</button>
+                    <button onclick="rejectWithdrawal('${w.id}', ${w.amount}, '${w.user_id}')" class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold uppercase hover:bg-red-100 transition">Reject</button>
+                </div>`;
             return `
                 <div class="flex items-center gap-2">
                     <button onclick="approveWithdrawal('${w.id}')" class="flex-1 px-3 py-2.5 bg-emerald-50 text-emerald-700 rounded-lg text-[11px] font-bold uppercase hover:bg-emerald-100 transition">Mark Paid</button>
@@ -338,6 +420,7 @@
             const cards = document.getElementById('withdrawalsCards');
             const body = document.getElementById('withdrawalsBody');
 
+            rowsById = Object.fromEntries(rows.map(r => [r.id, r]));
             if (rows.length === 0) {
                 cards.innerHTML = `<div class="p-10 text-center text-[var(--muted)] text-xs ">No withdrawals match this filter.</div>`;
                 body.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-[var(--muted)] text-xs ">No withdrawals match this filter.</td></tr>`;
@@ -352,7 +435,7 @@
                             <p class="text-sm font-semibold text-[var(--ink-text)] ax-display">${w.profiles?.full_name || 'Unknown'}</p>
                             <p class="text-[10px] text-[var(--muted)] mono mt-0.5">${new Date(w.created_at).toLocaleDateString()}</p>
                         </div>
-                        ${w.status !== 'pending' ? statusBadge(w.status) : `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700">pending</span>`}
+                        ${statusBadge(w.status)}
                     </div>
 
                     <div class="bg-black/[0.02] rounded-[10px] p-4 mb-3 space-y-2">
@@ -366,9 +449,10 @@
                         </div>
                         <div class="border-t border-black/[0.06] pt-2 mt-1">
                             <p class="text-[10px] font-bold text-[var(--muted)] uppercase mb-1">Bank Detail</p>
-                            <p class="text-xs font-semibold text-[var(--ink-text)]">${w.bank_name || '—'}</p>
-                            <p class="text-[11px] text-[var(--muted)] mono">${w.account_number || ''} · ${w.account_name || ''}</p>
+                            <p class="text-xs font-semibold text-[var(--ink-text)]">${escapeHtml(w.bank_name) || '—'}${w.bank_code ? ` <span class="mono text-[9px] text-[var(--muted)]">${w.bank_code}</span>` : ''}</p>
+                            <p class="text-[11px] text-[var(--muted)] mono">${escapeHtml(w.account_number)} · ${escapeHtml(w.account_name)}</p>
                         </div>
+                        ${gatewayInfo(w)}
                     </div>
 
                     ${actionButtons(w)}
@@ -384,20 +468,17 @@
                         <p class="text-[9px] text-red-400 uppercase font-bold">Fee: ₦${Number(w.charge || 0).toLocaleString()}</p>
                     </td>
                     <td class="px-8 py-5">
-                        <p class="text-xs font-semibold text-[var(--ink-text)]">${w.bank_name || '—'}</p>
-                        <p class="text-[10px] text-[var(--muted)] mono">${w.account_number || ''} · ${w.account_name || ''}</p>
+                        <p class="text-xs font-semibold text-[var(--ink-text)]">${escapeHtml(w.bank_name) || '—'}${w.bank_code ? ` <span class="mono text-[9px] text-[var(--muted)]">${w.bank_code}</span>` : ''}</p>
+                        <p class="text-[10px] text-[var(--muted)] mono">${escapeHtml(w.account_number)} · ${escapeHtml(w.account_name)}</p>
+                        ${gatewayInfo(w)}
                     </td>
                     <td class="px-8 py-5 text-xs text-[var(--muted)] mono">${new Date(w.created_at).toLocaleDateString()}</td>
                     <td class="px-8 py-5 text-right">
-                        ${w.status === 'pending' ? `
-                            <div class="flex items-center justify-end gap-2">
-                                <button onclick="approveWithdrawal('${w.id}')" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-bold uppercase hover:bg-emerald-100 transition">Mark Paid</button>
-                                <button onclick="rejectWithdrawal('${w.id}', ${w.amount}, '${w.user_id}')" class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold uppercase hover:bg-red-100 transition">Reject</button>
-                            </div>
-                        ` : statusBadge(w.status)}
+                        ${actionButtons(w, true)}
                     </td>
                 </tr>
             `).join('');
+            lucide.createIcons();
         }
 
         // --- 3. Actions ---
@@ -407,7 +488,7 @@
         // updating another user's withdrawals/wallets row matches 0 rows,
         // Supabase returns no error, and the button just appears to do
         // nothing. Routing through the API sidesteps RLS safely.
-        async function callWithdrawalAction(id, action) {
+        async function callWithdrawalAction(id, action, extra = {}) {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) { window.location.href = 'login.html'; return; }
 
@@ -417,10 +498,10 @@
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${session.access_token}`
                 },
-                body: JSON.stringify({ id, action })
+                body: JSON.stringify({ id, action, ...extra })
             });
             const body = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(body.error || `Request failed (${res.status})`);
+            if (!res.ok) { const e = new Error(body.error || `Request failed (${res.status})`); e.body = body; throw e; }
             return body;
         }
 
@@ -435,8 +516,12 @@
             }
         };
 
-        window.rejectWithdrawal = async (id, amount, userId) => {
-            if (!confirm(`Reject and refund ₦${Number(amount).toLocaleString()} back to the client's wallet?`)) return;
+        window.rejectWithdrawal = async (id, amount, userId, stuck = false) => {
+            const w = rowsById[id] || {};
+            const msg = stuck
+                ? `This payout was sent (order ${w.order_sn}) but the gateway never confirmed receiving it.\n\nOnly continue if the Afrstar portal shows NO payout for that order, otherwise the client could be paid twice.\n\nReject and refund ₦${Number(amount).toLocaleString()} to the client's wallet?`
+                : `Reject and refund ₦${Number(amount).toLocaleString()} back to the client's wallet?`;
+            if (!confirm(msg)) return;
             try {
                 await callWithdrawalAction(id, 'reject');
                 loadStats();
@@ -445,6 +530,56 @@
                 alert(err.message);
             }
         };
+
+        // --- Send to gateway ---
+        const sendModal = document.getElementById('sendModal');
+        const sBank = document.getElementById('sBank');
+        let sendingId = null;
+        function closeSend() { sendModal.classList.add('hidden'); sendModal.classList.remove('flex'); sendingId = null; }
+        sendModal.querySelectorAll('[data-close-send]').forEach(b => b.addEventListener('click', closeSend));
+        sendModal.addEventListener('click', (e) => { if (e.target === sendModal) closeSend(); });
+
+        window.openSend = (id) => {
+            const w = rowsById[id];
+            if (!w) return;
+            sendingId = id;
+            const fee = Number(w.charge || 0);
+            const guessed = w.bank_code || guessBankCode(w.bank_name);
+            document.getElementById('sClient').textContent = w.profiles?.full_name || 'Unknown';
+            document.getElementById('sAmount').textContent = money(w.amount);
+            document.getElementById('sFee').textContent = `− ${money(fee)}`;
+            document.getElementById('sNet').textContent = money(Number(w.amount) - fee);
+            document.getElementById('sAccount').textContent = `${w.account_number || '—'} · ${w.account_name || ''}`;
+            document.getElementById('sTyped').textContent = w.bank_name || '—';
+            sBank.innerHTML = bankOptionsHtml({ selected: guessed || '', placeholder: 'Choose the bank' });
+            document.getElementById('sBankHint').textContent = w.bank_code
+                ? 'Chosen by the client from the bank list.'
+                : guessed ? `Matched from what the client typed ("${w.bank_name}"). Check it is right.` : `Could not match "${w.bank_name || ''}" to a bank. Choose it before sending.`;
+            document.getElementById('sError').classList.add('hidden');
+            const btn = document.getElementById('sConfirm');
+            btn.disabled = false; btn.textContent = 'Send payout';
+            sendModal.classList.remove('hidden'); sendModal.classList.add('flex');
+            lucide.createIcons();
+        };
+
+        document.getElementById('sConfirm').addEventListener('click', async () => {
+            if (!sendingId) return;
+            const err = document.getElementById('sError');
+            if (!sBank.value) { err.textContent = 'Choose the bank first.'; err.classList.remove('hidden'); return; }
+            const btn = document.getElementById('sConfirm');
+            btn.disabled = true; btn.textContent = 'Sending…';
+            err.classList.add('hidden');
+            try {
+                await callWithdrawalAction(sendingId, 'send_gateway', { bank_code: sBank.value });
+                closeSend();
+                loadStats(); loadWithdrawals();
+            } catch (e) {
+                err.textContent = e.message;
+                err.classList.remove('hidden');
+                btn.disabled = false; btn.textContent = 'Try again';
+                loadWithdrawals();
+            }
+        });
 
         document.getElementById('statusFilter').addEventListener('change', (e) => {
             currentFilter = e.target.value;
@@ -461,6 +596,9 @@
 
         document.getElementById('logoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
         document.getElementById('drawerLogoutBtn').onclick = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+
+        // Payouts in flight: refresh until the gateway callback settles them.
+        setInterval(() => { if (Object.values(rowsById).some(r => r.status === 'processing')) { loadStats(); loadWithdrawals(); } }, 15000);
 
         setActiveNav();
         init();

@@ -30,6 +30,7 @@ export const DEFAULTS = {
     maintenance_message: 'We are carrying out scheduled maintenance. Please check back shortly.',
     registration_open: true,
     announcement_text: '',
+    payment_mode: 'manual', // 'manual' (bank transfer + admin approval) | 'gateway' (Afrstar, automatic)
 };
 
 const MONEY_KEYS = ['min_deposit', 'max_deposit', 'min_withdrawal', 'max_withdrawal', 'welcome_bonus'];

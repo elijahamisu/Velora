@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0A0F1C">
+    <title>Deposit status · Altivex</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --ink: #0C0E13;
+            --ink-soft: #171A22;
+            --paper: #F6F4EF;
+            --paper-card: #FFFFFF;
+            --gold: #D9C7A3;
+            --gold-deep: #D9C7A3;
+            --gold-light: #D9C7A3;
+            --line: rgba(217, 199, 163, 0.16);
+            --ink-text: #14161C;
+            --muted: #7A7E88;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--paper);
+            color: var(--ink-text);
+            overflow-x: hidden;
+        }
+
+        .field {
+            background: #FAF9F6;
+            border: 1px solid rgba(20,22,28,0.08);
+            transition: border-color .18s ease, background .18s ease;
+        }
+        .field:focus { outline: none; border-color: var(--gold); background: #fff; }
+
+        .copy-btn:active { transform: scale(0.9); }
+    </style>
+    <link rel="stylesheet" href="/altivex.css">
+</head>
+<body class="bg-[var(--paper)]">
+
+    <!-- Auth Guard Loader -->
+    <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
+        <div class="text-center">
+            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(217, 199, 163,0.25); border-top-color: var(--gold);"></div>
+            <span class="ax-logo ax-logo-lg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span>
+            <p class="text-[10px] uppercase tracking-[0.08em] text-white/30 mt-2">Verifying Access</p>
+        </div>
+    </div>
+
+    <!-- ============ Altivex app shell: top bar ============ -->
+    <header class="ax-topbar no-print">
+        <div class="ax-topbar-inner">
+            <div class="flex items-center gap-3 min-w-0">
+                <a href="dashboard.html" aria-label="Altivex home"><span class="ax-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span></a>
+                <span class="ax-crumb">Deposit status</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="ax-chip hidden sm:flex no-print"><i data-lucide="wallet"></i><span id="topBarBalance" class="mono">₦0.00</span></div>
+                <a href="notifications.html" class="ax-icon-btn" aria-label="Notifications"><i data-lucide="bell"></i></a>
+                
+                <button id="menuToggle" class="ax-avatar-btn" aria-label="Open account menu" aria-expanded="false" aria-controls="mobileDrawer">
+                    <span class="ax-avatar"><span id="userInitials">A</span></span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 hidden sm:block"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============ Desktop section nav (id kept as "sidebar" for scripts) ============ -->
+    <nav id="sidebar" class="ax-subnav no-print" aria-label="Sections">
+        <div class="ax-subnav-inner" id="sidebarNav">
+            <a href="dashboard.html" data-page="dashboard" class="sidebar-item"><i data-lucide="layout-grid"></i>Overview</a>
+            <a href="invest.html" data-page="invest" class="sidebar-item"><i data-lucide="trending-up"></i>Invest</a>
+            <a href="deposit.html" data-page="deposit" class="sidebar-item"><i data-lucide="arrow-down-left"></i>Deposit</a>
+            <a href="withdraw.html" data-page="withdraw" class="sidebar-item"><i data-lucide="arrow-up-right"></i>Withdraw</a>
+            <a href="wallet.html" data-page="wallet" class="sidebar-item"><i data-lucide="wallet"></i>Wallet</a>
+            <a href="transactions.html" data-page="transactions" class="sidebar-item"><i data-lucide="list"></i>Transactions</a>
+            <a href="referral.html" data-page="referral" class="sidebar-item"><i data-lucide="users"></i>Referrals</a>
+            <a href="gift.html" data-page="gift" class="sidebar-item"><i data-lucide="gift"></i>Gift codes</a>
+            <a href="support.html" data-page="support" class="sidebar-item"><i data-lucide="life-buoy"></i>Support</a>
+            <span class="ax-subnav-spacer"></span>
+            <button id="logoutBtn" class="sidebar-item ax-subnav-logout"><i data-lucide="log-out"></i>Log out</button>
+        </div>
+    </nav>
+
+    <!-- ============ Account sheet (opens from the avatar button) ============ -->
+    <div id="drawerOverlay" class="no-print"></div>
+    <aside id="mobileDrawer" class="no-print" aria-label="Account menu">
+        <div class="ax-sheet-head">
+            <span class="ax-logo ax-logo-sm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span>
+            <button id="drawerClose" aria-label="Close menu" class="ax-icon-btn"><i data-lucide="x"></i></button>
+        </div>
+        <div class="ax-sheet-account">
+            <span class="ax-avatar ax-avatar-lg"><span id="drawerInitials">A</span></span>
+            <div class="min-w-0">
+                <p class="text-sm font-semibold text-white truncate">Your account</p><p class="text-[11px] text-[var(--ax-muted)] truncate">Wallet <span id="drawerBalance" class="mono text-[var(--ax-accent)] font-semibold">₦0.00</span></p>
+            </div>
+        </div>
+        <nav class="ax-sheet-nav" id="drawerNav">
+            <p class="ax-sheet-label">Money</p>
+            <a href="dashboard.html" data-page="dashboard" class="drawer-item"><i data-lucide="layout-grid"></i><span>Overview</span></a>
+            <a href="invest.html" data-page="invest" class="drawer-item"><i data-lucide="trending-up"></i><span>Invest</span></a>
+            <a href="deposit.html" data-page="deposit" class="drawer-item"><i data-lucide="arrow-down-left"></i><span>Deposit</span></a>
+            <a href="withdraw.html" data-page="withdraw" class="drawer-item"><i data-lucide="arrow-up-right"></i><span>Withdraw</span></a>
+            <a href="wallet.html" data-page="wallet" class="drawer-item"><i data-lucide="wallet"></i><span>Wallet</span></a>
+            <a href="transactions.html" data-page="transactions" class="drawer-item"><i data-lucide="list"></i><span>Transactions</span></a>
+            <p class="ax-sheet-label">Account</p>
+            <a href="referral.html" data-page="referral" class="drawer-item"><i data-lucide="users"></i><span>Referrals</span></a>
+            <a href="gift.html" data-page="gift" class="drawer-item"><i data-lucide="gift"></i><span>Gift codes</span></a>
+            <a href="profile.html" data-page="profile" class="drawer-item"><i data-lucide="user-round"></i><span>Profile & security</span></a>
+            <a href="support.html" data-page="support" class="drawer-item"><i data-lucide="life-buoy"></i><span>Support</span></a>
+            <div class="ax-divider my-2"></div>
+            <button id="drawerLogoutBtn" class="drawer-item ax-logout"><i data-lucide="log-out"></i><span>Log out</span></button>
+        </nav>
+    </aside>
+
+    <!-- ============ Mobile tab bar (id kept as "islandNav" for scripts) ============ -->
+    <nav id="islandNav" class="ax-tabbar no-print" aria-label="Tabs">
+        <a href="dashboard.html" data-page="dashboard" class="island-item"><i data-lucide="layout-grid"></i><span>Home</span></a>
+        <a href="invest.html" data-page="invest" class="island-item"><i data-lucide="trending-up"></i><span>Invest</span></a>
+        <a href="wallet.html" data-page="wallet" class="island-item"><i data-lucide="wallet"></i><span>Wallet</span></a>
+        <a href="referral.html" data-page="referral" class="island-item"><i data-lucide="users"></i><span>Referral</span></a>
+        <a href="profile.html" data-page="profile" class="island-item"><i data-lucide="user-round"></i><span>Profile</span></a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="ax-main">
+        <div class="max-w-lg mx-auto">
+            <div class="ax-card p-8 rounded-[14px] text-center" id="resultCard">
+                <div id="stateIcon" class="w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-5" style="background: rgba(217, 199, 163,0.1);">
+                    <div class="w-8 h-8 border-2 rounded-full animate-spin" style="border-color: rgba(217, 199, 163,0.25); border-top-color: var(--gold);"></div>
+                </div>
+                <h1 id="stateTitle" class="text-2xl font-semibold ax-display mb-2">Confirming your payment</h1>
+                <p id="stateText" class="text-xs text-[var(--muted)] leading-relaxed mb-6">We are waiting for the payment gateway to confirm your deposit. This page updates by itself, so you can keep it open.</p>
+
+                <div id="details" class="bg-black/[0.02] rounded-[10px] border border-black/[0.05] p-5 text-left space-y-3 mb-6">
+                    <div class="flex justify-between text-sm"><span class="text-[var(--muted)]">Amount</span><span id="rAmount" class="font-semibold mono">—</span></div>
+                    <div id="rCreditedRow" class="flex justify-between text-sm hidden"><span class="text-[var(--muted)]">Credited</span><span id="rCredited" class="font-semibold mono ax-accent">—</span></div>
+                    <div class="flex justify-between text-sm"><span class="text-[var(--muted)]">Status</span><span id="rStatus" class="text-[9px] uppercase font-bold px-3 py-1 rounded-lg bg-amber-100 text-amber-700">checking</span></div>
+                    <div class="flex justify-between text-sm gap-3"><span class="text-[var(--muted)] shrink-0">Reference</span><span id="rRef" class="font-semibold mono text-[11px] break-all text-right">—</span></div>
+                    <div class="flex justify-between text-sm"><span class="text-[var(--muted)]">Started</span><span id="rDate" class="mono text-xs">—</span></div>
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <a id="payAgainBtn" href="#" class="hidden w-full py-4 ax-fill text-white font-bold rounded-lg">Continue payment</a>
+                    <a href="dashboard.html" id="doneBtn" class="w-full py-4 bg-black/[0.05] hover:bg-black/[0.08] text-[var(--ink-text)] font-bold rounded-lg transition">Back to overview</a>
+                    <a href="deposit.html" class="text-xs font-semibold text-[var(--muted)] underline">Make another deposit</a>
+                </div>
+                <p id="pollNote" class="text-[10px] text-[var(--muted)] mt-5">Checking every few seconds…</p>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import * as AX from './src/site-settings.js';
+
+        lucide.createIcons();
+
+        const supabase = createClient(
+            import.meta.env.VITE_SUPABASE_URL,
+            import.meta.env.VITE_SUPABASE_ANON_KEY
+        );
+
+        // --- Nav + drawer (same as other client pages) ---
+        document.querySelectorAll('#sidebarNav a[data-page="deposit"], #drawerNav a[data-page="deposit"]').forEach(a => a.classList.add(a.closest('#sidebarNav') ? 'sidebar-active' : 'drawer-active'));
+        const drawer = document.getElementById('mobileDrawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+        function openDrawer() { drawer.classList.add('open'); drawerOverlay.classList.add('open'); menuToggle.setAttribute('aria-expanded', 'true'); document.body.style.overflow = 'hidden'; }
+        function closeDrawer() { drawer.classList.remove('open'); drawerOverlay.classList.remove('open'); menuToggle.setAttribute('aria-expanded', 'false'); document.body.style.overflow = ''; }
+        menuToggle.addEventListener('click', openDrawer);
+        document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+        drawerOverlay.addEventListener('click', closeDrawer);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+        const logout = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+        document.getElementById('logoutBtn').onclick = logout;
+        document.getElementById('drawerLogoutBtn').onclick = logout;
+
+        const params = new URLSearchParams(location.search);
+        let ref = params.get('ref') || params.get('order_sn') || '';
+        if (!ref) { try { ref = sessionStorage.getItem('ax_last_deposit') || ''; } catch {} }
+
+        const POLL_MS = 4000;
+        const MAX_MS = 20 * 60 * 1000;   // stop polling after 20 minutes
+        const started = Date.now();
+        let timer = null;
+        let user = null;
+
+        const naira = n => `₦${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+        function setState(kind, title, text) {
+            const icon = document.getElementById('stateIcon');
+            const map = {
+                ok: ['check', 'bg-emerald-50', 'text-emerald-600'],
+                fail: ['x', 'bg-red-50', 'text-red-500'],
+                wait: ['clock', '', 'ax-accent'],
+            };
+            if (kind !== 'spin') {
+                const [ic, bg, fg] = map[kind];
+                icon.className = `w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-5 ${bg}`;
+                icon.innerHTML = `<i data-lucide="${ic}" class="w-8 h-8 ${fg}"></i>`;
+                lucide.createIcons();
+            }
+            document.getElementById('stateTitle').textContent = title;
+            document.getElementById('stateText').textContent = text;
+        }
+
+        function statusPill(status) {
+            const el = document.getElementById('rStatus');
+            const style = status === 'approved' ? 'bg-emerald-100 text-emerald-700' : status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700';
+            el.className = `text-[9px] uppercase font-bold px-3 py-1 rounded-lg ${style}`;
+            el.textContent = status === 'approved' ? 'credited' : status;
+        }
+
+        function render(d) {
+            document.getElementById('rAmount').textContent = naira(d.amount);
+            document.getElementById('rRef').textContent = d.order_sn;
+            document.getElementById('rDate').textContent = new Date(d.created_at).toLocaleString();
+            statusPill(d.status);
+            const payBtn = document.getElementById('payAgainBtn');
+            payBtn.classList.add('hidden');
+            if (d.status === 'approved') {
+                const credited = d.credited_amount != null ? Number(d.credited_amount) : Number(d.amount);
+                document.getElementById('rCreditedRow').classList.remove('hidden');
+                document.getElementById('rCredited').textContent = naira(credited);
+                setState('ok', 'Deposit successful',
+                    credited < Number(d.amount)
+                        ? `The gateway confirmed a payment of ${naira(credited)} (less than the ${naira(d.amount)} requested), and that amount has been added to your wallet.`
+                        : `${naira(credited)} has been added to your wallet.`);
+                document.getElementById('doneBtn').className = 'w-full py-4 ax-fill text-white font-bold rounded-lg';
+                document.getElementById('doneBtn').textContent = 'Go to overview';
+                return true;
+            }
+            if (d.status === 'failed' || d.status === 'rejected') {
+                setState('fail', 'Payment not completed', d.gateway_message
+                    ? `The gateway reported: ${d.gateway_message}. No money was added to your wallet. If you were debited, contact support with the reference below.`
+                    : 'No money was added to your wallet. If you were debited, contact support with the reference below.');
+                return true;
+            }
+            // pending
+            if (d.pay_url && Date.now() - new Date(d.created_at).getTime() < 60 * 60 * 1000) {
+                payBtn.href = d.pay_url;
+                payBtn.classList.remove('hidden');
+            }
+            return false;
+        }
+
+        async function poll() {
+            const { data, error } = await supabase.from('deposits')
+                .select('id, amount, credited_amount, status, order_sn, pay_url, gateway_message, created_at, method')
+                .eq('user_id', user.id).eq('order_sn', ref).maybeSingle();
+            if (error) { document.getElementById('pollNote').textContent = 'Could not check right now, retrying…'; return schedule(); }
+            if (!data) {
+                setState('fail', 'Deposit not found', 'We could not find this deposit on your account. Open your deposit history to check its status.');
+                document.getElementById('details').classList.add('hidden');
+                document.getElementById('pollNote').textContent = '';
+                return;
+            }
+            const done = render(data);
+            if (done) { document.getElementById('pollNote').textContent = ''; return; }
+            if (Date.now() - started > MAX_MS) {
+                setState('wait', 'Still waiting for confirmation', 'The gateway has not confirmed this payment yet. If you paid, your wallet will be credited automatically as soon as it does; you can safely leave this page.');
+                document.getElementById('pollNote').innerHTML = '<button id="recheck" class="underline">Check again</button>';
+                document.getElementById('recheck').onclick = () => { document.getElementById('pollNote').textContent = 'Checking…'; poll(); };
+                return;
+            }
+            schedule();
+        }
+        function schedule() { clearTimeout(timer); timer = setTimeout(poll, POLL_MS); }
+
+        async function init() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = 'login.html'; return; }
+            user = session.user;
+            const access = await AX.enforceAccess(supabase, user.id);
+            if (!access.ok) return;
+            document.getElementById('authGuard').classList.add('hidden');
+            const [{ data: w }, { data: p }] = await Promise.all([
+                supabase.from('wallets').select('available_balance').eq('user_id', user.id).maybeSingle(),
+                supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle(),
+            ]);
+            const bal = `₦${Number(w?.available_balance || 0).toLocaleString()}`;
+            document.getElementById('topBarBalance').textContent = bal;
+            document.getElementById('drawerBalance').textContent = bal;
+            if (p?.full_name) { document.getElementById('userInitials').textContent = p.full_name.charAt(0); document.getElementById('drawerInitials').textContent = p.full_name.charAt(0); }
+            if (!ref) {
+                setState('fail', 'No deposit selected', 'Open your deposit history to see the status of your deposits.');
+                document.getElementById('details').classList.add('hidden');
+                document.getElementById('pollNote').textContent = '';
+                return;
+            }
+            document.getElementById('rRef').textContent = ref;
+            poll();
+        }
+        document.addEventListener('visibilitychange', () => { if (!document.hidden && user && ref) poll(); });
+        init();
+    </script>
+</body>
+</html>

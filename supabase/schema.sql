@@ -581,3 +581,376 @@ end; $$;
 drop trigger if exists enforce_withdrawal_rules on public.withdrawals;
 create trigger enforce_withdrawal_rules before insert on public.withdrawals
   for each row execute function public.enforce_withdrawal_rules();
+
+-- ============================================================
+-- 2026-11-03 · Afrstar payment gateway (automatic deposits & payouts)
+-- ============================================================
+
+-- ---------- Payment mode switch (admin Settings) ----------
+alter table public.site_settings add column if not exists payment_mode text not null default 'manual';
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'site_settings_payment_mode_check') then
+    alter table public.site_settings add constraint site_settings_payment_mode_check
+      check (payment_mode in ('manual','gateway'));
+  end if;
+end $$;
+
+-- ---------- Deposits: gateway fields ----------
+alter table public.deposits add column if not exists method text not null default 'manual';
+alter table public.deposits add column if not exists order_sn text;
+alter table public.deposits add column if not exists platform_osn text;
+alter table public.deposits add column if not exists pay_url text;
+alter table public.deposits add column if not exists amount_paid numeric(14,2);
+alter table public.deposits add column if not exists credited_amount numeric(14,2);
+alter table public.deposits add column if not exists gateway_status int;
+alter table public.deposits add column if not exists gateway_message text;
+alter table public.deposits add column if not exists utr text;
+alter table public.deposits add column if not exists callback_payload jsonb;
+alter table public.deposits add column if not exists processed_at timestamptz;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'deposits_method_check') then
+    alter table public.deposits add constraint deposits_method_check check (method in ('manual','gateway'));
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'deposits_order_sn_key') then
+    alter table public.deposits add constraint deposits_order_sn_key unique (order_sn);
+  end if;
+end $$;
+
+-- ---------- Withdrawals: gateway fields ----------
+-- status: pending -> (manual) approved | rejected
+--         pending -> (gateway) processing -> approved (paid) | failed (refunded)
+alter table public.withdrawals add column if not exists bank_code text;
+alter table public.withdrawals add column if not exists method text not null default 'manual';
+alter table public.withdrawals add column if not exists order_sn text;
+alter table public.withdrawals add column if not exists platform_osn text;
+alter table public.withdrawals add column if not exists payout_amount numeric(14,2);
+alter table public.withdrawals add column if not exists gateway_status int;
+alter table public.withdrawals add column if not exists gateway_message text;
+alter table public.withdrawals add column if not exists utr text;
+alter table public.withdrawals add column if not exists callback_payload jsonb;
+alter table public.withdrawals add column if not exists sent_at timestamptz;
+alter table public.withdrawals add column if not exists sent_by uuid references public.profiles(id) on delete set null;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'withdrawals_method_check') then
+    alter table public.withdrawals add constraint withdrawals_method_check check (method in ('manual','gateway'));
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'withdrawals_order_sn_key') then
+    alter table public.withdrawals add constraint withdrawals_order_sn_key unique (order_sn);
+  end if;
+end $$;
+
+-- ---------- Admin gateway funding / withdrawals ----------
+create table if not exists public.gateway_admin_transactions (
+  id uuid primary key default gen_random_uuid(),
+  kind text not null check (kind in ('payout','topup')),
+  order_sn text not null unique,
+  platform_osn text,
+  amount numeric(14,2) not null,            -- payout: amount the bank account receives; topup: order amount
+  fee_pct numeric(6,2) not null default 0,  -- payout: 11
+  fee_amount numeric(14,2) not null default 0,
+  total_debit numeric(14,2) not null default 0, -- payout: amount + fee (checked against gateway balance)
+  balance_before numeric(14,2),
+  bank_code text,
+  bank_name text,
+  account_number text,
+  account_name text,
+  pay_url text,
+  amount_paid numeric(14,2),
+  status text not null default 'processing' check (status in ('pending','processing','completed','failed')),
+  gateway_status int,
+  gateway_message text,
+  utr text,
+  callback_payload jsonb,
+  created_by uuid references public.profiles(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table public.gateway_admin_transactions enable row level security;
+drop policy if exists admin_all on public.gateway_admin_transactions;
+create policy admin_all on public.gateway_admin_transactions for all using (public.is_admin()) with check (public.is_admin());
+
+-- ---------- Harden user-side inserts/updates ----------
+-- Users still insert manual deposits from the browser; they can never forge
+-- gateway fields (gateway deposits are created by the server with the service key).
+create or replace function public.enforce_deposit_limits() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare s public.site_settings;
+begin
+  if auth.uid() is null or public.is_admin() then return new; end if;
+  new.method := 'manual';
+  new.status := 'pending';
+  new.order_sn := null; new.platform_osn := null; new.pay_url := null;
+  new.amount_paid := null; new.credited_amount := null; new.gateway_status := null;
+  new.gateway_message := null; new.utr := null; new.callback_payload := null; new.processed_at := null;
+  select * into s from public.site_settings where id = 1;
+  if not found then return new; end if;
+  if new.amount < s.min_deposit then
+    raise exception 'Minimum deposit is ₦%', to_char(s.min_deposit,'FM999,999,999,990');
+  end if;
+  if s.max_deposit is not null and s.max_deposit > 0 and new.amount > s.max_deposit then
+    raise exception 'Maximum deposit is ₦%', to_char(s.max_deposit,'FM999,999,999,990');
+  end if;
+  return new;
+end; $$;
+
+create or replace function public.enforce_withdrawal_rules() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare s public.site_settings; lagos timestamp := now() at time zone 'Africa/Lagos'; t time;
+begin
+  if auth.uid() is null or public.is_admin() then return new; end if;
+  new.method := 'manual';
+  new.order_sn := null; new.platform_osn := null; new.payout_amount := null;
+  new.gateway_status := null; new.gateway_message := null; new.utr := null;
+  new.callback_payload := null; new.sent_at := null; new.sent_by := null; new.processed_at := null;
+  if new.bank_code is not null and new.bank_code !~ '^[0-9]{8}$' then new.bank_code := null; end if;
+  select * into s from public.site_settings where id = 1;
+  if not found then return new; end if;
+  if new.amount < s.min_withdrawal then
+    raise exception 'Minimum withdrawal is ₦%', to_char(s.min_withdrawal,'FM999,999,999,990');
+  end if;
+  if s.max_withdrawal is not null and s.max_withdrawal > 0 and new.amount > s.max_withdrawal then
+    raise exception 'Maximum withdrawal is ₦%', to_char(s.max_withdrawal,'FM999,999,999,990');
+  end if;
+  t := lagos::time;
+  if not (extract(dow from lagos)::int = any(s.withdrawal_days)) or
+     (case when s.withdrawal_open_time <= s.withdrawal_close_time
+           then t < s.withdrawal_open_time or t > s.withdrawal_close_time + interval '59 seconds'
+           else t < s.withdrawal_open_time and t > s.withdrawal_close_time + interval '59 seconds' end) then
+    raise exception 'Withdrawals are closed right now';
+  end if;
+  new.charge := round(new.amount * s.withdrawal_fee_pct / 100, 2);
+  new.status := 'pending';
+  return new;
+end; $$;
+
+-- Users may not edit a withdrawal after submitting it (amount, bank, status...),
+-- and may only delete their own still-pending, never-sent request (the browser
+-- uses this to roll back when the wallet debit fails).
+create or replace function public.protect_withdrawals() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is null or public.is_admin() then
+    return case when tg_op = 'DELETE' then old else new end;
+  end if;
+  if tg_op = 'UPDATE' then
+    raise exception 'Withdrawal requests cannot be changed once submitted';
+  end if;
+  if old.status <> 'pending' or old.order_sn is not null then
+    raise exception 'This withdrawal can no longer be cancelled';
+  end if;
+  return old;
+end; $$;
+drop trigger if exists protect_withdrawals on public.withdrawals;
+create trigger protect_withdrawals before update or delete on public.withdrawals
+  for each row execute function public.protect_withdrawals();
+
+-- ---------- Manual approve/reject never touch gateway deposits ----------
+create or replace function public.admin_approve_deposit(p_deposit uuid) returns void
+language plpgsql security definer set search_path = public as $$
+declare d public.deposits; ref uuid; pct numeric; bonus numeric;
+begin
+  if not public.is_admin() then raise exception 'Admin privileges required'; end if;
+  update public.deposits set status = 'approved', credited_amount = amount, processed_at = now()
+   where id = p_deposit and status = 'pending' and method = 'manual' returning * into d;
+  if not found then raise exception 'Deposit not found, already processed, or paid through the gateway'; end if;
+
+  update public.wallets set available_balance = available_balance + d.amount, updated_at = now() where user_id = d.user_id;
+
+  select referred_by into ref from public.profiles where id = d.user_id;
+  if ref is not null then
+    pct := coalesce((select referral_commission_pct from public.site_settings where id = 1), 20);
+    bonus := round(d.amount * pct / 100, 2);
+    if bonus > 0 then
+      update public.wallets set available_balance = available_balance + bonus, updated_at = now() where user_id = ref;
+      insert into public.transactions (user_id, amount, type, description)
+      values (ref, bonus, 'referral_bonus',
+              trim(to_char(pct,'FM990.##')) || '% referral bonus from a downstream deposit of ₦' || to_char(d.amount,'FM999,999,999,990'));
+    end if;
+  end if;
+
+  insert into public.notifications (user_id, title, message)
+  values (d.user_id, 'Deposit Approved',
+          'Your deposit of ₦' || to_char(d.amount,'FM999,999,999,990') || ' has been approved and credited to your wallet.');
+end; $$;
+
+create or replace function public.admin_reject_deposit(p_deposit uuid) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.is_admin() then raise exception 'Admin privileges required'; end if;
+  update public.deposits set status = 'rejected', processed_at = now()
+   where id = p_deposit and status = 'pending' and method = 'manual';
+  if not found then raise exception 'Deposit not found, already processed, or paid through the gateway'; end if;
+end; $$;
+
+-- ---------- Gateway callbacks (service role only) ----------
+-- Payin for a user deposit. Credits the wallet exactly once.
+-- Amount credited (decision, documented in README):
+--   amount_paid >= order amount -> credit the order amount (overpayment is not credited)
+--   amount_paid <  order amount -> credit amount_paid (partial payment)
+--   amount_paid missing         -> credit the order amount (status 1 + valid signature)
+-- Referral commission is paid on the credited amount, exactly as admin_approve_deposit does.
+create or replace function public.gateway_apply_payin(
+  p_order_sn text, p_platform_osn text, p_status int, p_amount_paid numeric,
+  p_message text, p_utr text, p_payload jsonb
+) returns text
+language plpgsql security definer set search_path = public as $$
+declare d public.deposits; credit numeric; ref uuid; pct numeric; bonus numeric;
+begin
+  select * into d from public.deposits where order_sn = p_order_sn and method = 'gateway' for update;
+  if not found then return 'not_found'; end if;
+  if d.platform_osn is not null and p_platform_osn is not null and d.platform_osn <> p_platform_osn then
+    return 'osn_mismatch';
+  end if;
+  if d.status = 'approved' then return 'duplicate'; end if;
+
+  if p_status is distinct from 1 then
+    update public.deposits
+       set status = case when status = 'pending' then 'failed' else status end,
+           platform_osn = coalesce(platform_osn, p_platform_osn),
+           gateway_status = p_status, gateway_message = p_message, utr = coalesce(p_utr, utr),
+           amount_paid = coalesce(p_amount_paid, amount_paid),
+           callback_payload = p_payload, processed_at = now()
+     where id = d.id;
+    if d.status = 'pending' then
+      insert into public.notifications (user_id, title, message)
+      values (d.user_id, 'Deposit Not Completed',
+              'Your deposit of ₦' || to_char(d.amount,'FM999,999,999,990') || ' was not completed by the payment gateway. No money was added to your wallet.');
+      return 'failed_recorded';
+    end if;
+    return 'ignored';
+  end if;
+
+  credit := case
+              when p_amount_paid is null then d.amount
+              when p_amount_paid >= d.amount then d.amount
+              else round(p_amount_paid, 2)
+            end;
+  if credit <= 0 then
+    update public.deposits set status = 'failed', gateway_status = p_status,
+           gateway_message = coalesce(p_message, '') || ' (paid amount was zero)',
+           platform_osn = coalesce(platform_osn, p_platform_osn), amount_paid = p_amount_paid,
+           callback_payload = p_payload, processed_at = now()
+     where id = d.id;
+    return 'failed_recorded';
+  end if;
+
+  update public.deposits
+     set status = 'approved', credited_amount = credit, amount_paid = p_amount_paid,
+         platform_osn = coalesce(platform_osn, p_platform_osn),
+         gateway_status = p_status, gateway_message = p_message, utr = p_utr,
+         callback_payload = p_payload, processed_at = now()
+   where id = d.id;
+
+  update public.wallets set available_balance = available_balance + credit, updated_at = now() where user_id = d.user_id;
+  insert into public.transactions (user_id, amount, type, description, reference)
+  values (d.user_id, credit, 'deposit',
+          'Gateway deposit' || case when credit < d.amount then ' (partial payment of ₦' || to_char(d.amount,'FM999,999,999,990.00') || ' order)' else '' end,
+          d.order_sn);
+
+  select referred_by into ref from public.profiles where id = d.user_id;
+  if ref is not null then
+    pct := coalesce((select referral_commission_pct from public.site_settings where id = 1), 20);
+    bonus := round(credit * pct / 100, 2);
+    if bonus > 0 then
+      update public.wallets set available_balance = available_balance + bonus, updated_at = now() where user_id = ref;
+      insert into public.transactions (user_id, amount, type, description)
+      values (ref, bonus, 'referral_bonus',
+              trim(to_char(pct,'FM990.##')) || '% referral bonus from a downstream deposit of ₦' || to_char(credit,'FM999,999,999,990'));
+    end if;
+  end if;
+
+  insert into public.notifications (user_id, title, message)
+  values (d.user_id, 'Deposit Successful',
+          'Your deposit of ₦' || to_char(credit,'FM999,999,999,990.00') || ' has been confirmed and credited to your wallet.');
+  return 'credited';
+end; $$;
+
+-- Payout result for a user withdrawal. 1 = paid, 9 = failed (refund once).
+create or replace function public.gateway_apply_payout(
+  p_order_sn text, p_platform_osn text, p_status int, p_amount numeric,
+  p_message text, p_utr text, p_payload jsonb
+) returns text
+language plpgsql security definer set search_path = public as $$
+declare w public.withdrawals;
+begin
+  select * into w from public.withdrawals where order_sn = p_order_sn for update;
+  if not found then return 'not_found'; end if;
+  if w.payout_amount is null or round(w.payout_amount, 2) <> round(p_amount, 2) then return 'amount_mismatch'; end if;
+  if w.platform_osn is not null and p_platform_osn is not null and w.platform_osn <> p_platform_osn then
+    return 'osn_mismatch';
+  end if;
+  if w.status in ('approved','failed','rejected') then return 'duplicate'; end if;
+  if w.status <> 'processing' then return 'ignored'; end if;
+
+  if p_status = 1 then
+    update public.withdrawals
+       set status = 'approved', processed_at = now(), platform_osn = coalesce(platform_osn, p_platform_osn),
+           gateway_status = p_status, gateway_message = p_message, utr = p_utr, callback_payload = p_payload
+     where id = w.id;
+    insert into public.notifications (user_id, title, message)
+    values (w.user_id, 'Withdrawal Paid',
+            'Your withdrawal of ₦' || to_char(w.payout_amount,'FM999,999,999,990.00') || ' has been sent to your bank account' ||
+            case when w.account_number is not null then ' (' || w.account_number || ')' else '' end || '.');
+    return 'completed';
+  elsif p_status = 9 then
+    update public.withdrawals
+       set status = 'failed', processed_at = now(), platform_osn = coalesce(platform_osn, p_platform_osn),
+           gateway_status = p_status, gateway_message = p_message, utr = p_utr, callback_payload = p_payload
+     where id = w.id;
+    update public.wallets set available_balance = available_balance + w.amount, updated_at = now() where user_id = w.user_id;
+    insert into public.transactions (user_id, amount, type, description, reference)
+    values (w.user_id, w.amount, 'withdrawal_refund', 'Refund: withdrawal payout failed at the gateway', w.order_sn);
+    insert into public.notifications (user_id, title, message)
+    values (w.user_id, 'Withdrawal Failed',
+            'Your withdrawal of ₦' || to_char(w.amount,'FM999,999,999,990.00') || ' could not be paid out and has been refunded to your wallet.' ||
+            case when coalesce(p_message,'') <> '' then ' Reason: ' || p_message else '' end);
+    return 'refunded';
+  end if;
+  update public.withdrawals set gateway_status = p_status, gateway_message = p_message where id = w.id;
+  return 'ignored';
+end; $$;
+
+-- Admin top-up (payin) or admin payout result. Never touches user wallets.
+create or replace function public.gateway_apply_admin(
+  p_order_sn text, p_kind text, p_platform_osn text, p_status int, p_amount numeric, p_amount_paid numeric,
+  p_message text, p_utr text, p_payload jsonb
+) returns text
+language plpgsql security definer set search_path = public as $$
+declare g public.gateway_admin_transactions; new_status text;
+begin
+  select * into g from public.gateway_admin_transactions where order_sn = p_order_sn and kind = p_kind for update;
+  if not found then return 'not_found'; end if;
+  if g.platform_osn is not null and p_platform_osn is not null and g.platform_osn <> p_platform_osn then
+    return 'osn_mismatch';
+  end if;
+  if p_kind = 'payout' and round(g.amount, 2) <> round(p_amount, 2) then return 'amount_mismatch'; end if;
+  if g.status = 'completed' then return 'duplicate'; end if;
+  if g.status = 'failed' and p_status is distinct from 1 then return 'duplicate'; end if;
+
+  if p_status = 1 then new_status := 'completed';
+  elsif p_kind = 'payout' and p_status = 9 then new_status := 'failed';
+  elsif p_kind = 'topup' then new_status := 'failed';
+  else
+    update public.gateway_admin_transactions set gateway_status = p_status, gateway_message = p_message, updated_at = now() where id = g.id;
+    return 'ignored';
+  end if;
+
+  update public.gateway_admin_transactions
+     set status = new_status, platform_osn = coalesce(platform_osn, p_platform_osn),
+         amount_paid = coalesce(p_amount_paid, amount_paid),
+         gateway_status = p_status, gateway_message = p_message, utr = coalesce(p_utr, utr),
+         callback_payload = p_payload, updated_at = now()
+   where id = g.id;
+  return new_status;
+end; $$;
+
+revoke execute on function public.gateway_apply_payin(text,text,int,numeric,text,text,jsonb) from public, anon, authenticated;
+revoke execute on function public.gateway_apply_payout(text,text,int,numeric,text,text,jsonb) from public, anon, authenticated;
+revoke execute on function public.gateway_apply_admin(text,text,text,int,numeric,numeric,text,text,jsonb) from public, anon, authenticated;
+grant execute on function public.gateway_apply_payin(text,text,int,numeric,text,text,jsonb) to service_role;
+grant execute on function public.gateway_apply_payout(text,text,int,numeric,text,text,jsonb) to service_role;
+grant execute on function public.gateway_apply_admin(text,text,text,int,numeric,numeric,text,text,jsonb) to service_role;
+
+-- Helps the deposit result page and the admin lists.
+create index if not exists deposits_method_created_idx on public.deposits (method, created_at desc);
+create index if not exists withdrawals_method_created_idx on public.withdrawals (method, created_at desc);

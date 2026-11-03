@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0A0F1C">
+    <title>Gateway · Altivex Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --ink: #0C0E13;
+            --ink-soft: #171A22;
+            --paper: #F6F4EF;
+            --paper-card: #FFFFFF;
+            --gold: #D9C7A3;
+            --gold-deep: #D9C7A3;
+            --gold-light: #D9C7A3;
+            --line: rgba(217, 199, 163, 0.16);
+            --ink-text: #14161C;
+            --muted: #7A7E88;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--paper);
+            color: var(--ink-text);
+            overflow-x: hidden;
+        }
+        .field {
+            background: #FAF9F6;
+            border: 1px solid rgba(20,22,28,0.08);
+            transition: border-color .18s ease, background .18s ease;
+        }
+        .field:focus { outline: none; border-color: var(--gold); background: #fff; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .lbl { display:block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 6px 2px; }
+        .tab-btn { padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; color: var(--ax-muted); white-space: nowrap; }
+        .tab-btn[aria-selected="true"] { color: var(--ax-accent-ink); background: var(--ax-accent); }
+        .kv { display:flex; justify-content:space-between; align-items:baseline; gap: 12px; font-size: 13px; }
+        .kv + .kv { margin-top: 8px; }
+    </style>
+    <link rel="stylesheet" href="/altivex.css">
+</head>
+<body class="bg-[var(--paper)]">
+
+    <!-- Auth Guard Loader -->
+    <div id="authGuard" class="fixed inset-0 z-[100] flex items-center justify-center" style="background: var(--ink);">
+        <div class="text-center" id="loaderContent">
+            <div class="w-14 h-14 border-2 rounded-full animate-spin mx-auto mb-5" style="border-color: rgba(217, 199, 163,0.25); border-top-color: var(--gold);"></div>
+            <span class="ax-logo ax-logo-lg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span>
+            <p class="text-[10px] uppercase tracking-[0.08em] text-white/30 mt-2">Verifying Admin Access</p>
+        </div>
+    </div>
+
+    <!-- ============ Altivex admin shell: top bar ============ -->
+    <header class="ax-topbar ax-topbar-admin">
+        <div class="ax-topbar-inner">
+            <div class="flex items-center gap-3 min-w-0">
+                <button id="menuToggle" class="ax-icon-btn lg:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+                    <i data-lucide="menu"></i>
+                </button>
+                <a href="dashboard.html" class="lg:hidden" aria-label="Admin home"><span class="ax-logo ax-logo-sm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span></a>
+                <span class="ax-admin-tag hidden sm:inline-flex lg:inline-flex">Admin</span>
+                <span class="ax-crumb">Gateway</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block leading-tight">
+                    <p id="adminName" class="text-[13px] font-semibold text-white">Admin</p>
+                    <p id="adminRole" class="text-[11px] text-[var(--ax-muted)] uppercase tracking-[0.06em]">...</p>
+                </div>
+                <div class="ax-avatar" id="adminInitials">A</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============ Admin icon rail (id kept as "sidebar") ============ -->
+    <aside id="sidebar" class="ax-rail" aria-label="Admin navigation">
+        <a href="dashboard.html" class="ax-rail-brand ax-logo ax-mark-only" aria-label="Altivex admin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <nav id="sidebarNav">
+            <a href="dashboard.html" data-page="dashboard" class="sidebar-item" aria-label="Overview"><i data-lucide="layout-grid"></i><span class="ax-tip">Overview</span></a>
+            <a href="users.html" data-page="users" class="sidebar-item" aria-label="Users"><i data-lucide="users"></i><span class="ax-tip">Users</span></a>
+            <a href="deposits.html" data-page="deposits" class="sidebar-item" aria-label="Deposits"><i data-lucide="arrow-down-left"></i><span class="ax-tip">Deposits</span></a>
+            <a href="withdrawals.html" data-page="withdrawals" class="sidebar-item" aria-label="Withdrawals"><i data-lucide="arrow-up-right"></i><span class="ax-tip">Withdrawals</span></a>
+            <a href="gateway.html" data-page="gateway" class="sidebar-item" aria-label="Gateway"><i data-lucide="zap"></i><span class="ax-tip">Gateway</span></a>
+            <a href="investments.html" data-page="investments" class="sidebar-item" aria-label="Investments"><i data-lucide="trending-up"></i><span class="ax-tip">Investments</span></a>
+            <a href="plans.html" data-page="plans" class="sidebar-item" aria-label="Plans"><i data-lucide="layers"></i><span class="ax-tip">Plans</span></a>
+            <a href="gift-codes.html" data-page="gift-codes" class="sidebar-item" aria-label="Gift codes"><i data-lucide="gift"></i><span class="ax-tip">Gift codes</span></a>
+            <a href="support.html" data-page="support" class="sidebar-item" aria-label="Support"><i data-lucide="life-buoy"></i><span class="ax-tip">Support</span></a>
+            <a href="settings.html" data-page="settings" class="sidebar-item" aria-label="Settings"><i data-lucide="settings"></i><span class="ax-tip">Settings</span></a>
+            <span class="flex-1"></span>
+            <span class="ax-rail-sep"></span>
+            <button id="logoutBtn" class="sidebar-item ax-logout" aria-label="Log out"><i data-lucide="log-out"></i><span class="ax-tip">Log out</span></button>
+        </nav>
+    </aside>
+
+    <!-- ============ Mobile admin menu ============ -->
+    <div id="drawerOverlay"></div>
+    <aside id="mobileDrawer" class="ax-sheet-left" aria-label="Admin menu">
+        <div class="ax-sheet-head">
+            <span class="flex items-center gap-2"><span class="ax-logo ax-logo-sm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span><span class="ax-admin-tag">Admin</span></span>
+            <button id="drawerClose" aria-label="Close menu" class="ax-icon-btn"><i data-lucide="x"></i></button>
+        </div>
+        <div class="ax-sheet-account">
+            <span class="ax-avatar ax-avatar-lg" id="drawerInitials">A</span>
+            <div class="min-w-0">
+                <p id="drawerName" class="text-sm font-semibold text-white truncate">Admin</p>
+                <p id="drawerRole" class="text-[11px] text-[var(--ax-muted)] uppercase tracking-[0.06em] truncate">...</p>
+            </div>
+        </div>
+        <nav class="ax-sheet-nav" id="drawerNav">
+            <a href="dashboard.html" data-page="dashboard" class="drawer-item"><i data-lucide="layout-grid"></i><span>Overview</span></a>
+            <a href="users.html" data-page="users" class="drawer-item"><i data-lucide="users"></i><span>Users</span></a>
+            <a href="deposits.html" data-page="deposits" class="drawer-item"><i data-lucide="arrow-down-left"></i><span>Deposits</span></a>
+            <a href="withdrawals.html" data-page="withdrawals" class="drawer-item"><i data-lucide="arrow-up-right"></i><span>Withdrawals</span></a>
+            <a href="gateway.html" data-page="gateway" class="drawer-item"><i data-lucide="zap"></i><span>Gateway</span></a>
+            <a href="investments.html" data-page="investments" class="drawer-item"><i data-lucide="trending-up"></i><span>Investments</span></a>
+            <a href="plans.html" data-page="plans" class="drawer-item"><i data-lucide="layers"></i><span>Plans</span></a>
+            <a href="gift-codes.html" data-page="gift-codes" class="drawer-item"><i data-lucide="gift"></i><span>Gift codes</span></a>
+            <a href="support.html" data-page="support" class="drawer-item"><i data-lucide="life-buoy"></i><span>Support</span></a>
+            <a href="settings.html" data-page="settings" class="drawer-item"><i data-lucide="settings"></i><span>Settings</span></a>
+            <div class="ax-divider my-2"></div>
+            <button id="drawerLogoutBtn" class="drawer-item ax-logout"><i data-lucide="log-out"></i><span>Log out</span></button>
+        </nav>
+    </aside>
+
+    <!-- ============ Mobile tab bar (id kept as "islandNav") ============ -->
+    <nav id="islandNav" class="ax-tabbar" aria-label="Tabs">
+        <a href="dashboard.html" data-page="dashboard" class="island-item"><i data-lucide="layout-grid"></i><span>Home</span></a>
+        <a href="users.html" data-page="users" class="island-item"><i data-lucide="users"></i><span>Users</span></a>
+        <a href="deposits.html" data-page="deposits" class="island-item"><i data-lucide="arrow-down-left"></i><span>Deposits</span></a>
+        <a href="withdrawals.html" data-page="withdrawals" class="island-item"><i data-lucide="arrow-up-right"></i><span>Payouts</span></a>
+        <a href="support.html" data-page="support" class="island-item"><i data-lucide="life-buoy"></i><span>Support</span></a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="ax-main ax-main-admin">
+        <div class="max-w-6xl mx-auto">
+
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
+                <div>
+                    <h1 class="text-3xl ax-display font-semibold">Payment gateway</h1>
+                    <p class="text-xs text-[var(--muted)] mt-1">Afrstar Nigeria · balance, admin withdrawals and top-ups</p>
+                </div>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">Mode: <a id="modeLink" href="settings.html#sec-payments" class="ax-accent">…</a></p>
+            </div>
+
+            <!-- Configuration / connection errors -->
+            <div id="configError" class="hidden mb-6 p-4 rounded-[14px] bg-red-50 border border-red-100 text-red-700 text-xs leading-relaxed break-words" role="alert"></div>
+
+            <div class="grid lg:grid-cols-5 gap-6 mb-8">
+                <!-- Balance -->
+                <div class="lg:col-span-2 ax-card rounded-[14px] p-6 md:p-7 flex flex-col">
+                    <div class="flex items-center justify-between mb-4">
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">Gateway balance</p>
+                        <button id="refreshBalance" class="ax-icon-btn" aria-label="Refresh balance"><i data-lucide="refresh-cw"></i></button>
+                    </div>
+                    <h2 id="balance" class="text-4xl ax-display font-semibold mono ax-accent">—</h2>
+                    <p id="balanceMeta" class="text-[10px] text-[var(--muted)] mt-2 mono">Loading…</p>
+                    <div class="mt-auto pt-6 grid grid-cols-2 gap-3 text-xs">
+                        <div class="bg-black/[0.02] rounded-[10px] p-3">
+                            <p class="text-[9px] uppercase font-bold tracking-widest text-[var(--muted)] mb-1">Deposits today</p>
+                            <p id="statDepToday" class="font-semibold mono">—</p>
+                        </div>
+                        <div class="bg-black/[0.02] rounded-[10px] p-3">
+                            <p class="text-[9px] uppercase font-bold tracking-widest text-[var(--muted)] mb-1">Payouts today</p>
+                            <p id="statPayToday" class="font-semibold mono">—</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Withdraw to bank -->
+                <form id="payoutForm" class="lg:col-span-3 ax-card rounded-[14px] p-6 md:p-7" novalidate>
+                    <h4 class="text-lg font-semibold ax-display mb-1 flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 ax-accent"></i> Withdraw to bank</h4>
+                    <p class="text-[11px] text-[var(--muted)] mb-5">Enter what the account should receive. An <span class="fee-pct">11</span>% fee is added on top and must be covered by the gateway balance.</p>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="sm:col-span-2">
+                            <label class="lbl" for="pBank">Bank</label>
+                            <input id="pBankSearch" type="search" placeholder="Search banks…" class="field w-full rounded-lg px-4 py-2.5 text-sm mb-2" autocomplete="off">
+                            <select id="pBank" required class="field w-full rounded-lg px-4 py-3 text-sm font-semibold"></select>
+                        </div>
+                        <div>
+                            <label class="lbl" for="pAccount">Account number</label>
+                            <input id="pAccount" required inputmode="numeric" maxlength="10" placeholder="10 digits" class="field w-full rounded-lg px-4 py-3 text-sm mono">
+                        </div>
+                        <div>
+                            <label class="lbl" for="pName">Account name</label>
+                            <input id="pName" required maxlength="100" placeholder="Name on the account" class="field w-full rounded-lg px-4 py-3 text-sm">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="lbl" for="pAmount">Amount to receive (₦)</label>
+                            <input id="pAmount" type="number" min="1" step="0.01" required placeholder="0.00" class="field w-full rounded-lg px-4 py-4 text-xl font-semibold mono">
+                        </div>
+                    </div>
+
+                    <div class="bg-black/[0.02] rounded-[10px] border border-black/[0.05] p-4 mt-5" aria-live="polite">
+                        <div class="kv"><span class="text-[var(--muted)]">Amount to receive</span><span id="bAmount" class="mono">₦0.00</span></div>
+                        <div class="kv"><span class="text-[var(--muted)]">Fee (<span class="fee-pct">11</span>%)</span><span id="bFee" class="mono text-red-500">₦0.00</span></div>
+                        <div class="kv border-t border-black/[0.06] pt-2"><span class="font-semibold">Total from gateway</span><span id="bTotal" class="mono font-bold ax-accent text-lg">₦0.00</span></div>
+                        <div class="kv"><span class="text-[var(--muted)]">Balance after</span><span id="bAfter" class="mono">—</span></div>
+                        <p id="bWarn" class="hidden text-[11px] text-red-500 mt-2"></p>
+                    </div>
+
+                    <div id="payoutMsg" class="hidden mt-4 p-3 rounded-lg text-[11px] leading-relaxed break-words" role="status"></div>
+                    <button type="submit" id="payoutBtn" class="ax-btn ax-btn-primary w-full mt-5">Send withdrawal</button>
+                </form>
+            </div>
+
+            <div class="grid lg:grid-cols-5 gap-6 mb-8">
+                <!-- Top up -->
+                <form id="topupForm" class="lg:col-span-2 ax-card rounded-[14px] p-6 md:p-7" novalidate>
+                    <h4 class="text-lg font-semibold ax-display mb-1 flex items-center gap-2"><i data-lucide="plus-circle" class="w-5 h-5 ax-accent"></i> Top up gateway</h4>
+                    <p class="text-[11px] text-[var(--muted)] mb-5">Fund the gateway balance through the Afrstar checkout. This never credits a client wallet.</p>
+                    <label class="lbl" for="tAmount">Amount (₦)</label>
+                    <input id="tAmount" type="number" min="1" step="0.01" required placeholder="0.00" class="field w-full rounded-lg px-4 py-4 text-xl font-semibold mono mb-3">
+                    <div id="tPhoneWrap" class="hidden">
+                        <label class="lbl" for="tPhone">Phone for checkout</label>
+                        <input id="tPhone" type="tel" placeholder="080…" class="field w-full rounded-lg px-4 py-3 text-sm mono mb-3">
+                    </div>
+                    <div id="topupMsg" class="hidden mb-3 p-3 rounded-lg text-[11px] leading-relaxed break-words" role="status"></div>
+                    <button type="submit" id="topupBtn" class="ax-btn w-full">Open checkout</button>
+                </form>
+
+                <!-- Callback URLs -->
+                <div class="lg:col-span-3 ax-card rounded-[14px] p-6 md:p-7">
+                    <h4 class="text-lg font-semibold ax-display mb-1 flex items-center gap-2"><i data-lucide="webhook" class="w-5 h-5 ax-accent"></i> Callback URLs</h4>
+                    <p class="text-[11px] text-[var(--muted)] mb-4">Save these in the Afrstar merchant portal settings. Results are only applied when the gateway calls them with a valid signature.</p>
+                    <div class="space-y-3">
+                        <div class="bg-black/[0.02] rounded-[10px] p-3">
+                            <p class="text-[9px] uppercase font-bold tracking-widest text-[var(--muted)] mb-1">Collection callback</p>
+                            <div class="flex items-center gap-2"><code class="mono text-[11px] break-all flex-1" data-origin-path="/api/afrstar/payin-callback"></code><button type="button" class="ax-icon-btn shrink-0" data-copy aria-label="Copy"><i data-lucide="copy"></i></button></div>
+                        </div>
+                        <div class="bg-black/[0.02] rounded-[10px] p-3">
+                            <p class="text-[9px] uppercase font-bold tracking-widest text-[var(--muted)] mb-1">Payout callback</p>
+                            <div class="flex items-center gap-2"><code class="mono text-[11px] break-all flex-1" data-origin-path="/api/afrstar/payout-callback"></code><button type="button" class="ax-icon-btn shrink-0" data-copy aria-label="Copy"><i data-lucide="copy"></i></button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent activity -->
+            <div class="ax-card rounded-[14px] overflow-hidden mb-10">
+                <div class="p-4 md:p-6 border-b border-black/[0.05] flex flex-wrap items-center justify-between gap-3">
+                    <h4 class="text-lg font-semibold ax-display">Recent gateway activity</h4>
+                    <div class="flex gap-1 overflow-x-auto no-scrollbar" role="tablist">
+                        <button class="tab-btn" role="tab" aria-selected="true" data-tab="admin">Admin</button>
+                        <button class="tab-btn" role="tab" aria-selected="false" data-tab="deposits">Deposits</button>
+                        <button class="tab-btn" role="tab" aria-selected="false" data-tab="payouts">Payouts</button>
+                    </div>
+                </div>
+                <div id="activityList" class="divide-y divide-black/[0.05]">
+                    <div class="p-10 text-center text-[var(--muted)] text-xs">Loading…</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast" class="hidden fixed left-1/2 -translate-x-1/2 top-20 z-[120] px-4 py-3 rounded-[10px] text-sm font-semibold shadow-lg"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { NG_BANKS, bankOptionsHtml, bankByCode, sortedBanks } from '../src/ng-banks.js';
+
+        lucide.createIcons();
+
+        const supabase = createClient(
+            import.meta.env.VITE_SUPABASE_URL,
+            import.meta.env.VITE_SUPABASE_ANON_KEY
+        );
+
+        const FEE_PCT = 11; // admin withdrawal fee, mirrored server-side (ADMIN_PAYOUT_FEE_PCT)
+
+        // --- nav + drawer ---
+        document.querySelectorAll('[data-page="gateway"]').forEach(a => a.classList.add(a.closest('#sidebarNav') ? 'sidebar-active' : 'drawer-active'));
+        const drawer = document.getElementById('mobileDrawer');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+        function openDrawer() { drawer.classList.add('open'); drawerOverlay.classList.add('open'); menuToggle.setAttribute('aria-expanded', 'true'); document.body.style.overflow = 'hidden'; }
+        function closeDrawer() { drawer.classList.remove('open'); drawerOverlay.classList.remove('open'); menuToggle.setAttribute('aria-expanded', 'false'); document.body.style.overflow = ''; }
+        menuToggle.addEventListener('click', openDrawer);
+        document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+        drawerOverlay.addEventListener('click', closeDrawer);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+        const logout = async () => { await supabase.auth.signOut(); window.location.href = 'login.html'; };
+        document.getElementById('logoutBtn').onclick = logout;
+        document.getElementById('drawerLogoutBtn').onclick = logout;
+
+        const money = n => `₦${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        const r2 = n => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+        const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        document.querySelectorAll('.fee-pct').forEach(el => el.textContent = FEE_PCT);
+        document.querySelectorAll('[data-origin-path]').forEach(el => el.textContent = location.origin + el.dataset.originPath);
+        document.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', () => {
+            navigator.clipboard?.writeText(b.parentElement.querySelector('code').textContent);
+            toast('Copied');
+        }));
+
+        function toast(msg, ok = true) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `fixed left-1/2 -translate-x-1/2 top-20 z-[120] px-4 py-3 rounded-[10px] text-sm font-semibold shadow-lg ${ok ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`;
+            clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.add('hidden'), 3500);
+        }
+        function showMsg(id, text, ok) {
+            const el = document.getElementById(id);
+            if (!text) { el.classList.add('hidden'); return; }
+            el.innerHTML = text;
+            el.className = `mt-4 p-3 rounded-lg text-[11px] leading-relaxed break-words ${ok ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`;
+        }
+
+        async function api(method, body, query = '') {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = 'login.html'; throw new Error('Signed out'); }
+            const res = await fetch(`/api/admin/gateway${query}`, {
+                method,
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+                body: body ? JSON.stringify(body) : undefined,
+            });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                const e = new Error(json.error || `Request failed (${res.status})`);
+                e.body = json; e.status = res.status;
+                throw e;
+            }
+            return json;
+        }
+        function errorHtml(e) {
+            let html = esc(e.message);
+            if (e.body?.hint) html += `<br><span class="opacity-80">${esc(e.body.hint)}</span>`;
+            return html;
+        }
+
+        // --- init / admin guard ---
+        let adminProfile = null;
+        async function init() {
+            try {
+                const { data: { session }, error: authError } = await supabase.auth.getSession();
+                if (authError || !session) throw new Error('No valid session found.');
+                const { data: profile, error: profileError } = await supabase.from('profiles').select('role, full_name, phone').eq('id', session.user.id).single();
+                if (profileError || !profile || !['admin', 'super_admin'].includes(profile.role)) {
+                    await supabase.auth.signOut();
+                    window.location.href = 'login.html?error=unauthorized';
+                    return;
+                }
+                adminProfile = profile;
+                const roleLabel = profile.role === 'super_admin' ? 'Super Admin' : 'Administrator';
+                document.getElementById('adminName').textContent = profile.full_name || 'Admin';
+                document.getElementById('adminInitials').textContent = (profile.full_name || 'A').charAt(0);
+                document.getElementById('drawerName').textContent = profile.full_name || 'Admin';
+                document.getElementById('drawerInitials').textContent = (profile.full_name || 'A').charAt(0);
+                document.getElementById('adminRole').textContent = roleLabel;
+                document.getElementById('drawerRole').textContent = roleLabel;
+                document.getElementById('tPhoneWrap').classList.toggle('hidden', !!profile.phone);
+                document.getElementById('authGuard').classList.add('hidden');
+
+                supabase.from('site_settings').select('payment_mode').eq('id', 1).maybeSingle().then(({ data }) => {
+                    document.getElementById('modeLink').textContent = (data?.payment_mode || 'manual') === 'gateway' ? 'Gateway (automatic)' : 'Manual';
+                });
+                loadBalance();
+                loadActivity();
+                loadToday();
+                const topup = new URLSearchParams(location.search).get('topup');
+                if (topup) toast('Returned from checkout. The top-up shows as completed once the gateway confirms it.');
+            } catch (err) {
+                console.error('Security Halt:', err);
+                document.getElementById('loaderContent').innerHTML = `
+                    <p class="text-red-400 font-semibold mb-4">Access Denied or Connection Failure</p>
+                    <a href="login.html" class="px-6 py-2 ax-fill text-white rounded-lg text-sm font-bold">Return to Login</a>`;
+            }
+        }
+
+        // --- balance ---
+        let balance = null;
+        async function loadBalance() {
+            const btn = document.getElementById('refreshBalance');
+            btn.disabled = true;
+            document.getElementById('balanceMeta').textContent = 'Checking…';
+            try {
+                const r = await api('GET', null, '?action=balance');
+                balance = Number(r.balance);
+                document.getElementById('balance').textContent = money(balance);
+                document.getElementById('balanceMeta').textContent = `Live from Afrstar · ${new Date(r.fetched_at).toLocaleTimeString()}`;
+                document.getElementById('configError').classList.add('hidden');
+            } catch (e) {
+                balance = null;
+                document.getElementById('balance').textContent = '—';
+                document.getElementById('balanceMeta').textContent = e.status === 503 ? 'Gateway not configured' : 'Could not load balance';
+                const box = document.getElementById('configError');
+                box.innerHTML = `<b>${e.status === 503 ? 'Gateway not configured.' : 'Gateway error.'}</b> ${errorHtml(e)}`;
+                box.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                updateBreakdown();
+            }
+        }
+        document.getElementById('refreshBalance').addEventListener('click', loadBalance);
+
+        // --- bank picker with search ---
+        const pBank = document.getElementById('pBank');
+        pBank.innerHTML = bankOptionsHtml({ placeholder: 'Select bank' });
+        document.getElementById('pBankSearch').addEventListener('input', (e) => {
+            const q = e.target.value.trim().toLowerCase();
+            const keep = pBank.value;
+            if (!q) { pBank.innerHTML = bankOptionsHtml({ selected: keep, placeholder: 'Select bank' }); return; }
+            const hits = sortedBanks().filter(b => b.name.toLowerCase().includes(q) || b.code.includes(q));
+            pBank.innerHTML = `<option value="">${hits.length ? `${hits.length} match${hits.length === 1 ? '' : 'es'}` : 'No bank matches'}</option>` +
+                hits.map(b => `<option value="${b.code}"${b.code === keep ? ' selected' : ''}>${esc(b.name)}</option>`).join('');
+            if (hits.length === 1) pBank.value = hits[0].code;
+        });
+        document.getElementById('pAccount').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10); });
+
+        // --- fee breakdown: amount entered is what the account receives ---
+        function breakdown() {
+            const amount = r2(Number(document.getElementById('pAmount').value) || 0);
+            const fee = r2(amount * FEE_PCT / 100);
+            return { amount, fee, total: r2(amount + fee) };
+        }
+        function updateBreakdown() {
+            const { amount, fee, total } = breakdown();
+            document.getElementById('bAmount').textContent = money(amount);
+            document.getElementById('bFee').textContent = money(fee);
+            document.getElementById('bTotal').textContent = money(total);
+            const warn = document.getElementById('bWarn');
+            if (balance === null) {
+                document.getElementById('bAfter').textContent = '—';
+                warn.classList.add('hidden');
+            } else {
+                document.getElementById('bAfter').textContent = money(balance - total);
+                const over = total > balance;
+                warn.textContent = over ? `Total ${money(total)} is more than the gateway balance ${money(balance)}.` : '';
+                warn.classList.toggle('hidden', !over);
+            }
+            document.getElementById('payoutBtn').disabled = !(amount > 0) || (balance !== null && total > balance);
+        }
+        document.getElementById('pAmount').addEventListener('input', updateBreakdown);
+        updateBreakdown();
+
+        document.getElementById('payoutForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showMsg('payoutMsg', '');
+            const bank = bankByCode(pBank.value);
+            const account = document.getElementById('pAccount').value.trim();
+            const name = document.getElementById('pName').value.trim();
+            const { amount, fee, total } = breakdown();
+            if (!bank) return showMsg('payoutMsg', 'Choose a bank.', false);
+            if (!/^\d{10}$/.test(account)) return showMsg('payoutMsg', 'Account number must be 10 digits.', false);
+            if (name.length < 2) return showMsg('payoutMsg', 'Enter the account name.', false);
+            if (!(amount > 0)) return showMsg('payoutMsg', 'Enter an amount.', false);
+            if (balance !== null && total > balance) return showMsg('payoutMsg', `Not enough balance: ${money(total)} needed.`, false);
+            if (!confirm(`Send ${money(amount)} to ${name}\n${bank.name} · ${account}\n\nFee (${FEE_PCT}%): ${money(fee)}\nTotal from gateway: ${money(total)}\n\nContinue?`)) return;
+            const btn = document.getElementById('payoutBtn');
+            btn.disabled = true; btn.textContent = 'Sending…';
+            try {
+                const r = await api('POST', { action: 'payout', amount, bank_code: bank.code, account_number: account, account_name: name });
+                showMsg('payoutMsg', `Payout of <b>${money(r.amount)}</b> accepted by the gateway (order <span class="mono">${esc(r.order_sn)}</span>). It completes when the gateway confirms it.`, true);
+                document.getElementById('payoutForm').reset();
+                pBank.innerHTML = bankOptionsHtml({ placeholder: 'Select bank' });
+                loadBalance(); loadActivity('admin');
+            } catch (err) {
+                showMsg('payoutMsg', errorHtml(err), false);
+                loadActivity('admin');
+            } finally {
+                btn.textContent = 'Send withdrawal';
+                updateBreakdown();
+            }
+        });
+
+        // --- top up ---
+        document.getElementById('topupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const amount = r2(Number(document.getElementById('tAmount').value) || 0);
+            const phone = document.getElementById('tPhone').value.trim();
+            showMsg('topupMsg', '');
+            if (!(amount > 0)) return showMsg('topupMsg', 'Enter an amount.', false);
+            // Open the tab now (inside the click) so pop-up blockers allow it.
+            const win = window.open('', '_blank');
+            const btn = document.getElementById('topupBtn');
+            btn.disabled = true; btn.textContent = 'Creating checkout…';
+            try {
+                const r = await api('POST', { action: 'topup', amount, phone: phone || undefined });
+                if (win) { win.location.href = r.pay_url; }
+                showMsg('topupMsg', `Checkout for <b>${money(r.amount)}</b> created. ${win ? 'It opened in a new tab.' : ''} <a href="${esc(r.pay_url)}" target="_blank" rel="noopener" class="underline font-semibold">Open checkout</a>`, true);
+                document.getElementById('topupForm').reset();
+                loadActivity('admin');
+            } catch (err) {
+                if (win) win.close();
+                if (err.body?.code === 'phone_required') document.getElementById('tPhoneWrap').classList.remove('hidden');
+                showMsg('topupMsg', errorHtml(err), false);
+            } finally {
+                btn.disabled = false; btn.textContent = 'Open checkout';
+            }
+        });
+
+        // --- recent activity ---
+        let currentTab = 'admin';
+        document.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', () => loadActivity(b.dataset.tab)));
+        const pill = (status, label) => {
+            const cls = ['completed', 'approved'].includes(status) ? 'bg-emerald-50 text-emerald-700'
+                : ['processing'].includes(status) ? 'bg-blue-50 text-blue-700'
+                : status === 'pending' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-600';
+            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${cls}">${label || status}</span>`;
+        };
+        const when = d => new Date(d).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+        async function loadActivity(tab = currentTab) {
+            currentTab = tab;
+            document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+            const list = document.getElementById('activityList');
+            let rows = [], html = '';
+            if (tab === 'admin') {
+                const { data, error } = await supabase.from('gateway_admin_transactions').select('*').order('created_at', { ascending: false }).limit(30);
+                if (error) { list.innerHTML = `<div class="p-8 text-center text-red-500 text-xs">${esc(error.message)}</div>`; return; }
+                rows = data || [];
+                html = rows.map(g => `
+                    <div class="p-4 md:px-6 flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold">${g.kind === 'payout' ? `Withdrawal to ${esc(g.bank_name || '')}` : 'Gateway top-up'}</p>
+                            <p class="text-[10px] text-[var(--muted)] mono break-all">${g.kind === 'payout' ? `${esc(g.account_number || '')} · ${esc(g.account_name || '')} · ` : ''}${esc(g.order_sn)}</p>
+                            ${g.kind === 'payout' ? `<p class="text-[10px] text-[var(--muted)] mt-0.5">Fee ${money(g.fee_amount)} · total ${money(g.total_debit)}</p>` : ''}
+                            ${g.gateway_message && g.status !== 'completed' ? `<p class="text-[10px] mt-0.5 ${g.status === 'failed' ? 'text-red-500' : 'text-[var(--muted)]'}">${esc(g.gateway_message)}</p>` : ''}
+                            ${g.kind === 'topup' && g.status === 'pending' && g.pay_url ? `<a href="${esc(g.pay_url)}" target="_blank" rel="noopener" class="text-[10px] ax-accent underline">Open checkout</a>` : ''}
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="text-sm font-semibold mono ${g.kind === 'payout' ? '' : 'ax-accent'}">${g.kind === 'payout' ? '−' : '+'}${money(g.kind === 'topup' && g.amount_paid != null ? g.amount_paid : g.amount)}</p>
+                            <p class="text-[10px] text-[var(--muted)] mono mb-1">${when(g.created_at)}</p>
+                            ${pill(g.status)}
+                        </div>
+                    </div>`).join('');
+            } else if (tab === 'deposits') {
+                const { data, error } = await supabase.from('deposits').select('*, profiles(full_name)').eq('method', 'gateway').order('created_at', { ascending: false }).limit(30);
+                if (error) { list.innerHTML = `<div class="p-8 text-center text-red-500 text-xs">${esc(error.message)}</div>`; return; }
+                rows = data || [];
+                html = rows.map(d => `
+                    <div class="p-4 md:px-6 flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold">${esc(d.profiles?.full_name || 'Unknown')}</p>
+                            <p class="text-[10px] text-[var(--muted)] mono break-all">${esc(d.order_sn || '')}${d.platform_osn ? ` · ${esc(d.platform_osn)}` : ''}</p>
+                            ${d.status === 'approved' && d.credited_amount != null && Number(d.credited_amount) !== Number(d.amount) ? `<p class="text-[10px] text-amber-600">Credited ${money(d.credited_amount)} of ${money(d.amount)}</p>` : ''}
+                            ${d.status === 'failed' && d.gateway_message ? `<p class="text-[10px] text-red-500">${esc(d.gateway_message)}</p>` : ''}
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="text-sm font-semibold mono ax-accent">+${money(d.credited_amount ?? d.amount)}</p>
+                            <p class="text-[10px] text-[var(--muted)] mono mb-1">${when(d.created_at)}</p>
+                            ${pill(d.status, d.status === 'approved' ? 'credited' : d.status)}
+                        </div>
+                    </div>`).join('');
+            } else {
+                const { data, error } = await supabase.from('withdrawals').select('*, profiles(full_name)').eq('method', 'gateway').order('created_at', { ascending: false }).limit(30);
+                if (error) { list.innerHTML = `<div class="p-8 text-center text-red-500 text-xs">${esc(error.message)}</div>`; return; }
+                rows = data || [];
+                html = rows.map(w => `
+                    <div class="p-4 md:px-6 flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold">${esc(w.profiles?.full_name || 'Unknown')}</p>
+                            <p class="text-[10px] text-[var(--muted)] mono break-all">${esc(w.bank_name || '')} · ${esc(w.account_number || '')} · ${esc(w.order_sn || '')}</p>
+                            ${w.gateway_message && w.status !== 'approved' ? `<p class="text-[10px] ${w.status === 'failed' ? 'text-red-500' : 'text-[var(--muted)]'}">${esc(w.gateway_message)}</p>` : ''}
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="text-sm font-semibold mono">−${money(w.payout_amount ?? (w.amount - (w.charge || 0)))}</p>
+                            <p class="text-[10px] text-[var(--muted)] mono mb-1">${when(w.sent_at || w.created_at)}</p>
+                            ${pill(w.status, w.status === 'approved' ? 'paid' : w.status === 'failed' ? 'failed · refunded' : w.status)}
+                        </div>
+                    </div>`).join('');
+            }
+            list.innerHTML = html || `<div class="p-10 text-center text-[var(--muted)] text-xs">Nothing here yet.</div>`;
+        }
+
+        async function loadToday() {
+            const start = new Date(); start.setHours(0, 0, 0, 0);
+            const since = start.toISOString();
+            const [dep, pay] = await Promise.all([
+                supabase.from('deposits').select('credited_amount, amount').eq('method', 'gateway').eq('status', 'approved').gte('created_at', since),
+                supabase.from('withdrawals').select('payout_amount').eq('method', 'gateway').eq('status', 'approved').gte('created_at', since),
+            ]);
+            const sum = (rows, f) => (rows || []).reduce((a, r) => a + Number(f(r) || 0), 0);
+            document.getElementById('statDepToday').textContent = money(sum(dep.data, r => r.credited_amount ?? r.amount));
+            document.getElementById('statPayToday').textContent = money(sum(pay.data, r => r.payout_amount));
+        }
+
+        init();
+    </script>
+</body>
+</html>
