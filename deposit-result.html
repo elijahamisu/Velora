@@ -113,6 +113,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { safeUrl } from './src/escape.js';
         import * as AX from './src/site-settings.js';
 
         lucide.createIcons();
@@ -199,8 +200,9 @@
                 return true;
             }
             // pending
-            if (d.pay_url && Date.now() - new Date(d.created_at).getTime() < 60 * 60 * 1000) {
-                payBtn.href = d.pay_url;
+            const payUrl = safeUrl(d.pay_url, { allow: ['https', 'http'] });
+            if (payUrl && Date.now() - new Date(d.created_at).getTime() < 60 * 60 * 1000) {
+                payBtn.href = payUrl;
                 payBtn.classList.remove('hidden');
             }
             return false;

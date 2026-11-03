@@ -245,6 +245,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc, safeId } from './src/escape.js';
         import * as AX from './src/site-settings.js';
         let siteSettings = AX.cachedSettings();
 
@@ -369,18 +370,18 @@
             document.getElementById('resolvedCount').textContent = data.filter(t => t.status === 'closed').length;
 
             list.innerHTML = data.map(t => `
-                <div onclick="openTicket('${t.id}')" class="ax-card p-5 rounded-[14px] hover:border-neutral-600 transition cursor-pointer flex items-center justify-between">
+                <div onclick="openTicket('${safeId(t.id)}')" class="ax-card p-5 rounded-[14px] hover:border-neutral-600 transition cursor-pointer flex items-center justify-between">
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 rounded-[10px] bg-black/[0.03] flex items-center justify-center text-[var(--muted)]">
                             <i data-lucide="message-square" class="w-5 h-5"></i>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-[var(--ink-text)]">${t.subject}</p>
-                            <p class="text-[9px] text-[var(--muted)] uppercase font-bold tracking-widest">${t.category} • ${new Date(t.created_at).toLocaleDateString()}</p>
+                            <p class="text-sm font-semibold text-[var(--ink-text)]">${esc(t.subject)}</p>
+                            <p class="text-[9px] text-[var(--muted)] uppercase font-bold tracking-widest">${esc(t.category)} • ${new Date(t.created_at).toLocaleDateString()}</p>
                         </div>
                     </div>
-                    <span class="text-[9px] font-bold uppercase px-3 py-1 rounded-lg status-${t.status.toLowerCase()}">
-                        ${t.status}
+                    <span class="text-[9px] font-bold uppercase px-3 py-1 rounded-lg status-${esc(t.status.toLowerCase())}">
+                        ${esc(t.status)}
                     </span>
                 </div>
             `).join('');
@@ -450,7 +451,7 @@
             container.innerHTML = messages.map(m => `
                 <div class="flex ${m.user_id === user.id ? 'justify-end' : 'justify-start'}">
                     <div class="max-w-[80%] p-4 rounded-[14px] text-sm ${m.user_id === user.id ? 'ax-fill text-white rounded-br-none' : 'bg-black/[0.04] text-[var(--ink-text)] rounded-bl-none'}">
-                        <p>${m.message}</p>
+                        <p>${esc(m.message)}</p>
                         <p class="text-[8px] mt-1 opacity-60">${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                     </div>
                 </div>
@@ -478,10 +479,10 @@
             container.innerHTML = filtered.map(f => `
                 <details class="faq-details group border border-black/[0.06] rounded-[10px] bg-[var(--paper-card)] overflow-hidden">
                     <summary class="flex justify-between items-center p-5 cursor-pointer font-semibold text-sm text-[var(--ink-text)]">
-                        ${f.q}
+                        ${esc(f.q)}
                         <i data-lucide="chevron-down" class="w-4 h-4 ax-accent transition-transform"></i>
                     </summary>
-                    <div class="px-5 pb-5 text-xs text-[var(--muted)] leading-relaxed">${f.a}</div>
+                    <div class="px-5 pb-5 text-xs text-[var(--muted)] leading-relaxed">${esc(f.a)}</div>
                 </details>
             `).join('');
             lucide.createIcons();

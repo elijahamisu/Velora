@@ -206,6 +206,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc, safeId } from '../src/escape.js';
 
         lucide.createIcons();
 
@@ -347,7 +348,7 @@
                         <span class="text-[9px] font-bold uppercase px-2 py-1 rounded-lg ax-badge-accent" style="background: var(--ax-accent-soft); color: var(--ax-accent); border: 1px solid var(--ax-accent-line);"><i data-lucide="zap" class="w-3 h-3 inline -mt-0.5"></i> Gateway</span>
                         ${statusPill(d.status)}
                     </div>
-                    <span class="text-[9px] mono text-[var(--muted)]">${d.order_sn || ''}</span>
+                    <span class="text-[9px] mono text-[var(--muted)]">${esc(d.order_sn || '')}</span>
                     ${d.status === 'approved' && d.credited_amount != null && Number(d.credited_amount) !== Number(d.amount) ? `<span class="text-[9px] text-amber-600">Credited ₦${Number(d.credited_amount).toLocaleString()} (paid less)</span>` : ''}
                     ${d.status === 'failed' && d.gateway_message ? `<span class="text-[9px] text-red-500 whitespace-normal">${escapeHtml(d.gateway_message)}</span>` : ''}
                     ${d.status === 'pending' ? `<span class="text-[9px] text-[var(--muted)]">Awaiting gateway confirmation</span>` : ''}
@@ -355,26 +356,26 @@
 
             const actionButtons = (d) => d.method === 'gateway' ? gatewayCell(d) : d.status === 'pending' ? `
                 <div class="flex items-center gap-2">
-                    <button onclick="approveDeposit('${d.id}', ${d.amount}, '${d.user_id}')" class="flex-1 px-3 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-bold uppercase hover:bg-emerald-100 transition">Approve</button>
-                    <button onclick="rejectDeposit('${d.id}')" class="flex-1 px-3 py-2 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold uppercase hover:bg-red-100 transition">Reject</button>
+                    <button onclick="approveDeposit('${safeId(d.id)}', ${Number(d.amount) || 0}, '${safeId(d.user_id)}')" class="flex-1 px-3 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-bold uppercase hover:bg-emerald-100 transition">Approve</button>
+                    <button onclick="rejectDeposit('${safeId(d.id)}')" class="flex-1 px-3 py-2 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold uppercase hover:bg-red-100 transition">Reject</button>
                 </div>
-            ` : `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${d.status === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}">${d.status}</span>`;
+            ` : `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${d.status === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}">${esc(d.status)}</span>`;
 
             body.innerHTML = rows.map(d => `
                 <tr class="hover:bg-black/[0.015] transition">
-                    <td class="px-8 py-5 text-sm font-semibold text-[var(--ink-text)]">${d.profiles?.full_name || 'Unknown'}</td>
+                    <td class="px-8 py-5 text-sm font-semibold text-[var(--ink-text)]">${esc(d.profiles?.full_name || 'Unknown')}</td>
                     <td class="px-8 py-5 text-sm font-semibold mono">₦${Number(d.amount).toLocaleString()}</td>
                     <td class="px-8 py-5 text-xs mono text-[var(--muted)]">
-                        ${d.method === 'gateway' ? 'Afrstar checkout' : (d.account_name ? `${d.account_name}<br><span class="opacity-70">${d.bank_name || ''}</span>` : '—')}
+                        ${d.method === 'gateway' ? 'Afrstar checkout' : (d.account_name ? `${esc(d.account_name)}<br><span class="opacity-70">${esc(d.bank_name || '')}</span>` : '—')}
                     </td>
                     <td class="px-8 py-5 text-xs text-[var(--muted)] mono">${new Date(d.created_at).toLocaleDateString()}</td>
                     <td class="px-8 py-5 text-right">
                         ${d.method === 'gateway' ? gatewayCell(d, 'items-end') : d.status === 'pending' ? `
                             <div class="flex items-center justify-end gap-2">
-                                <button onclick="approveDeposit('${d.id}', ${d.amount}, '${d.user_id}')" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-bold uppercase hover:bg-emerald-100 transition">Approve</button>
-                                <button onclick="rejectDeposit('${d.id}')" class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold uppercase hover:bg-red-100 transition">Reject</button>
+                                <button onclick="approveDeposit('${safeId(d.id)}', ${Number(d.amount) || 0}, '${safeId(d.user_id)}')" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-bold uppercase hover:bg-emerald-100 transition">Approve</button>
+                                <button onclick="rejectDeposit('${safeId(d.id)}')" class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold uppercase hover:bg-red-100 transition">Reject</button>
                             </div>
-                        ` : `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${d.status === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}">${d.status}</span>`}
+                        ` : `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${d.status === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}">${esc(d.status)}</span>`}
                     </td>
                 </tr>
             `).join('');
@@ -383,14 +384,14 @@
                 <div class="ax-card rounded-[10px] p-4">
                     <div class="flex items-start justify-between gap-3 mb-3">
                         <div>
-                            <p class="text-sm font-semibold text-[var(--ink-text)] ax-display">${d.profiles?.full_name || 'Unknown'}</p>
+                            <p class="text-sm font-semibold text-[var(--ink-text)] ax-display">${esc(d.profiles?.full_name || 'Unknown')}</p>
                             <p class="text-[10px] text-[var(--muted)] mono mt-0.5">${new Date(d.created_at).toLocaleDateString()}</p>
                         </div>
                         <p class="text-base font-bold mono ax-accent">₦${Number(d.amount).toLocaleString()}</p>
                     </div>
                     <div class="bg-black/[0.02] rounded-lg p-3 mb-3 text-xs">
                         <p class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Paid From</p>
-                        <p class="mono text-[var(--ink-text)]">${d.method === 'gateway' ? 'Afrstar checkout' : (d.account_name ? `${d.account_name} · ${d.bank_name || ''}` : '—')}</p>
+                        <p class="mono text-[var(--ink-text)]">${d.method === 'gateway' ? 'Afrstar checkout' : (d.account_name ? `${esc(d.account_name)} · ${esc(d.bank_name || '')}` : '—')}</p>
                     </div>
                     ${actionButtons(d)}
                 </div>
@@ -401,9 +402,9 @@
 
         function statusPill(status) {
             const cls = status === 'approved' ? 'bg-emerald-50 text-emerald-700' : status === 'pending' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-600';
-            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${cls}">${status === 'approved' ? 'credited' : status}</span>`;
+            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${cls}">${esc(status === 'approved' ? 'credited' : status)}</span>`;
         }
-        function escapeHtml(t) { return String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+        const escapeHtml = esc;
 
         // --- 3. Actions ---
         // Approve/reject run as one database transaction (admin_approve_deposit /

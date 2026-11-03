@@ -262,6 +262,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { safeImageUrl } from './src/escape.js';
         import * as AX from './src/site-settings.js';
         import { prepareAvatar, uploadAvatar, removeAvatar, initialsOf } from './src/avatar.js';
         let siteSettings = AX.cachedSettings();
@@ -379,6 +380,7 @@
             const img = document.getElementById('profileAvatar');
             const fb = document.getElementById('profileAvatarFallback');
             fb.textContent = initialsOf(currentName || user?.email);
+            url = safeImageUrl(url);
             if (url) {
                 img.src = url;
                 img.classList.remove('hidden');

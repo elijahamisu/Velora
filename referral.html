@@ -276,6 +276,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc } from './src/escape.js';
         import * as AX from './src/site-settings.js';
         let siteSettings = AX.cachedSettings();
 
@@ -435,7 +436,6 @@
                 return;
             }
 
-            const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
             tbody.innerHTML = refs.map(r => `
                 <tr class="hover:bg-black/[0.015] transition">
                     <td class="px-8 py-6">

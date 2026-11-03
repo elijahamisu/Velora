@@ -78,6 +78,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc } from './src/escape.js';
         import * as AX from './src/site-settings.js';
         let siteSettings = AX.cachedSettings();
 
@@ -137,11 +138,11 @@
                 const date = nItem.created_at ? new Date(nItem.created_at).toLocaleString() : '';
                 const unread = nItem.is_read === false;
                 return `
-                    <div class="p-6 flex items-start gap-4 ${unread ? 'bg-[var(--gold-light)]/10' : ''} notif-row" data-id="${nItem.id}">
+                    <div class="p-6 flex items-start gap-4 ${unread ? 'bg-[var(--gold-light)]/10' : ''} notif-row" data-id="${esc(nItem.id)}">
                         ${unread ? '<span class="unread-dot mt-1.5"></span>' : '<span class="w-2"></span>'}
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold text-[var(--ink-text)]">${text}</p>
-                            <p class="text-[10px] text-[var(--muted)] font-medium mono mt-1">${date}</p>
+                            <p class="text-sm font-semibold text-[var(--ink-text)]">${esc(text)}</p>
+                            <p class="text-[10px] text-[var(--muted)] font-medium mono mt-1">${esc(date)}</p>
                         </div>
                     </div>
                 `;

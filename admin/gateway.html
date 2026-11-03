@@ -301,6 +301,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc, safeUrl } from '../src/escape.js';
         import { NG_BANKS, bankOptionsHtml, bankByCode, sortedBanks } from '../src/ng-banks.js';
 
         lucide.createIcons();
@@ -329,7 +330,6 @@
 
         const money = n => `₦${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         const r2 = n => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
-        const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         document.querySelectorAll('.fee-pct').forEach(el => el.textContent = FEE_PCT);
         document.querySelectorAll('[data-origin-path]').forEach(el => el.textContent = location.origin + el.dataset.originPath);
         document.querySelectorAll('[data-copy]').forEach(b => b.addEventListener('click', () => {
@@ -484,7 +484,7 @@
             if (!q) { pBank.innerHTML = bankOptionsHtml({ selected: keep, placeholder: 'Select bank' }); return; }
             const hits = sortedBanks().filter(b => b.name.toLowerCase().includes(q) || b.code.includes(q));
             pBank.innerHTML = `<option value="">${hits.length ? `${hits.length} match${hits.length === 1 ? '' : 'es'}` : 'No bank matches'}</option>` +
-                hits.map(b => `<option value="${b.code}"${b.code === keep ? ' selected' : ''}>${esc(b.name)}</option>`).join('');
+                hits.map(b => `<option value="${esc(b.code)}"${b.code === keep ? ' selected' : ''}>${esc(b.name)}</option>`).join('');
             if (hits.length === 1) pBank.value = hits[0].code;
         });
         document.getElementById('pAccount').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10); });
@@ -558,8 +558,9 @@
             btn.disabled = true; btn.textContent = 'Creating checkout…';
             try {
                 const r = await api('POST', { action: 'topup', amount, phone: phone || undefined });
-                if (win) { win.location.href = r.pay_url; }
-                showMsg('topupMsg', `Checkout for <b>${money(r.amount)}</b> created. ${win ? 'It opened in a new tab.' : ''} <a href="${esc(r.pay_url)}" target="_blank" rel="noopener" class="underline font-semibold">Open checkout</a>`, true);
+                const payUrl = safeUrl(r.pay_url, { allow: ['https', 'http'] });
+                if (win) { if (payUrl) win.location.href = payUrl; else win.close(); }
+                showMsg('topupMsg', `Checkout for <b>${money(r.amount)}</b> created. ${win ? 'It opened in a new tab.' : ''} <a href="${esc(safeUrl(r.pay_url, { allow: ['https', 'http'] }))}" target="_blank" rel="noopener" class="underline font-semibold">Open checkout</a>`, true);
                 document.getElementById('topupForm').reset();
                 loadActivity('admin');
             } catch (err) {
@@ -578,7 +579,7 @@
             const cls = ['completed', 'approved'].includes(status) ? 'bg-emerald-50 text-emerald-700'
                 : ['processing'].includes(status) ? 'bg-blue-50 text-blue-700'
                 : status === 'pending' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-600';
-            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${cls}">${label || status}</span>`;
+            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${cls}">${esc(label || status)}</span>`;
         };
         const when = d => new Date(d).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
@@ -598,7 +599,7 @@
                             <p class="text-[10px] text-[var(--muted)] mono break-all">${g.kind === 'payout' ? `${esc(g.account_number || '')} · ${esc(g.account_name || '')} · ` : ''}${esc(g.order_sn)}</p>
                             ${g.kind === 'payout' ? `<p class="text-[10px] text-[var(--muted)] mt-0.5">Fee ${money(g.fee_amount)} · total ${money(g.total_debit)}</p>` : ''}
                             ${g.gateway_message && g.status !== 'completed' ? `<p class="text-[10px] mt-0.5 ${g.status === 'failed' ? 'text-red-500' : 'text-[var(--muted)]'}">${esc(g.gateway_message)}</p>` : ''}
-                            ${g.kind === 'topup' && g.status === 'pending' && g.pay_url ? `<a href="${esc(g.pay_url)}" target="_blank" rel="noopener" class="text-[10px] ax-accent underline">Open checkout</a>` : ''}
+                            ${g.kind === 'topup' && g.status === 'pending' && g.pay_url ? `<a href="${esc(safeUrl(g.pay_url, { allow: ['https', 'http'] }))}" target="_blank" rel="noopener" class="text-[10px] ax-accent underline">Open checkout</a>` : ''}
                         </div>
                         <div class="text-right shrink-0">
                             <p class="text-sm font-semibold mono ${g.kind === 'payout' ? '' : 'ax-accent'}">${g.kind === 'payout' ? '−' : '+'}${money(g.kind === 'topup' && g.amount_paid != null ? g.amount_paid : g.amount)}</p>

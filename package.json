@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test tests/afrstar.test.mjs tests/withdrawal-actions.test.mjs"
+    "test": "node --test tests/afrstar.test.mjs tests/withdrawal-actions.test.mjs tests/escape.test.mjs",
+    "check:xss": "node scripts/check-xss.mjs"
   },
   "devDependencies": {
     "vite": "^5.0.0"

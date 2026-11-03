@@ -351,6 +351,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc } from './src/escape.js';
         import * as AX from './src/site-settings.js';
         let siteSettings = AX.cachedSettings();
 
@@ -615,9 +616,9 @@
                                 <i data-lucide="gem" class="w-6 h-6"></i>
                             </div>
                             <div>
-                                <p class="text-sm font-semibold text-[var(--ink-text)]">${planName}</p>
+                                <p class="text-sm font-semibold text-[var(--ink-text)]">${esc(planName)}</p>
                                 <p class="text-[10px] text-[var(--muted)] font-medium mono">
-                                    Started ${new Date(inv.created_at).toLocaleDateString()} · ${toNum(inv.remaining_days)} days left
+                                    Started ${new Date(inv.created_at).toLocaleDateString()} · ${esc(toNum(inv.remaining_days))} days left
                                 </p>
                             </div>
                         </div>
@@ -652,13 +653,13 @@
                         <stop offset="100%" stop-color="#D9C7A3" stop-opacity="0"/>
                     </linearGradient>
                 </defs>
-                <path d="${areaPath}" fill="url(#sparkFill)" stroke="none"/>
-                <path d="${linePath}" fill="none" stroke="#D9C7A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                ${points.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="2.2" fill="#0A0F1C" stroke="#D9C7A3" stroke-width="1.4"/>`).join('')}
+                <path d="${esc(areaPath)}" fill="url(#sparkFill)" stroke="none"/>
+                <path d="${esc(linePath)}" fill="none" stroke="#D9C7A3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                ${points.map(p => `<circle cx="${esc(p[0])}" cy="${esc(p[1])}" r="2.2" fill="#0A0F1C" stroke="#D9C7A3" stroke-width="1.4"/>`).join('')}
             `;
 
             const labels = document.getElementById('sparklineLabels');
-            labels.innerHTML = ['6d', '5d', '4d', '3d', '2d', '1d', 'Today'].map(l => `<span>${l}</span>`).join('');
+            labels.innerHTML = ['6d', '5d', '4d', '3d', '2d', '1d', 'Today'].map(l => `<span>${esc(l)}</span>`).join('');
         }
 
         // ---- Earnings Overview bar chart: last 7 days ----
@@ -673,14 +674,14 @@
                 const x = i * (barW + gap);
                 const y = h - padBottom - barH;
                 const isToday = i === values.length - 1;
-                return `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="6"
+                return `<rect x="${esc(x)}" y="${esc(y)}" width="${esc(barW)}" height="${esc(barH)}" rx="6"
                     fill="${isToday ? '#D9C7A3' : 'rgba(255,255,255,0.12)'}"></rect>`;
             }).join('');
 
             svg.innerHTML = bars;
 
             const labels = document.getElementById('earningsChartLabels');
-            labels.innerHTML = days.map(d => `<span>${d.toLocaleDateString(undefined, { weekday: 'short' })}</span>`).join('');
+            labels.innerHTML = days.map(d => `<span>${esc(d.toLocaleDateString(undefined, { weekday: 'short' }))}</span>`).join('');
         }
 
         function updateUIActivity(items) {
@@ -706,10 +707,10 @@
                     <div class="p-6 flex items-center justify-between hover:bg-black/[0.015] transition cursor-default">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-[10px] ${isPositive ? 'bg-emerald-50 text-emerald-700' : 'bg-black/5 text-[var(--ink-text)]'} flex items-center justify-center">
-                                <i data-lucide="${iconMap[item.type] || 'circle'}" class="w-6 h-6"></i>
+                                <i data-lucide="${esc(iconMap[item.type] || 'circle')}" class="w-6 h-6"></i>
                             </div>
                             <div>
-                                <p class="text-sm font-semibold text-[var(--ink-text)] capitalize">${(item.type || '').replace('_', ' ')}</p>
+                                <p class="text-sm font-semibold text-[var(--ink-text)] capitalize">${esc((item.type || '').replace('_', ' '))}</p>
                                 <p class="text-[10px] text-[var(--muted)] font-medium mono">${new Date(item.created_at).toLocaleString()}</p>
                             </div>
                         </div>
@@ -718,7 +719,7 @@
                                 ${isPositive ? '+' : '-'}${naira(item.amount)}
                             </p>
                             <span class="text-[9px] uppercase font-bold px-2 py-1 rounded-md ${item.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
-                                ${item.status}
+                                ${esc(item.status)}
                             </span>
                         </div>
                     </div>

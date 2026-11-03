@@ -1,0 +1,184 @@
+{
+  "safeCalls": {
+    "admin/deposits.html": [
+      "actionButtons",
+      "gatewayCell",
+      "statusPill"
+    ],
+    "admin/gateway.html": [
+      "money",
+      "when",
+      "errorHtml",
+      "pill"
+    ],
+    "admin/user.html": [
+      "when",
+      "badge",
+      "statusTone",
+      "wdActions",
+      "empty"
+    ],
+    "admin/users.html": [
+      "userAvatar",
+      "roleBadge",
+      "statusBadge",
+      "manageButton",
+      "detailsHref"
+    ],
+    "admin/withdrawals.html": [
+      "money",
+      "statusBadge",
+      "gatewayInfo",
+      "actionButtons"
+    ]
+  },
+  "safeNames": {
+    "admin/deposits.html": [
+      "align",
+      "cls"
+    ],
+    "admin/plans.html": [
+      "statusClass",
+      "statusLabel"
+    ],
+    "admin/gateway.html": [
+      "cls"
+    ],
+    "admin/user.html": [
+      "cls",
+      "s"
+    ],
+    "admin/users.html": [
+      "cls",
+      "size",
+      "initial",
+      "details",
+      "url"
+    ],
+    "admin/withdrawals.html": [
+      "cls",
+      "sz",
+      "send",
+      "paid",
+      "reject",
+      "msg",
+      "bits.join"
+    ],
+    "deposit-result.html": [
+      "ic",
+      "fg"
+    ],
+    "src/user-shell.js": [
+      "key",
+      "icon",
+      "label",
+      "g.label",
+      "groups"
+    ]
+  },
+  "sinks": [
+    {
+      "file": "admin/gateway.html",
+      "contains": ".innerHTML = text",
+      "why": "showMsg(): every caller passes a literal, money() or esc()/errorHtml() output"
+    },
+    {
+      "file": "admin/user.html",
+      "contains": ".innerHTML = label",
+      "why": "busy(): restores the button's own original markup"
+    },
+    {
+      "file": "admin/user.html",
+      "contains": ".innerHTML = referrer",
+      "why": "ternary of templates whose values are esc()/encodeURIComponent()"
+    },
+    {
+      "file": "admin/user.html",
+      "contains": "badge(profile.role",
+      "why": "badge() escapes its text; tones are fixed"
+    },
+    {
+      "file": "admin/user.html",
+      "contains": "rows.length ? rows.map(r =>",
+      "why": "referral rows: template values are esc()/naira()/encodeURIComponent()"
+    },
+    {
+      "file": "dashboard.html",
+      "contains": ".innerHTML = bars",
+      "why": "SVG bars built from computed numbers only"
+    },
+    {
+      "file": "src/user-shell.js",
+      "contains": "sidebarHTML(page)",
+      "why": "static NAV config; page is matched against NAV keys only"
+    }
+  ],
+  "safeUrlCalls": {
+    "admin/users.html": [
+      "detailsHref"
+    ]
+  },
+  "urlSinks": [
+    {
+      "file": "deposit-result.html",
+      "contains": ".href = payUrl",
+      "why": "payUrl = safeUrl(d.pay_url, https/http)"
+    },
+    {
+      "file": "deposit.html",
+      "contains": "location.href = payUrl",
+      "why": "payUrl = safeUrl(body.pay_url, https/http)"
+    },
+    {
+      "file": "admin/gateway.html",
+      "contains": "location.href = payUrl",
+      "why": "payUrl = safeUrl(r.pay_url, https/http)"
+    },
+    {
+      "file": "profile.html",
+      "contains": ".src = url",
+      "why": "url = safeImageUrl(url) just above"
+    },
+    {
+      "file": "admin/user.html",
+      "contains": ".src = avatarSrc",
+      "why": "avatarSrc = safeImageUrl(profile.avatar_url)"
+    },
+    {
+      "file": "src/user-shell.js",
+      "contains": ".src = avatar",
+      "why": "avatar = safeImageUrl(state.avatar)"
+    },
+    {
+      "file": "src/site-settings.js",
+      "contains": "setAttribute('href', h",
+      "why": "h = hrefFor(): mailto/tel built from validated text, links via safeUrl"
+    },
+    {
+      "file": "src/site-settings.js",
+      "contains": ".href = tgUrl",
+      "why": "tgUrl = safeUrl(telegram_link, https/http)"
+    },
+    {
+      "file": "referral.html",
+      "contains": "window.open(urls[platform]",
+      "why": "fixed https share URLs with encodeURIComponent'd params"
+    },
+    {
+      "file": "register.html",
+      "contains": ".src = avatarPreviewUrl",
+      "why": "blob: URL from URL.createObjectURL of the picked file"
+    },
+    {
+      "file": "src/avatar.js",
+      "contains": ".src = url",
+      "why": "blob: URL from URL.createObjectURL"
+    },
+    {
+      "file": "transactions.html",
+      "contains": "encodeURI(csvContent",
+      "why": "data:text/csv download link built locally"
+    }
+  ],
+  "_note": "Hand-reviewed exceptions for scripts/check-xss.mjs. Add an entry only after checking the value cannot carry markup or a non-http(s) URL."
+}

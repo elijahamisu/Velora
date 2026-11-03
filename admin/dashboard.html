@@ -183,6 +183,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc } from '../src/escape.js';
 
         lucide.createIcons();
 
@@ -319,15 +320,15 @@
                 <tr class="hover:bg-black/[0.015] transition duration-150">
                     <td class="px-8 py-5 text-xs text-[var(--muted)] font-medium mono">${new Date(tx.created_at).toLocaleTimeString()}</td>
                     <td class="px-8 py-5">
-                        <span class="px-3 py-1 rounded-lg text-[9px] font-bold uppercase ${getCatColor(tx.type)}">${tx.type}</span>
+                        <span class="px-3 py-1 rounded-lg text-[9px] font-bold uppercase ${esc(getCatColor(tx.type))}">${esc(tx.type)}</span>
                     </td>
                     <td class="px-8 py-5">
-                        <p class="text-sm font-semibold text-[var(--ink-text)]">${tx.profiles?.full_name || 'System'}</p>
-                        <p class="text-[10px] text-[var(--muted)] font-medium">${tx.description || ''}</p>
+                        <p class="text-sm font-semibold text-[var(--ink-text)]">${esc(tx.profiles?.full_name || 'System')}</p>
+                        <p class="text-[10px] text-[var(--muted)] font-medium">${esc(tx.description || '')}</p>
                     </td>
-                    <td class="px-8 py-5 text-sm font-semibold text-[var(--ink-text)] mono">₦${tx.amount.toLocaleString()}</td>
+                    <td class="px-8 py-5 text-sm font-semibold text-[var(--ink-text)] mono">₦${esc(tx.amount.toLocaleString())}</td>
                     <td class="px-8 py-5 text-right">
-                        <span class="text-[9px] font-bold uppercase ${tx.status === 'completed' ? 'text-emerald-600' : 'text-amber-600'}">${tx.status}</span>
+                        <span class="text-[9px] font-bold uppercase ${tx.status === 'completed' ? 'text-emerald-600' : 'text-amber-600'}">${esc(tx.status)}</span>
                     </td>
                 </tr>
             `).join('');

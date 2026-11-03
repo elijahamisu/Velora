@@ -205,6 +205,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc } from './src/escape.js';
         import * as AX from './src/site-settings.js';
         let siteSettings = AX.cachedSettings();
 
@@ -386,10 +387,10 @@
                     <div class="p-6 flex items-center justify-between hover:bg-black/[0.015] transition">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-[10px] ${isGain ? 'bg-emerald-50 text-emerald-700' : 'bg-black/5 text-[var(--ink-text)]'} flex items-center justify-center">
-                                <i data-lucide="${icons[item.type] || 'circle'}" class="w-6 h-6"></i>
+                                <i data-lucide="${esc(icons[item.type] || 'circle')}" class="w-6 h-6"></i>
                             </div>
                             <div>
-                                <p class="text-sm font-semibold capitalize">${(item.type || '').replace('_', ' ')}</p>
+                                <p class="text-sm font-semibold capitalize">${esc((item.type || '').replace('_', ' '))}</p>
                                 <p class="text-[10px] text-[var(--muted)] font-medium mono">${new Date(item.created_at).toLocaleString()}</p>
                             </div>
                         </div>
@@ -398,7 +399,7 @@
                                 ${isGain ? '+' : '-'} ${naira(item.amount)}
                             </p>
                             <span class="text-[9px] font-bold uppercase tracking-tighter px-2 py-0.5 rounded ${item.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
-                                ${item.status}
+                                ${esc(item.status)}
                             </span>
                         </div>
                     </div>

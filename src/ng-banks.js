@@ -5,6 +5,8 @@
 // functions (validating codes, mapping free-text bank names typed before the
 // gateway existed). No secrets in here.
 
+import { esc } from './escape.js';
+
 export const NG_BANKS = [
     { name: "Access Bank", code: '80000001' },
     { name: "Citibank Nigeria", code: '80000002' },
@@ -172,9 +174,8 @@ export function sortedBanks({ popularFirst = false } = {}) {
 
 /** <option> markup for a <select>. */
 export function bankOptionsHtml({ selected = '', placeholder = 'Select bank', popularFirst = true } = {}) {
-    const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
     const opts = sortedBanks({ popularFirst }).map(b =>
-        `<option value="${b.code}"${b.code === selected ? ' selected' : ''}>${esc(b.name)}</option>`);
+        `<option value="${esc(b.code)}"${b.code === selected ? ' selected' : ''}>${esc(b.name)}</option>`);
     if (popularFirst) opts.splice(POPULAR_CODES.length, 0, '<option disabled>──────────</option>');
     return `<option value="">${esc(placeholder)}</option>` + opts.join('');
 }

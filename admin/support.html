@@ -221,6 +221,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc, safeId } from '../src/escape.js';
 
         lucide.createIcons();
 
@@ -357,13 +358,13 @@
             const statusStyle = { Open: 'bg-blue-50 text-blue-700', Answered: 'bg-emerald-50 text-emerald-700', Closed: 'bg-black/5 text-[var(--ink-text)]' };
 
             body.innerHTML = rows.map(t => `
-                <tr onclick="openTicket('${t.id}')" class="hover:bg-black/[0.015] transition cursor-pointer">
-                    <td class="px-8 py-5 text-sm font-semibold text-[var(--ink-text)]">${t.profiles?.full_name || 'Unknown'}</td>
-                    <td class="px-8 py-5 text-sm text-[var(--ink-text)]">${t.subject}</td>
-                    <td class="px-8 py-5 text-xs text-[var(--muted)]">${t.category || 'General'}</td>
+                <tr onclick="openTicket('${safeId(t.id)}')" class="hover:bg-black/[0.015] transition cursor-pointer">
+                    <td class="px-8 py-5 text-sm font-semibold text-[var(--ink-text)]">${esc(t.profiles?.full_name || 'Unknown')}</td>
+                    <td class="px-8 py-5 text-sm text-[var(--ink-text)]">${esc(t.subject)}</td>
+                    <td class="px-8 py-5 text-xs text-[var(--muted)]">${esc(t.category || 'General')}</td>
                     <td class="px-8 py-5 text-xs text-[var(--muted)] mono">${new Date(t.created_at).toLocaleDateString()}</td>
                     <td class="px-8 py-5 text-right">
-                        <span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${statusStyle[t.status] || 'bg-black/5 text-[var(--ink-text)]'}">${t.status}</span>
+                        <span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${esc(statusStyle[t.status] || 'bg-black/5 text-[var(--ink-text)]')}">${esc(t.status)}</span>
                     </td>
                 </tr>
             `).join('');
@@ -389,7 +390,7 @@
             container.innerHTML = messages.map(m => `
                 <div class="flex ${m.user_id === adminUserId ? 'justify-end' : 'justify-start'}">
                     <div class="max-w-[80%] p-4 rounded-[14px] text-sm ${m.user_id === adminUserId ? 'ax-fill text-white rounded-br-none' : 'bg-black/[0.04] text-[var(--ink-text)] rounded-bl-none'}">
-                        <p>${m.message}</p>
+                        <p>${esc(m.message)}</p>
                         <p class="text-[8px] mt-1 opacity-60">${new Date(m.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                     </div>
                 </div>

@@ -284,6 +284,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc, safeUrl } from './src/escape.js';
         import * as AX from './src/site-settings.js';
         let siteSettings = AX.cachedSettings();
 
@@ -504,7 +505,9 @@
                     throw new Error(body.error || `Could not start the payment (${res.status}).`);
                 }
                 try { sessionStorage.setItem('ax_last_deposit', body.order_sn); } catch {}
-                window.location.href = body.pay_url;
+                const payUrl = safeUrl(body.pay_url, { allow: ['https', 'http'] });
+                if (!payUrl) throw new Error('The payment link from the gateway looks invalid. Please try again or contact support.');
+                window.location.href = payUrl;
             } catch (err) {
                 showGatewayError(err.message);
                 btn.disabled = false;
@@ -602,14 +605,14 @@
                         ${row.method === 'gateway'
                             ? `<span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded bg-black/[0.05] text-[var(--ink-text)]">Gateway</span>`
                               + (row.status === 'pending' && row.pay_url && (Date.now() - new Date(row.created_at).getTime()) < 60 * 60 * 1000
-                                  ? `<br><a href="${row.pay_url}" class="ax-accent underline font-semibold">Continue payment</a>` : '')
+                                  ? `<br><a href="${esc(safeUrl(row.pay_url, { allow: ['https', 'http'] }))}" class="ax-accent underline font-semibold">Continue payment</a>` : '')
                               + (row.status === 'approved' && row.credited_amount != null && Number(row.credited_amount) !== Number(row.amount)
                                   ? `<br><span class="opacity-70">Credited ₦${Number(row.credited_amount).toLocaleString()}</span>` : '')
-                            : (row.account_name ? `${row.account_name}<br><span class="opacity-70">${row.bank_name || ''}</span>` : '—')}
+                            : (row.account_name ? `${esc(row.account_name)}<br><span class="opacity-70">${esc(row.bank_name || '')}</span>` : '—')}
                     </td>
                     <td class="px-8 py-6 text-right">
-                        <a ${row.order_sn ? `href="deposit-result.html?ref=${encodeURIComponent(row.order_sn)}"` : ''} class="text-[9px] uppercase font-bold px-3 py-1 rounded-lg ${getStatusStyle(row.status)}">
-                            ${row.method === 'gateway' && row.status === 'approved' ? 'credited' : row.status}
+                        <a ${row.order_sn ? `href="deposit-result.html?ref=${encodeURIComponent(row.order_sn)}"` : ''} class="text-[9px] uppercase font-bold px-3 py-1 rounded-lg ${esc(getStatusStyle(row.status))}">
+                            ${esc(row.method === 'gateway' && row.status === 'approved' ? 'credited' : row.status)}
                         </a>
                     </td>
                 </tr>

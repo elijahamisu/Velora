@@ -193,6 +193,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc } from '../src/escape.js';
 
         lucide.createIcons();
 
@@ -329,12 +330,12 @@
 
             body.innerHTML = rows.map(inv => `
                 <tr class="hover:bg-black/[0.015] transition">
-                    <td class="px-8 py-5 text-sm font-semibold text-[var(--ink-text)]">${inv.profiles?.full_name || 'Unknown'}</td>
+                    <td class="px-8 py-5 text-sm font-semibold text-[var(--ink-text)]">${esc(inv.profiles?.full_name || 'Unknown')}</td>
                     <td class="px-8 py-5 text-sm font-semibold mono">₦${Number(inv.amount).toLocaleString()}</td>
                     <td class="px-8 py-5 text-sm font-semibold mono text-emerald-600">₦${(Number(inv.amount) * (Number(inv.daily_roi_pct || 0) / 100)).toLocaleString()}</td>
                     <td class="px-8 py-5 text-xs text-[var(--muted)] mono">${new Date(inv.created_at).toLocaleDateString()}</td>
                     <td class="px-8 py-5 text-right">
-                        <span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${inv.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-black/5 text-[var(--ink-text)]'}">${inv.status}</span>
+                        <span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${inv.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-black/5 text-[var(--ink-text)]'}">${esc(inv.status)}</span>
                     </td>
                 </tr>
             `).join('');

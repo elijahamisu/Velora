@@ -214,6 +214,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc, safeId } from '../src/escape.js';
 
         lucide.createIcons();
 
@@ -372,14 +373,14 @@
                 const expired = c.expiry_date && new Date(c.expiry_date) < new Date();
                 return `
                     <tr class="hover:bg-black/[0.015] transition">
-                        <td class="px-8 py-5 text-sm font-bold mono uppercase text-[var(--ink-text)]">${c.code}</td>
+                        <td class="px-8 py-5 text-sm font-bold mono uppercase text-[var(--ink-text)]">${esc(c.code)}</td>
                         <td class="px-8 py-5 text-sm font-semibold mono">₦${Number(c.amount).toLocaleString()}</td>
-                        <td class="px-8 py-5 text-xs mono text-[var(--muted)]">${c.current_usage || 0} / ${c.usage_limit || '∞'}</td>
+                        <td class="px-8 py-5 text-xs mono text-[var(--muted)]">${esc(c.current_usage || 0)} / ${esc(c.usage_limit || '∞')}</td>
                         <td class="px-8 py-5 text-xs mono text-[var(--muted)]">${c.expiry_date ? new Date(c.expiry_date).toLocaleDateString() : 'No expiry'}</td>
                         <td class="px-8 py-5 text-right">
                             <div class="flex items-center justify-end gap-2">
                                 ${expired ? `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg bg-red-50 text-red-600">Expired</span>` : ''}
-                                <button onclick="toggleCode('${c.id}', ${!c.is_active})" class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg transition ${c.is_active ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-black/5 text-[var(--ink-text)] hover:bg-black/10'}">
+                                <button onclick="toggleCode('${safeId(c.id)}', ${c.is_active ? 'false' : 'true'})" class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg transition ${c.is_active ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-black/5 text-[var(--ink-text)] hover:bg-black/10'}">
                                     ${c.is_active ? 'Active' : 'Disabled'}
                                 </button>
                             </div>

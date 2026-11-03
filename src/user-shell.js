@@ -20,6 +20,7 @@
 
 import { cachedSettings, applySettings } from './site-settings.js';
 import { initialsOf } from './avatar.js';
+import { safeImageUrl } from './escape.js';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -58,9 +59,6 @@ function currentPage() {
     return ALIASES[file] || file;
 }
 
-function esc(s) {
-    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
 
 // ---------------------------------------------------------------- markup
 function sidebarHTML(page) {
@@ -211,8 +209,9 @@ function paintAvatars() {
         const img = el.querySelector('.ax-av-img');
         const ini = el.querySelector('.ax-av-ini');
         ini.textContent = initialsOf(state.name || state.email);
-        if (state.avatar) {
-            if (img.getAttribute('src') !== state.avatar) img.src = state.avatar;
+        const avatar = safeImageUrl(state.avatar);
+        if (avatar) {
+            if (img.getAttribute('src') !== avatar) img.src = avatar;
             img.hidden = false;
             el.classList.add('ax-av-has-img');
         } else {
@@ -267,7 +266,7 @@ async function fetchProfile(attempt = 0) {
         if (!row) return;
         state.name = row.full_name || state.name;
         state.email = row.email || s.user.email || state.email;
-        state.avatar = row.avatar_url || null;
+        state.avatar = safeImageUrl(row.avatar_url) || null;
         saveCache(uid);
         paintIdentity();
     } catch (_) { /* offline: cached identity stays */ }
@@ -279,7 +278,7 @@ function initIdentity() {
         state.email = s.user.email || '';
         state.name = s.user.user_metadata?.full_name || '';
         const c = loadCache(s.user.id);
-        if (c) { state.name = c.name || state.name; state.email = c.email || state.email; state.avatar = c.avatar || null; }
+        if (c) { state.name = c.name || state.name; state.email = c.email || state.email; state.avatar = safeImageUrl(c.avatar) || null; }
     }
     paintIdentity();
     fetchProfile();

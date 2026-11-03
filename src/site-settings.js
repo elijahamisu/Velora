@@ -4,6 +4,11 @@
 // from the single row in public.site_settings (anon-readable). If the request
 // fails, the last cached copy is used, then the DEFAULTS below, which mirror
 // the values that used to be hardcoded in the HTML.
+//
+// Settings are admin-editable, so they are treated as untrusted text: values
+// go in with textContent, and links pass through safeUrl() (src/escape.js).
+
+import { safeUrl } from './escape.js';
 
 export const DEFAULTS = {
     site_name: 'Altivex',
@@ -149,12 +154,18 @@ export function isWithdrawalOpen(s) {
 }
 
 // ---------- DOM wiring ----------
-function hrefFor(kind, value) {
+export function hrefFor(kind, value) {
     if (!value) return '';
-    if (kind === 'mailto') return `mailto:${value}`;
-    if (kind === 'tel') return `tel:${value.replace(/\s+/g, '')}`;
-    if (kind === 'whatsapp') return /^https?:/.test(value) ? value : `https://wa.me/${value.replace(/[^\d]/g, '')}`;
-    return value;
+    value = String(value).trim();
+    if (kind === 'mailto') return /^[^\s<>"'@]+@[^\s<>"'@]+$/.test(value) ? `mailto:${value}` : '';
+    if (kind === 'tel') { const t = value.replace(/[^\d+]/g, ''); return t ? `tel:${t}` : ''; }
+    if (kind === 'whatsapp') {
+        if (/^https?:/i.test(value)) return safeUrl(value, { allow: ['https', 'http'] });
+        const d = value.replace(/[^\d]/g, '');
+        return d ? `https://wa.me/${d}` : '';
+    }
+    // Plain links (telegram etc.): http(s) only.
+    return safeUrl(value, { allow: ['https', 'http'] });
 }
 
 /**
@@ -223,7 +234,8 @@ export function showMaintenance(s) {
     wrap.querySelector('#axMaintTitle').textContent = `${s.site_name} is under maintenance`;
     wrap.querySelector('#axMaintMsg').textContent = s.maintenance_message || DEFAULTS.maintenance_message;
     const tg = wrap.querySelector('#axMaintTg');
-    if (s.telegram_link) tg.href = s.telegram_link; else tg.remove();
+    const tgUrl = safeUrl(s.telegram_link, { allow: ['https', 'http'] });
+    if (tgUrl) tg.href = tgUrl; else tg.remove();
     document.body.appendChild(wrap);
     document.body.style.overflow = 'hidden';
 }

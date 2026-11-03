@@ -157,6 +157,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc } from './src/escape.js';
         import * as AX from './src/site-settings.js';
         let siteSettings = AX.cachedSettings();
 
@@ -272,7 +273,7 @@
             body.innerHTML = data.map(item => `
                 <tr class="hover:bg-black/[0.015] transition">
                     <td class="px-8 py-6">
-                        <p class="text-sm mono font-bold text-[var(--ink-text)] tracking-tighter uppercase">${item.reference || 'ALT-GIFT'}</p>
+                        <p class="text-sm mono font-bold text-[var(--ink-text)] tracking-tighter uppercase">${esc(item.reference || 'ALT-GIFT')}</p>
                     </td>
                     <td class="px-8 py-6">
                         <p class="text-sm font-semibold mono text-emerald-600">+ ${naira(item.amount)}</p>

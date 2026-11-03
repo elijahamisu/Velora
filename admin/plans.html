@@ -353,6 +353,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc, safeId } from '../src/escape.js';
 
         lucide.createIcons();
 
@@ -519,17 +520,17 @@
                 return `
                 <tr class="border-b border-black/[0.04] ${!p.is_active ? 'opacity-60' : ''}">
                     <td class="px-6 py-4">
-                        <p class="font-semibold ax-display">${p.name}</p>
-                        <span class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-wide">${p.category || 'elite'}</span>
+                        <p class="font-semibold ax-display">${esc(p.name)}</p>
+                        <span class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-wide">${esc(p.category || 'elite')}</span>
                         ${p.is_popular ? `<span class="text-[9px] font-bold ax-accent uppercase tracking-wide ml-2">Popular</span>` : ''}
                     </td>
                     <td class="px-6 py-4 mono">₦${Number(p.price || 0).toLocaleString()}</td>
-                    <td class="px-6 py-4 mono text-emerald-600">₦${dailyProfitNaira(p).toLocaleString(undefined, { maximumFractionDigits: 2 })} / day</td>
-                    <td class="px-6 py-4">${p.duration_days ? p.duration_days + ' days' : '—'}</td>
+                    <td class="px-6 py-4 mono text-emerald-600">₦${esc(dailyProfitNaira(p).toLocaleString(undefined, { maximumFractionDigits: 2 }))} / day</td>
+                    <td class="px-6 py-4">${esc(p.duration_days ? p.duration_days + ' days' : '—')}</td>
                     <td class="px-6 py-4"><span class="status-badge ${statusClass}">${statusLabel}</span></td>
                     <td class="px-6 py-4">
-                        <button class="action-icon" onclick="openEditModal('${p.id}')" title="Edit"><i data-lucide="pen" class="w-4 h-4"></i></button>
-                        <button class="action-icon danger" onclick="deletePlan('${p.id}')" title="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <button class="action-icon" onclick="openEditModal('${safeId(p.id)}')" title="Edit"><i data-lucide="pen" class="w-4 h-4"></i></button>
+                        <button class="action-icon danger" onclick="deletePlan('${safeId(p.id)}')" title="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </td>
                 </tr>`;
             }).join('');
@@ -541,20 +542,20 @@
                 <div class="ax-card p-4 rounded-[10px] ${!p.is_active ? 'opacity-60' : ''}">
                     <div class="flex items-start justify-between gap-3">
                         <div>
-                            <p class="font-semibold ax-display">${p.name}</p>
-                            <span class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-wide">${p.category || 'elite'}</span>
+                            <p class="font-semibold ax-display">${esc(p.name)}</p>
+                            <span class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-wide">${esc(p.category || 'elite')}</span>
                             ${p.is_popular ? `<span class="text-[9px] font-bold ax-accent uppercase tracking-wide ml-2">Popular</span>` : ''}
                         </div>
                         <span class="status-badge ${statusClass}">${statusLabel}</span>
                     </div>
                     <div class="grid grid-cols-2 gap-3 mt-4 text-sm">
                         <div><p class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Price</p>₦${Number(p.price || 0).toLocaleString()}</div>
-                        <div><p class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Daily Profit</p><span class="text-emerald-600 font-semibold">₦${dailyProfitNaira(p).toLocaleString(undefined, { maximumFractionDigits: 2 })}</span></div>
-                        <div><p class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Duration</p>${p.duration_days ? p.duration_days + ' days' : '—'}</div>
+                        <div><p class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Daily Profit</p><span class="text-emerald-600 font-semibold">₦${esc(dailyProfitNaira(p).toLocaleString(undefined, { maximumFractionDigits: 2 }))}</span></div>
+                        <div><p class="text-[9px] font-bold text-[var(--muted)] uppercase tracking-widest mb-1">Duration</p>${esc(p.duration_days ? p.duration_days + ' days' : '—')}</div>
                     </div>
                     <div class="plan-card-actions">
-                        <button class="btn-edit-plan" onclick="openEditModal('${p.id}')"><i data-lucide="pen" class="w-3.5 h-3.5"></i> Edit</button>
-                        <button class="btn-delete-plan" onclick="deletePlan('${p.id}')"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete</button>
+                        <button class="btn-edit-plan" onclick="openEditModal('${safeId(p.id)}')"><i data-lucide="pen" class="w-3.5 h-3.5"></i> Edit</button>
+                        <button class="btn-delete-plan" onclick="deletePlan('${safeId(p.id)}')"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete</button>
                     </div>
                 </div>`;
             }).join('');

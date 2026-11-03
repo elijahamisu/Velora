@@ -241,6 +241,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc, safeId, safeImageUrl } from '../src/escape.js';
 
         lucide.createIcons();
 
@@ -378,13 +379,13 @@
         }
 
         function roleBadge(role, isAdmin) {
-            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${isAdmin ? 'bg-[rgba(217, 199, 163,0.12)] ax-accent' : 'bg-black/5 text-[var(--ink-text)]'}">${role || 'client'}</span>`;
+            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${isAdmin ? 'bg-[rgba(217, 199, 163,0.12)] ax-accent' : 'bg-black/5 text-[var(--ink-text)]'}">${esc(role || 'client')}</span>`;
         }
 
         function statusBadge(status) {
             if (!status || status === 'active') return '';
             const cls = status === 'banned' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-700';
-            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${cls}">${status}</span>`;
+            return `<span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-lg ${cls}">${esc(status)}</span>`;
         }
 
         function detailsHref(u) { return `user.html?id=${encodeURIComponent(u.id)}`; }
@@ -392,16 +393,14 @@
         function manageButton(u, isAdmin) {
             const details = `<a href="${detailsHref(u)}" class="flex-1 text-center px-3 py-2.5 ax-fill text-white rounded-lg text-[11px] font-bold uppercase transition">View &amp; Edit</a>`;
             if (isAdmin) return `<div class="flex gap-2">${details}</div>`;
-            return `<div class="flex gap-2">${details}<button onclick="openManageModal('${u.id}')" class="flex-1 px-3 py-2.5 bg-black/5 hover:bg-black/10 rounded-lg text-[11px] font-bold uppercase transition">Quick Manage</button></div>`;
+            return `<div class="flex gap-2">${details}<button onclick="openManageModal('${safeId(u.id)}')" class="flex-1 px-3 py-2.5 bg-black/5 hover:bg-black/10 rounded-lg text-[11px] font-bold uppercase transition">Quick Manage</button></div>`;
         }
 
-        function escHtml(v) {
-            return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-        }
+        const escHtml = esc;
         // User photo (profiles.avatar_url) in a circle, initials when there is none or it fails to load
         function userAvatar(u, size) {
             const initial = escHtml((u.full_name || '?').trim().charAt(0).toUpperCase() || '?');
-            const url = /^https:\/\//i.test(u.avatar_url || '') ? escHtml(u.avatar_url) : '';
+            const url = escHtml(safeImageUrl(u.avatar_url));
             return `<div class="${size} shrink-0 rounded-full ax-fill flex items-center justify-center text-white ax-display font-semibold text-sm overflow-hidden relative">${initial}${url ? `<img src="${url}" alt="" loading="lazy" referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">` : ''}</div>`;
         }
 
@@ -439,7 +438,7 @@
                             </div>
                             <div class="flex justify-between items-baseline">
                                 <span class="text-[10px] font-bold text-[var(--muted)] uppercase">Referral Code</span>
-                                <span class="text-xs font-semibold mono">${u.referral_code || '—'}</span>
+                                <span class="text-xs font-semibold mono">${esc(u.referral_code || '—')}</span>
                             </div>
                             <div class="flex justify-between items-baseline">
                                 <span class="text-[10px] font-bold text-[var(--muted)] uppercase">Joined</span>
@@ -467,7 +466,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="px-8 py-5 text-xs mono text-[var(--muted)]">${u.referral_code || '—'}</td>
+                        <td class="px-8 py-5 text-xs mono text-[var(--muted)]">${esc(u.referral_code || '—')}</td>
                         <td class="px-8 py-5 text-sm font-semibold mono">₦${Number(balance).toLocaleString()}</td>
                         <td class="px-8 py-5 text-xs text-[var(--muted)] mono">${new Date(u.created_at).toLocaleDateString()}</td>
                         <td class="px-8 py-5">
@@ -475,7 +474,7 @@
                         </td>
                         <td class="px-8 py-5 text-right">
                             <a href="${detailsHref(u)}" class="px-3 py-1.5 ax-fill text-white rounded-lg text-[10px] font-bold uppercase transition">View</a>
-                            ${isAdmin ? '' : `<button onclick="openManageModal('${u.id}')" class="ml-1 px-3 py-1.5 bg-black/5 hover:bg-black/10 rounded-lg text-[10px] font-bold uppercase transition">Manage</button>`}
+                            ${isAdmin ? '' : `<button onclick="openManageModal('${safeId(u.id)}')" class="ml-1 px-3 py-1.5 bg-black/5 hover:bg-black/10 rounded-lg text-[10px] font-bold uppercase transition">Manage</button>`}
                         </td>
                     </tr>
                 `;
@@ -519,7 +518,7 @@
             }
             const select = document.getElementById('assignPlanSelect');
             select.innerHTML = '<option value="">Select a plan...</option>' +
-                managePlansCache.map(p => `<option value="${p.id}">${p.name} — ₦${Number(p.price).toLocaleString()}</option>`).join('');
+                managePlansCache.map(p => `<option value="${esc(p.id)}">${esc(p.name)} — ₦${Number(p.price).toLocaleString()}</option>`).join('');
 
             const overlay = document.getElementById('manageOverlay');
             overlay.classList.remove('hidden');

@@ -237,6 +237,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { esc } from './src/escape.js';
         import * as AX from './src/site-settings.js';
         import { bankOptionsHtml, bankByCode } from './src/ng-banks.js';
         let siteSettings = AX.cachedSettings();
@@ -395,19 +396,19 @@
                 <tr class="hover:bg-black/[0.015] transition">
                     <td class="px-8 py-6">
                         <p class="text-xs font-semibold text-[var(--ink-text)]">${new Date(row.created_at).toLocaleDateString()}</p>
-                        <p class="text-[9px] text-[var(--muted)] mono">REF: ${row.id.split('-')[0].toUpperCase()}</p>
+                        <p class="text-[9px] text-[var(--muted)] mono">REF: ${esc(row.id.split('-')[0].toUpperCase())}</p>
                     </td>
                     <td class="px-8 py-6">
                         <p class="text-sm font-semibold text-[var(--ink-text)] mono">${naira(toNum(row.amount) - toNum(row.charge))}</p>
                         <p class="text-[9px] text-red-400 uppercase font-bold">Fee: ${naira(row.charge)}</p>
                     </td>
                     <td class="px-8 py-6">
-                        <p class="text-[10px] font-semibold text-[var(--ink-text)]">${row.bank_name}</p>
-                        <p class="text-[10px] text-[var(--muted)] mono">${row.account_number}</p>
+                        <p class="text-[10px] font-semibold text-[var(--ink-text)]">${esc(row.bank_name)}</p>
+                        <p class="text-[10px] text-[var(--muted)] mono">${esc(row.account_number)}</p>
                     </td>
                     <td class="px-8 py-6 text-right">
-                        <span class="text-[9px] uppercase font-bold px-3 py-1 rounded-lg ${getStatusStyle(row.status)}">
-                            ${getStatusLabel(row.status)}
+                        <span class="text-[9px] uppercase font-bold px-3 py-1 rounded-lg ${esc(getStatusStyle(row.status))}">
+                            ${esc(getStatusLabel(row.status))}
                         </span>
                     </td>
                 </tr>
