@@ -625,7 +625,7 @@
                         </div>
                     </div>`).join('');
             } else {
-                const { data, error } = await supabase.from('withdrawals').select('*, profiles(full_name)').eq('method', 'gateway').order('created_at', { ascending: false }).limit(30);
+                const { data, error } = await supabase.from('withdrawals').select('*, profiles!withdrawals_user_id_fkey(full_name)').eq('method', 'gateway').order('created_at', { ascending: false }).limit(30);
                 if (error) { list.innerHTML = `<div class="p-8 text-center text-red-500 text-xs">${esc(error.message)}</div>`; return; }
                 rows = data || [];
                 html = rows.map(w => `

@@ -360,7 +360,7 @@
 
         async function loadWithdrawals() {
             try {
-                let query = supabase.from('withdrawals').select('*, profiles(full_name)').order('created_at', { ascending: false });
+                let query = supabase.from('withdrawals').select('*, profiles!withdrawals_user_id_fkey(full_name)').order('created_at', { ascending: false });
                 if (currentFilter !== 'all') query = query.eq('status', currentFilter);
                 const { data, error } = await query;
                 if (error) throw error;
@@ -368,6 +368,8 @@
             } catch (err) {
                 console.error('Withdrawals fetch error:', err);
                 document.getElementById('withdrawalsBody').innerHTML = `<tr><td colspan="5" class="p-12 text-center text-red-400 text-xs ">Could not load withdrawals — check console</td></tr>`;
+                const cards = document.getElementById('withdrawalsCards');
+                if (cards) cards.innerHTML = `<div class="p-10 text-center text-red-400 text-xs">Could not load withdrawals: ${String(err.message || err).replace(/</g,'&lt;')}</div>`;
             }
         }
 
