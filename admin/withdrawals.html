@@ -168,9 +168,9 @@
                 <span id="modeChip" class="ml-auto text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]"></span>
             </div>
 
-            <div id="gatewayBanner" class="hidden ax-card rounded-[14px] p-4 mb-6 text-[11px] text-[var(--muted)] leading-relaxed flex gap-3">
+            <div id="gatewayBanner" class="ax-card rounded-[14px] p-4 mb-6 text-[11px] text-[var(--muted)] leading-relaxed flex gap-3">
                 <i data-lucide="zap" class="w-4 h-4 ax-accent shrink-0 mt-0.5"></i>
-                <p>Gateway mode: <b class="text-[var(--ink-text)]">Send to gateway</b> pays the net amount (after the withdrawal fee) to the client's bank through Afrstar. It shows as Processing until the gateway confirms; a failed payout is refunded to the client automatically.</p>
+                <p>Every withdrawal needs your approval. <b class="text-[var(--ink-text)]">Send to gateway</b> pays the net amount (after the fee) to the client's bank through Afrstar; it shows as Processing until the gateway confirms, and a failed payout is refunded automatically. <b class="text-[var(--ink-text)]">Mark as paid</b> is for a payout you made yourself outside the gateway. <b class="text-[var(--ink-text)]">Reject</b> refunds the full amount to the client's wallet.</p>
             </div>
 
             <!-- Withdrawals: stacked cards on mobile, full table on wider screens -->
@@ -335,14 +335,13 @@
 
         // --- 2. Data Fetching ---
         let currentFilter = 'pending';
-        let paymentMode = 'manual';
         let rowsById = {};
 
+        // Withdrawals are always gateway-based; the chip only shows the deposit mode for context.
         async function loadMode() {
-            const { data } = await supabase.from('site_settings').select('payment_mode').eq('id', 1).maybeSingle();
-            paymentMode = data?.payment_mode || 'manual';
-            document.getElementById('modeChip').innerHTML = `Mode: <a href="settings.html#sec-payments" class="ax-accent">${paymentMode === 'gateway' ? 'Gateway (automatic)' : 'Manual'}</a>`;
-            document.getElementById('gatewayBanner').classList.toggle('hidden', paymentMode !== 'gateway');
+            const { data } = await supabase.from('site_settings').select('deposit_mode').eq('id', 1).maybeSingle();
+            const mode = data?.deposit_mode === 'gateway' ? 'gateway' : 'manual';
+            document.getElementById('modeChip').innerHTML = `Payouts: gateway · Deposits: <a href="gateway.html#depositMode" class="ax-accent">${mode === 'gateway' ? 'Automatic' : 'Manual'}</a>`;
         }
         const money = n => `₦${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         function escapeHtml(t) { return String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -397,23 +396,12 @@
                     <button onclick="rejectWithdrawal('${w.id}', ${w.amount}, '${w.user_id}', true)" class="${sz} bg-red-50 text-red-600 rounded-lg font-bold uppercase hover:bg-red-100 transition" title="Only if the Afrstar portal shows no payout for ${w.order_sn}">Reject &amp; refund</button></div>`;
             }
             if (w.status !== 'pending') return statusBadge(w.status);
-            if (paymentMode === 'gateway') {
-                return `
-                <div class="flex items-center gap-2 ${compact ? 'justify-end' : ''}">
-                    <button onclick="openSend('${w.id}')" class="${sz} rounded-lg font-bold uppercase transition ax-fill text-white inline-flex items-center justify-center gap-1"><i data-lucide="zap" class="w-3 h-3"></i>Send to gateway</button>
-                    <button onclick="rejectWithdrawal('${w.id}', ${w.amount}, '${w.user_id}')" class="${sz} bg-red-50 text-red-600 rounded-lg font-bold uppercase hover:bg-red-100 transition">Reject</button>
-                </div>`;
-            }
-            if (compact) return `
-                <div class="flex items-center justify-end gap-2">
-                    <button onclick="approveWithdrawal('${w.id}')" class="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-bold uppercase hover:bg-emerald-100 transition">Mark Paid</button>
-                    <button onclick="rejectWithdrawal('${w.id}', ${w.amount}, '${w.user_id}')" class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold uppercase hover:bg-red-100 transition">Reject</button>
-                </div>`;
-            return `
-                <div class="flex items-center gap-2">
-                    <button onclick="approveWithdrawal('${w.id}')" class="flex-1 px-3 py-2.5 bg-emerald-50 text-emerald-700 rounded-lg text-[11px] font-bold uppercase hover:bg-emerald-100 transition">Mark Paid</button>
-                    <button onclick="rejectWithdrawal('${w.id}', ${w.amount}, '${w.user_id}')" class="flex-1 px-3 py-2.5 bg-red-50 text-red-600 rounded-lg text-[11px] font-bold uppercase hover:bg-red-100 transition">Reject</button>
-                </div>`;
+            // Pending: admin approval is required; choose how it is paid (or reject).
+            const send = `<button onclick="openSend('${w.id}')" class="${compact ? 'px-3 py-1.5 text-[10px]' : 'col-span-2 px-3 py-2.5 text-[11px]'} rounded-lg font-bold uppercase transition ax-fill text-white inline-flex items-center justify-center gap-1 whitespace-nowrap"><i data-lucide="zap" class="w-3 h-3"></i>Send to gateway</button>`;
+            const paid = `<button onclick="approveWithdrawal('${w.id}')" class="${compact ? 'px-3 py-1.5 text-[10px]' : 'px-3 py-2.5 text-[11px]'} bg-emerald-50 text-emerald-700 rounded-lg font-bold uppercase hover:bg-emerald-100 transition inline-flex items-center justify-center gap-1 whitespace-nowrap"><i data-lucide="check" class="w-3 h-3"></i>Mark as paid</button>`;
+            const reject = `<button onclick="rejectWithdrawal('${w.id}', ${w.amount}, '${w.user_id}')" class="${compact ? 'px-3 py-1.5 text-[10px]' : 'px-3 py-2.5 text-[11px]'} bg-red-50 text-red-600 rounded-lg font-bold uppercase hover:bg-red-100 transition inline-flex items-center justify-center gap-1 whitespace-nowrap"><i data-lucide="x" class="w-3 h-3"></i>Reject</button>`;
+            if (compact) return `<div class="flex flex-wrap items-center justify-end gap-2">${send}${paid}${reject}</div>`;
+            return `<div class="grid grid-cols-2 gap-2">${send}${paid}${reject}</div>`;
         }
 
         function renderWithdrawals(rows) {
@@ -506,9 +494,11 @@
         }
 
         window.approveWithdrawal = async (id) => {
-            if (!confirm('Mark this withdrawal as paid?')) return;
+            const w = rowsById[id] || {};
+            const net = Number(w.amount || 0) - Number(w.charge || 0);
+            if (!confirm(`Mark as paid?\n\nUse this only if you have already paid ${money(net)} to ${w.bank_name || 'the client\'s bank'} (${w.account_number || '—'}) yourself, outside the gateway.\n\nNo payout is sent. The request is marked Completed and the client is notified.`)) return;
             try {
-                await callWithdrawalAction(id, 'complete');
+                await callWithdrawalAction(id, 'mark_paid');
                 loadStats();
                 loadWithdrawals();
             } catch (err) {

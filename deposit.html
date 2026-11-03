@@ -379,7 +379,7 @@
 
         let user = null;
         let profilePhone = '';
-        const isGateway = () => (siteSettings.payment_mode || 'manual') === 'gateway';
+        const isGateway = () => (siteSettings.deposit_mode || 'manual') === 'gateway'; // admin Gateway page switch
         // Limits come from admin Settings (site_settings); 3000 is the fallback.
         const minDeposit = () => Number(siteSettings.min_deposit || 3000);
         const maxDeposit = () => (siteSettings.max_deposit ? Number(siteSettings.max_deposit) : null);

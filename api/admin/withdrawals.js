@@ -3,116 +3,69 @@ import { requireAdmin } from '../_lib/requireAdmin.js';
 import { getConfig, createPayout, makeOrderSn, money, PREFIX } from '../_lib/afrstar.js';
 import { bankByCode, guessBankCode } from '../../src/ng-banks.js';
 
-// Actions:
-//   complete      manual mode: mark a pending withdrawal paid
-//   reject        refund a pending withdrawal (or a gateway one whose send
-//                 never reached the gateway: processing with no platform_osn)
-//   send_gateway  gateway mode: create an Afrstar payout for the net amount
-//                 (amount - charge); the payout callback finalises it
+// Withdrawals are always gateway-based (whatever the deposit mode) and every
+// request needs an admin's approval first. Actions on a withdrawal:
+//   send_gateway  pending -> processing: create an Afrstar payout for the net
+//                 amount (amount - charge); the payout callback finalises it
+//   mark_paid     pending -> approved: the admin paid it outside the gateway;
+//                 no payout call, the user is notified ('complete' = alias)
+//   reject        pending (or a gateway send whose outcome is unknown:
+//                 processing with no platform_osn) -> rejected, full refund
+// mark_paid and reject run in Postgres functions (admin_mark_withdrawal_paid /
+// admin_reject_withdrawal, service role only) that lock the withdrawal and
+// wallet rows, so a refund can never be lost or doubled.
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).json({ error: 'Method not allowed.' });
-  }
+export const ACTIONS = ['send_gateway', 'mark_paid', 'complete', 'reject'];
 
-  const admin = await requireAdmin(req, res);
-  if (!admin) return;
-
-  const { id, action } = req.body || {};
-  if (!id || !['complete', 'reject', 'send_gateway'].includes(action)) {
-    return res.status(400).json({ error: 'Body must include id and action: "complete" | "reject" | "send_gateway".' });
-  }
-  if (action === 'send_gateway') return sendToGateway(req, res, admin);
-
-  try {
-    const { data: withdrawal, error: fetchErr } = await supabaseAdmin
-      .from('withdrawals')
-      .select('id, user_id, amount, status, platform_osn, order_sn')
-      .eq('id', id)
-      .single();
-
-    if (fetchErr || !withdrawal) {
-      return res.status(404).json({ error: 'Withdrawal not found.' });
-    }
-    // A gateway send whose outcome is unknown (processing, never acknowledged
-    // with a platform order number) may be rejected after checking the portal.
-    const stuckGateway = action === 'reject' && withdrawal.status === 'processing' && !withdrawal.platform_osn;
-    if (withdrawal.status !== 'pending' && !stuckGateway) {
-      return res.status(409).json({ error: `Withdrawal already ${withdrawal.status}.` });
+export function createHandler({ db = supabaseAdmin, authorize = requireAdmin, env = process.env, fetchImpl } = {}) {
+  return async function handler(req, res) {
+    if (req.method !== 'POST') {
+      res.setHeader('Allow', 'POST');
+      return res.status(405).json({ error: 'Method not allowed.' });
     }
 
-    if (action === 'complete') {
-      // Funds were already debited from the wallet at request time
-      // (see withdraw.html) — completing just flips the status.
-      // NOTE: withdrawals_status_check only permits 'pending' | 'approved'
-      // | 'rejected' — there is no 'completed' value in this schema.
-      // NOTE: `transactions` has no `status` column in this schema, so
-      // there is nothing else to update here.
-      const { data: updatedRows, error } = await supabaseAdmin
-        .from('withdrawals')
-        .update({ status: 'approved', processed_at: new Date().toISOString() })
-        .eq('id', id)
-        .eq('status', 'pending')
-        .select('id');
+    const admin = await authorize(req, res);
+    if (!admin) return;
+
+    const { id, action } = req.body || {};
+    if (!id || !ACTIONS.includes(action)) {
+      return res.status(400).json({ error: 'Body must include id and action: "send_gateway" | "mark_paid" | "reject".' });
+    }
+    if (action === 'send_gateway') return sendToGateway({ db, env, fetchImpl }, req, res, admin);
+
+    const fn = action === 'reject' ? 'admin_reject_withdrawal' : 'admin_mark_withdrawal_paid';
+    try {
+      const { data, error } = await db.rpc(fn, { p_withdrawal: id, p_admin: admin.user?.id || null });
       if (error) throw error;
-      if (!updatedRows || updatedRows.length === 0) {
-        return res.status(409).json({ error: 'Withdrawal was already processed.' });
+      const out = typeof data === 'string' ? JSON.parse(data) : (data || {});
+      if (out.result === 'not_found') return res.status(404).json({ error: 'Withdrawal not found.' });
+      if (out.result === 'conflict') {
+        const st = out.status === 'processing'
+          ? 'processing at the gateway (acknowledged). Wait for the payout callback'
+          : `already ${out.status}`;
+        return res.status(409).json({ error: `Withdrawal ${st}.`, status: out.status });
       }
-
-      return res.status(200).json({ ok: true, status: 'approved' });
+      if (action === 'reject') {
+        return res.status(200).json({ ok: true, status: 'rejected', refundedBalance: Number(out.refunded_balance) });
+      }
+      return res.status(200).json({ ok: true, status: 'approved', method: 'manual' });
+    } catch (err) {
+      console.error(`admin/withdrawals ${action} error:`, err);
+      return res.status(500).json({ error: err.message || 'Internal error.' });
     }
-
-    // action === 'reject' — reverse the earlier debit, refund the client.
-    const { data: updatedRows, error: wdErr } = await supabaseAdmin
-      .from('withdrawals')
-      .update({ status: 'rejected', processed_at: new Date().toISOString() })
-      .eq('id', id)
-      .eq('status', withdrawal.status)
-      .is('platform_osn', null)
-      .select('id');
-    if (wdErr) throw wdErr;
-    if (!updatedRows || updatedRows.length === 0) {
-      return res.status(409).json({ error: 'Withdrawal was already processed.' });
-    }
-
-    const { data: wallet, error: walletFetchErr } = await supabaseAdmin
-      .from('wallets')
-      .select('available_balance')
-      .eq('user_id', withdrawal.user_id)
-      .single();
-    if (walletFetchErr) throw walletFetchErr;
-
-    const refundedBalance = Number(wallet?.available_balance || 0) + Number(withdrawal.amount);
-    const { error: walletErr } = await supabaseAdmin
-      .from('wallets')
-      .update({ available_balance: refundedBalance })
-      .eq('user_id', withdrawal.user_id);
-    if (walletErr) throw walletErr;
-
-    await supabaseAdmin.from('notifications').insert([{
-      user_id: withdrawal.user_id,
-      title: 'Withdrawal Rejected',
-      message: `Your withdrawal of ₦${Number(withdrawal.amount).toLocaleString()} was rejected and refunded to your wallet.`,
-    }]);
-
-    return res.status(200).json({ ok: true, status: 'rejected', refundedBalance });
-  } catch (err) {
-    console.error('admin/withdrawals error:', err);
-    return res.status(500).json({ error: err.message || 'Internal error.' });
-  }
+  };
 }
 
-async function sendToGateway(req, res, admin) {
+export default createHandler();
+
+async function sendToGateway({ db: supabaseAdmin, env, fetchImpl }, req, res, admin) {
   const { id, bank_code: bankCodeOverride } = req.body || {};
-  const config = getConfig();
+  const config = getConfig(env);
   if (!config.ok) return res.status(503).json({ error: config.error, code: 'gateway_not_configured' });
 
   try {
-    const { data: settings } = await supabaseAdmin.from('site_settings').select('payment_mode, site_name').eq('id', 1).maybeSingle();
-    if ((settings?.payment_mode || 'manual') !== 'gateway') {
-      return res.status(409).json({ error: 'Payment mode is Manual. Switch to Gateway in Settings to send payouts automatically.' });
-    }
+    // Payouts do not depend on the deposit mode: withdrawals are always gateway-based.
+    const { data: settings } = await supabaseAdmin.from('site_settings').select('site_name').eq('id', 1).maybeSingle();
 
     const { data: w, error } = await supabaseAdmin
       .from('withdrawals')
@@ -156,7 +109,7 @@ async function sendToGateway(req, res, admin) {
     const r = await createPayout(config, {
       orderSn, amount: net, name, account, bankCode: bank.code,
       remark: `${settings?.site_name || 'Altivex'} withdrawal`,
-    });
+    }, fetchImpl ? { fetchImpl } : undefined);
 
     if (r.ok) {
       await supabaseAdmin.from('withdrawals')

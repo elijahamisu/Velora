@@ -441,9 +441,9 @@
             currentMethod = e.target.value;
             loadDeposits();
         });
-        supabase.from('site_settings').select('payment_mode').eq('id', 1).maybeSingle().then(({ data }) => {
-            const mode = data?.payment_mode || 'manual';
-            document.getElementById('modeChip').innerHTML = `Mode: <a href="settings.html#sec-payments" class="ax-accent">${mode === 'gateway' ? 'Gateway (automatic)' : 'Manual'}</a>`;
+        supabase.from('site_settings').select('deposit_mode').eq('id', 1).maybeSingle().then(({ data }) => {
+            const mode = data?.deposit_mode || 'manual';
+            document.getElementById('modeChip').innerHTML = `Deposits: <a href="gateway.html#depositMode" class="ax-accent">${mode === 'gateway' ? 'Automatic (Afrstar)' : 'Manual bank transfer'}</a>`;
         });
 
         function setupRealtime() {

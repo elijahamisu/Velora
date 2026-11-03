@@ -202,8 +202,7 @@ do $$
 declare u uuid := (select ids.id from ids where k='u'); w uuid;
 begin
   select id into w from withdrawals where user_id = u limit 1;
-  update withdrawals set status = 'rejected', processed_at = now() where id = w and status = 'pending';
-  update wallets set available_balance = available_balance + 2000 where user_id = u;
+  insert into r(step,val) values ('service_role admin_reject_withdrawal', admin_reject_withdrawal(w, null)->>'result');
   insert into r(step,val) values ('service_role reject+refund (exp 18345)', (select available_balance::text from wallets where user_id = u));
 end $$;
 reset role;

@@ -182,8 +182,6 @@
                                         class="field w-full px-5 py-4 rounded-[10px] text-sm font-semibold">
                                         <option value="">Select bank</option>
                                     </select>
-                                    <input type="text" id="bankNameOther" placeholder="Type your bank name"
-                                        class="field w-full px-6 py-4 rounded-[10px] text-sm font-semibold mt-2 hidden">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-[var(--muted)] uppercase mb-2 ml-1 tracking-wide">Account Number</label>
@@ -479,21 +477,14 @@
         }
 
         // --- Bank dropdown (Afrstar Nigeria bank codes) ---
-        // In Manual mode an "Other bank" option keeps free-text names possible;
-        // Gateway payouts need a code, so the option is hidden there.
+        // Withdrawals are always paid via the gateway's bank list (whatever the
+        // deposit mode), so every request carries a valid bank_code.
         const bankSelect = document.getElementById('bankCode');
-        const bankOther = document.getElementById('bankNameOther');
         function fillBankSelect() {
-            const gateway = (siteSettings.payment_mode || 'manual') === 'gateway';
-            bankSelect.innerHTML = bankOptionsHtml({ placeholder: 'Select bank' }) + (gateway ? '' : '<option value="__other">Other bank (type the name)</option>');
+            const keep = bankSelect.value;
+            bankSelect.innerHTML = bankOptionsHtml({ selected: keep, placeholder: 'Select bank' });
         }
         fillBankSelect();
-        bankSelect.addEventListener('change', () => {
-            const other = bankSelect.value === '__other';
-            bankOther.classList.toggle('hidden', !other);
-            bankOther.required = other;
-            if (other) bankOther.focus();
-        });
         document.getElementById('accNumber').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10); });
 
         // --- Form Logic ---
@@ -509,8 +500,8 @@
         document.getElementById('withdrawForm').onsubmit = async (e) => {
             e.preventDefault();
             const amount = toNum(amountInput.value);
-            const bankCode = bankSelect.value === '__other' ? null : (bankByCode(bankSelect.value)?.code || null);
-            const bankName = bankCode ? bankByCode(bankCode).name : bankOther.value.trim();
+            const bankCode = bankByCode(bankSelect.value)?.code || null;
+            const bankName = bankCode ? bankByCode(bankCode).name : '';
             const accNum = document.getElementById('accNumber').value.trim();
             const accName = document.getElementById('accName').value.trim();
             const charge = amount * chargeRate();
@@ -535,8 +526,8 @@
                 alert('Insufficient wallet balance.');
                 return;
             }
-            if (!bankName) {
-                alert('Select your bank.');
+            if (!bankCode) {
+                alert('Select your bank from the list.');
                 return;
             }
             if (!/^\d{10}$/.test(accNum)) {

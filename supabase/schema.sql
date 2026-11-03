@@ -1463,3 +1463,169 @@ begin
           'Your deposit of ₦' || to_char(credit,'FM999,999,999,990.00') || ' has been confirmed and credited to your wallet.');
   return 'credited';
 end; $function$;
+
+-- ============================================================================
+-- 2026-11-03 · Deposit mode split + withdrawals always gateway-based
+-- * site_settings.deposit_mode ('manual'|'gateway') is the deposit switch
+--   (admin Gateway page). payment_mode stays as a legacy alias, kept in sync
+--   both ways by a trigger, so older code reading it keeps working.
+-- * Withdrawals never depend on the deposit mode: users pick a bank from the
+--   Afrstar list (bank_code required); an admin approves every request with
+--   Send to gateway (payout), Mark as paid (paid outside the gateway) or
+--   Reject (refund).
+-- * Mark-as-paid and Reject run in service-role-only functions that lock the
+--   withdrawal row and (for refunds) the wallet row, in one transaction.
+-- ============================================================================
+alter table public.site_settings add column if not exists deposit_mode text;
+update public.site_settings set deposit_mode = coalesce(payment_mode, 'manual') where deposit_mode is null;
+alter table public.site_settings alter column deposit_mode set default 'manual';
+alter table public.site_settings alter column deposit_mode set not null;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'site_settings_deposit_mode_check') then
+    alter table public.site_settings add constraint site_settings_deposit_mode_check
+      check (deposit_mode in ('manual','gateway'));
+  end if;
+end $$;
+comment on column public.site_settings.deposit_mode is 'Deposit method: manual bank transfer or gateway (Afrstar). Switched on admin/gateway.html.';
+comment on column public.site_settings.payment_mode is 'Legacy alias of deposit_mode (kept in sync by trigger sync_deposit_mode).';
+
+create or replace function public.sync_deposit_mode() returns trigger
+language plpgsql set search_path = public as $$
+begin
+  if tg_op = 'INSERT' then
+    new.deposit_mode := coalesce(new.deposit_mode, new.payment_mode, 'manual');
+  elsif new.deposit_mode is distinct from old.deposit_mode then
+    null;                                   -- deposit_mode wins
+  elsif new.payment_mode is distinct from old.payment_mode then
+    new.deposit_mode := new.payment_mode;   -- legacy writer
+  end if;
+  new.payment_mode := new.deposit_mode;
+  return new;
+end; $$;
+drop trigger if exists sync_deposit_mode on public.site_settings;
+create trigger sync_deposit_mode before insert or update on public.site_settings
+  for each row execute function public.sync_deposit_mode();
+revoke execute on function public.sync_deposit_mode() from public, anon, authenticated;
+
+alter table public.withdrawals add column if not exists processed_by uuid references public.profiles(id) on delete set null;
+
+-- Mark as paid: the admin paid this pending request outside the gateway.
+-- The wallet was debited at request time, so only the status changes.
+create or replace function public.admin_mark_withdrawal_paid(p_withdrawal uuid, p_admin uuid default null)
+returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare w public.withdrawals;
+begin
+  select * into w from public.withdrawals where id = p_withdrawal for update;
+  if not found then return jsonb_build_object('result', 'not_found'); end if;
+  if w.status <> 'pending' then return jsonb_build_object('result', 'conflict', 'status', w.status); end if;
+  update public.withdrawals
+     set status = 'approved', method = 'manual', processed_at = now(), processed_by = p_admin,
+         gateway_message = 'Marked as paid by admin (paid outside the gateway)'
+   where id = w.id;
+  insert into public.notifications (user_id, title, message)
+  values (w.user_id, 'Withdrawal Paid',
+          'Your withdrawal of ₦' || to_char(w.amount - coalesce(w.charge, 0),'FM999,999,999,990.00') ||
+          ' has been paid to your bank account' ||
+          case when w.account_number is not null then ' (' || w.account_number || ')' else '' end || '.');
+  return jsonb_build_object('result', 'approved', 'status', 'approved');
+end; $$;
+
+-- Reject & refund: pending, or a gateway send whose outcome is unknown
+-- (processing with no platform order number, after checking the portal).
+-- Locks the withdrawal and the wallet; the refund is one in-place update.
+create or replace function public.admin_reject_withdrawal(p_withdrawal uuid, p_admin uuid default null)
+returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare w public.withdrawals; bal numeric;
+begin
+  select * into w from public.withdrawals where id = p_withdrawal for update;
+  if not found then return jsonb_build_object('result', 'not_found'); end if;
+  if not (w.status = 'pending' or (w.status = 'processing' and w.platform_osn is null)) then
+    return jsonb_build_object('result', 'conflict', 'status', w.status);
+  end if;
+  perform 1 from public.wallets where user_id = w.user_id for update;
+  if not found then raise exception 'Wallet not found for this user.'; end if;
+  update public.withdrawals
+     set status = 'rejected', processed_at = now(), processed_by = p_admin
+   where id = w.id;
+  update public.wallets set available_balance = available_balance + w.amount, updated_at = now()
+   where user_id = w.user_id returning available_balance into bal;
+  insert into public.transactions (user_id, amount, type, description, reference)
+  values (w.user_id, w.amount, 'withdrawal_refund', 'Refund: withdrawal rejected by admin', coalesce(w.order_sn, w.id::text));
+  insert into public.notifications (user_id, title, message)
+  values (w.user_id, 'Withdrawal Rejected',
+          'Your withdrawal of ₦' || to_char(w.amount,'FM999,999,999,990') || ' was rejected and refunded to your wallet.');
+  return jsonb_build_object('result', 'rejected', 'status', 'rejected', 'refunded_balance', bal);
+end; $$;
+revoke execute on function public.admin_mark_withdrawal_paid(uuid, uuid) from public, anon, authenticated;
+revoke execute on function public.admin_reject_withdrawal(uuid, uuid) from public, anon, authenticated;
+grant execute on function public.admin_mark_withdrawal_paid(uuid, uuid) to service_role;
+grant execute on function public.admin_reject_withdrawal(uuid, uuid) to service_role;
+
+-- Withdrawal requests now require a bank from the Afrstar list.
+create or replace function public.user_request_withdrawal(
+  p_amount numeric, p_bank_name text, p_bank_code text, p_account_number text, p_account_name text
+) returns uuid
+language plpgsql security definer set search_path = public as $$
+declare
+  uid uuid := auth.uid();
+  s public.site_settings;
+  w public.wallets;
+  amt numeric := round(coalesce(p_amount, 0), 2);
+  acct text := regexp_replace(coalesce(p_account_number, ''), '\s', '', 'g');
+  bname text := nullif(trim(coalesce(p_bank_name, '')), '');
+  aname text := nullif(trim(coalesce(p_account_name, '')), '');
+  bcode text := nullif(trim(coalesce(p_bank_code, '')), '');
+  lagos timestamp := now() at time zone 'Africa/Lagos';
+  t time := (now() at time zone 'Africa/Lagos')::time;
+  wid uuid;
+begin
+  if uid is null then raise exception 'Please sign in again.'; end if;
+  if not public.is_active_user() then raise exception 'Your account is not active. Contact support.'; end if;
+  if amt <= 0 then raise exception 'Enter a valid amount.'; end if;
+  if bname is null then raise exception 'Select your bank.'; end if;
+  if acct !~ '^[0-9]{10}$' then raise exception 'Enter your 10-digit account number.'; end if;
+  if aname is null then raise exception 'Enter the account holder name.'; end if;
+  -- Withdrawals are always paid through the gateway's bank list: a valid
+  -- 8-digit Afrstar bank code is required (free-text "other bank" removed).
+  if bcode is null or bcode !~ '^[0-9]{8}$' then raise exception 'Select your bank from the list.'; end if;
+
+  select * into s from public.site_settings where id = 1;
+  if found then
+    if amt < s.min_withdrawal then
+      raise exception 'Minimum withdrawal is ₦%', to_char(s.min_withdrawal,'FM999,999,999,990');
+    end if;
+    if s.max_withdrawal is not null and s.max_withdrawal > 0 and amt > s.max_withdrawal then
+      raise exception 'Maximum withdrawal is ₦%', to_char(s.max_withdrawal,'FM999,999,999,990');
+    end if;
+    if not (extract(dow from lagos)::int = any(s.withdrawal_days)) or
+       (case when s.withdrawal_open_time <= s.withdrawal_close_time
+             then t < s.withdrawal_open_time or t > s.withdrawal_close_time + interval '59 seconds'
+             else t < s.withdrawal_open_time and t > s.withdrawal_close_time + interval '59 seconds' end) then
+      raise exception 'Withdrawals are closed right now';
+    end if;
+  end if;
+
+  if not exists (select 1 from public.investments where user_id = uid and status = 'active') then
+    raise exception 'You need at least one active investment before you can withdraw.';
+  end if;
+
+  select * into w from public.wallets where user_id = uid for update;
+  if not found then raise exception 'Wallet not found.'; end if;
+  if w.available_balance < amt then raise exception 'Insufficient wallet balance.'; end if;
+
+  update public.wallets set available_balance = available_balance - amt, updated_at = now() where user_id = uid;
+
+  insert into public.withdrawals (user_id, amount, charge, bank_name, bank_code, account_number, account_name, status)
+  values (uid, amt, round(amt * coalesce(s.withdrawal_fee_pct, 0) / 100, 2), bname, bcode, acct, aname, 'pending')
+  returning id into wid;   -- enforce_withdrawal_rules recomputes the same charge for non-admins
+
+  insert into public.transactions (user_id, amount, type, description)
+  values (uid, amt, 'withdrawal', 'Withdrawal request to ' || bname || ' (' || acct || ') — pending');
+
+  insert into public.notifications (user_id, title, message)
+  values (uid, 'Withdrawal Pending', 'Your request for ₦' || to_char(amt,'FM999,999,999,990.00') || ' is being reviewed.');
+
+  return wid;
+end; $$;

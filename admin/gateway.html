@@ -41,6 +41,16 @@
         .tab-btn[aria-selected="true"] { color: var(--ax-accent-ink); background: var(--ax-accent); }
         .kv { display:flex; justify-content:space-between; align-items:baseline; gap: 12px; font-size: 13px; }
         .kv + .kv { margin-top: 8px; }
+        .mode-card { display:block; position:relative; cursor:pointer; }
+        .mode-card input { position:absolute; opacity:0; pointer-events:none; }
+        .mode-card .mode-body { display:block; height:100%; padding:16px; border-radius:12px; border:1px solid var(--ax-border); background: rgba(255,255,255,0.02); transition: border-color .15s, background .15s; }
+        .mode-card input:checked + .mode-body { border-color: var(--ax-accent); background: var(--ax-accent-soft); }
+        .mode-card input:focus-visible + .mode-body { outline: 2px solid var(--ax-accent); outline-offset: 2px; }
+        .mode-dot { width:16px; height:16px; border-radius:50%; border:1.5px solid var(--ax-border-strong); display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .mode-card input:checked + .mode-body .mode-dot { border-color: var(--ax-accent); }
+        .mode-card input:checked + .mode-body .mode-dot::after { content:''; width:8px; height:8px; border-radius:50%; background: var(--ax-accent); }
+        .mode-card input:disabled + .mode-body { opacity: .6; cursor: progress; }
+        #depositMode { scroll-margin-top: calc(var(--ax-top, 64px) + 16px); }
     </style>
     <link rel="stylesheet" href="/altivex.css">
 </head>
@@ -144,8 +154,38 @@
                     <h1 class="text-3xl ax-display font-semibold">Payment gateway</h1>
                     <p class="text-xs text-[var(--muted)] mt-1">Afrstar Nigeria · balance, admin withdrawals and top-ups</p>
                 </div>
-                <p class="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">Mode: <a id="modeLink" href="settings.html#sec-payments" class="ax-accent">…</a></p>
+                <p class="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">Deposits: <a id="modeLink" href="#depositMode" class="ax-accent">…</a></p>
             </div>
+
+            <!-- Deposit mode switch (the one place to change it) -->
+            <section id="depositMode" class="ax-card rounded-[14px] p-6 md:p-7 mb-6" aria-labelledby="depositModeTitle">
+                <div class="flex items-start justify-between gap-3 mb-1">
+                    <h4 id="depositModeTitle" class="text-lg font-semibold ax-display flex items-center gap-2"><i data-lucide="zap" class="w-5 h-5 ax-accent"></i> Deposit mode</h4>
+                    <span id="depositModeState" class="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)] mt-1.5" aria-live="polite"></span>
+                </div>
+                <p class="text-[11px] text-[var(--muted)] mb-4">How clients add money to their wallet. Changes apply on the site immediately.</p>
+                <div class="grid md:grid-cols-2 gap-3" role="radiogroup" aria-label="Deposit mode">
+                    <label class="mode-card">
+                        <input type="radio" name="deposit_mode" value="manual">
+                        <span class="mode-body">
+                            <span class="flex items-center gap-2 mb-2"><span class="mode-dot"></span><span class="text-sm font-semibold">Manual bank transfer</span></span>
+                            <span class="block text-[11px] text-[var(--muted)] leading-relaxed">Clients transfer to the bank account in Settings and you approve or reject each deposit.</span>
+                        </span>
+                    </label>
+                    <label class="mode-card">
+                        <input type="radio" name="deposit_mode" value="gateway">
+                        <span class="mode-body">
+                            <span class="flex items-center gap-2 mb-2"><span class="mode-dot"></span><span class="text-sm font-semibold">Automatic via Afrstar</span></span>
+                            <span class="block text-[11px] text-[var(--muted)] leading-relaxed">Clients pay through the Afrstar checkout and are credited automatically when the gateway confirms.</span>
+                        </span>
+                    </label>
+                </div>
+                <div class="mt-4 p-3 rounded-lg text-[11px] leading-relaxed bg-black/[0.03] flex gap-2">
+                    <i data-lucide="shield-check" class="w-4 h-4 ax-accent shrink-0 mt-0.5"></i>
+                    <span><span class="font-semibold">Withdrawals always use the gateway</span>, whatever the deposit mode: clients pick their bank from the Afrstar list and you approve each request on the <a href="withdrawals.html" class="ax-accent underline">Withdrawals</a> page with <span class="font-semibold">Send to gateway</span>, <span class="font-semibold">Mark as paid</span> or <span class="font-semibold">Reject</span>.</span>
+                </div>
+                <p class="text-[10px] text-[var(--muted)] mt-3 leading-relaxed">Afrstar portal callback URLs: <span class="mono break-all" data-origin-path="/api/afrstar/payin-callback">/api/afrstar/payin-callback</span> (collection) and <span class="mono break-all" data-origin-path="/api/afrstar/payout-callback">/api/afrstar/payout-callback</span> (payout).</p>
+            </section>
 
             <!-- Configuration / connection errors -->
             <div id="configError" class="hidden mb-6 p-4 rounded-[14px] bg-red-50 border border-red-100 text-red-700 text-xs leading-relaxed break-words" role="alert"></div>
@@ -332,6 +372,46 @@
             return html;
         }
 
+        // --- Deposit mode switch ---
+        const MODE_LABEL = { manual: 'Manual bank transfer', gateway: 'Automatic (Afrstar)' };
+        let depositMode = null;
+        const modeRadios = () => [...document.querySelectorAll('input[name="deposit_mode"]')];
+        function renderDepositMode() {
+            modeRadios().forEach(r => { r.checked = r.value === depositMode; });
+            document.getElementById('modeLink').textContent = depositMode ? MODE_LABEL[depositMode] : '…';
+            document.getElementById('depositModeState').textContent = depositMode ? `Live: ${depositMode === 'gateway' ? 'Automatic' : 'Manual'}` : '';
+        }
+        async function loadDepositMode() {
+            const { data, error } = await supabase.from('site_settings').select('deposit_mode').eq('id', 1).maybeSingle();
+            if (error) { toast('Could not read the deposit mode', false); return; }
+            depositMode = data?.deposit_mode === 'gateway' ? 'gateway' : 'manual';
+            renderDepositMode();
+        }
+        modeRadios().forEach(r => r.addEventListener('change', async () => {
+            const next = r.value;
+            if (!depositMode || next === depositMode) return;
+            const msg = next === 'gateway'
+                ? 'Switch deposits to Automatic via Afrstar?\n\nClients will pay through the Afrstar checkout and be credited automatically. Make sure the AFRSTAR_MERCHANT_* keys are set in Vercel and the callback URLs are saved in the Afrstar portal.'
+                : 'Switch deposits to Manual bank transfer?\n\nClients will see your bank details and you will approve each deposit. Gateway payments already started still complete automatically.';
+            if (!confirm(msg)) { renderDepositMode(); return; }
+            modeRadios().forEach(x => { x.disabled = true; });
+            try {
+                const { data, error } = await supabase.from('site_settings').update({ deposit_mode: next }).eq('id', 1).select('deposit_mode').maybeSingle();
+                if (error) throw error;
+                if (!data) throw new Error('Not saved: admin access required.');
+                depositMode = data.deposit_mode;
+                try { localStorage.removeItem('ax_site_settings_v1'); } catch {}
+                toast(`Deposits are now ${MODE_LABEL[depositMode]}.`);
+            } catch (ex) {
+                console.error(ex);
+                toast(ex.message || 'Could not change the deposit mode', false);
+            } finally {
+                modeRadios().forEach(x => { x.disabled = false; });
+                renderDepositMode();
+            }
+        }));
+        document.querySelectorAll('[data-origin-path]').forEach(el => { el.textContent = location.origin + el.dataset.originPath; });
+
         // --- init / admin guard ---
         let adminProfile = null;
         async function init() {
@@ -355,9 +435,7 @@
                 document.getElementById('tPhoneWrap').classList.toggle('hidden', !!profile.phone);
                 document.getElementById('authGuard').classList.add('hidden');
 
-                supabase.from('site_settings').select('payment_mode').eq('id', 1).maybeSingle().then(({ data }) => {
-                    document.getElementById('modeLink').textContent = (data?.payment_mode || 'manual') === 'gateway' ? 'Gateway (automatic)' : 'Manual';
-                });
+                loadDepositMode();
                 loadBalance();
                 loadActivity();
                 loadToday();

@@ -349,6 +349,7 @@
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+        import { bankByCode, guessBankCode } from '../src/ng-banks.js';
 
         lucide.createIcons();
 
@@ -402,7 +403,7 @@
             const cls = { gold: 'ax-badge ax-badge-accent', pos: 'ax-badge ax-badge-pos', neg: 'ax-badge ax-badge-neg', warn: 'ax-badge bg-amber-50 text-amber-700', plain: 'ax-badge' }[tone] || 'ax-badge';
             return `<span class="${cls} text-[10px] uppercase font-bold">${esc(text)}</span>`;
         }
-        const statusTone = (s) => ({ approved: 'pos', completed: 'pos', active: 'pos', pending: 'warn', rejected: 'neg', cancelled: 'neg', paused: 'warn', suspended: 'warn', banned: 'neg' }[s] || 'plain');
+        const statusTone = (s) => ({ approved: 'pos', completed: 'pos', active: 'pos', pending: 'warn', processing: 'gold', failed: 'neg', rejected: 'neg', cancelled: 'neg', paused: 'warn', suspended: 'warn', banned: 'neg' }[s] || 'plain');
 
         async function api(path, body) {
             const { data: { session } } = await supabase.auth.getSession();
@@ -783,20 +784,54 @@
                     <div>
                         <p class="text-base font-semibold mono">${naira(w.amount)} <span class="text-[10px] text-[var(--muted)] font-normal">fee ${naira(w.charge)} · pays ${naira(Number(w.amount) - Number(w.charge || 0))}</span></p>
                         <p class="text-[11px] text-[var(--muted)]">${esc(w.account_name || '—')} · ${esc(w.bank_name || '—')} · <span class="mono">${esc(w.account_number || '')}</span></p>
-                        <p class="text-[10px] text-[var(--muted)] mono">${when(w.created_at)}${w.processed_at ? ` · processed ${when(w.processed_at)}` : ''}</p>
+                        <p class="text-[10px] text-[var(--muted)] mono">${when(w.created_at)}${w.processed_at ? ` · processed ${when(w.processed_at)}` : ''}${w.order_sn ? ` · ${esc(w.order_sn)}` : ''}</p>
+                        ${w.gateway_message ? `<p class="text-[10px] text-[var(--muted)] mt-1">${esc(w.gateway_message)}</p>` : ''}
                     </div>
-                    ${w.status === 'pending' ? `<div class="flex gap-2">
-                        <button class="flex-1 px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-lg text-[11px] font-bold uppercase" onclick="withdrawalAction('${w.id}', 'complete', this)">Mark paid</button>
-                        <button class="flex-1 px-4 py-2.5 bg-red-50 text-red-600 rounded-lg text-[11px] font-bold uppercase" onclick="withdrawalAction('${w.id}', 'reject', this)">Reject &amp; refund</button>
-                    </div>` : badge(w.status === 'approved' ? 'paid' : w.status, statusTone(w.status))}
+                    ${wdActions(w)}
                 </div>`).join('') : empty('No withdrawals yet.');
         }
 
+        // Withdrawals are always gateway-based and need admin approval:
+        // Send to gateway (Afrstar payout), Mark as paid (paid outside the gateway) or Reject (refund).
+        let wdById = {};
+        function wdActions(w) {
+            wdById[w.id] = w;
+            if (w.status === 'processing' && !w.platform_osn) {
+                return `<div class="flex items-center gap-2">${badge('processing', 'gold')}
+                    <button class="px-4 py-2.5 bg-red-50 text-red-600 rounded-lg text-[11px] font-bold uppercase" title="Only if the Afrstar portal shows no payout for ${esc(w.order_sn || '')}" onclick="withdrawalAction('${w.id}', 'reject_stuck', this)">Reject &amp; refund</button></div>`;
+            }
+            if (w.status !== 'pending') return badge(w.status === 'approved' ? 'paid' : w.status === 'failed' ? 'failed · refunded' : w.status, statusTone(w.status));
+            return `<div class="grid grid-cols-2 sm:flex gap-2">
+                <button class="col-span-2 px-4 py-2.5 ax-fill text-white rounded-lg text-[11px] font-bold uppercase whitespace-nowrap" onclick="withdrawalAction('${w.id}', 'send_gateway', this)">Send to gateway</button>
+                <button class="px-4 py-2.5 bg-emerald-50 text-emerald-700 rounded-lg text-[11px] font-bold uppercase whitespace-nowrap" onclick="withdrawalAction('${w.id}', 'mark_paid', this)">Mark as paid</button>
+                <button class="px-4 py-2.5 bg-red-50 text-red-600 rounded-lg text-[11px] font-bold uppercase whitespace-nowrap" onclick="withdrawalAction('${w.id}', 'reject', this)">Reject</button>
+            </div>`;
+        }
+
         window.withdrawalAction = (id, action, btn) => busy(btn, async () => {
-            if (!confirm(action === 'complete' ? 'Mark this withdrawal as paid?' : 'Reject and refund this withdrawal to the wallet?')) return;
-            await api('/api/admin/withdrawals', { id, action });
-            toast(action === 'complete' ? 'Marked as paid' : 'Rejected and refunded');
-            await Promise.all([loadWithdrawals(), loadWallet()]);
+            const w = wdById[id] || {};
+            const net = Number(w.amount || 0) - Number(w.charge || 0);
+            const body = { id, action: action === 'reject_stuck' ? 'reject' : action };
+            let msg;
+            if (action === 'send_gateway') {
+                const bank = bankByCode(w.bank_code || guessBankCode(w.bank_name));
+                if (!bank) { toast(`Pick the bank for "${w.bank_name || 'this account'}" on the Withdrawals page before sending.`, false); return; }
+                body.bank_code = bank.code;
+                msg = `Send ${naira(net)} to ${w.account_name || ''}\n${bank.name} · ${w.account_number || ''}\n\nThe payout goes through Afrstar and shows as Processing until the gateway confirms.${w.bank_code ? '' : `\n\nBank matched from "${w.bank_name}". Check it is right.`}`;
+            } else if (action === 'mark_paid') {
+                msg = `Mark as paid?\n\nUse this only if you have already paid ${naira(net)} to ${w.bank_name || 'the client\'s bank'} (${w.account_number || '—'}) yourself, outside the gateway. No payout is sent; the client is notified.`;
+            } else if (action === 'reject_stuck') {
+                msg = `This payout was sent (order ${w.order_sn}) but the gateway never confirmed receiving it.\n\nOnly continue if the Afrstar portal shows NO payout for that order, otherwise the client could be paid twice.\n\nReject and refund ${naira(w.amount)} to the wallet?`;
+            } else {
+                msg = `Reject and refund ${naira(w.amount)} to the wallet?`;
+            }
+            if (!confirm(msg)) return;
+            try {
+                await api('/api/admin/withdrawals', body);
+                toast(action === 'send_gateway' ? 'Sent to gateway. Waiting for confirmation.' : action === 'mark_paid' ? 'Marked as paid' : 'Rejected and refunded');
+            } finally {
+                await Promise.all([loadWithdrawals(), loadWallet(), loadTransactions(), loadNotifications()]);
+            }
         });
 
         // --- Transactions ---

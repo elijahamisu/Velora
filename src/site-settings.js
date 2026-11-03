@@ -30,7 +30,11 @@ export const DEFAULTS = {
     maintenance_message: 'We are carrying out scheduled maintenance. Please check back shortly.',
     registration_open: true,
     announcement_text: '',
-    payment_mode: 'manual', // 'manual' (bank transfer + admin approval) | 'gateway' (Afrstar, automatic)
+    // Deposit mode, switched on admin/gateway.html: 'manual' (bank transfer +
+    // admin approval) | 'gateway' (Afrstar checkout, credited automatically).
+    // Withdrawals are always gateway-based (bank list + admin approval).
+    deposit_mode: 'manual',
+    payment_mode: 'manual', // legacy alias of deposit_mode, kept in sync by the DB
 };
 
 const MONEY_KEYS = ['min_deposit', 'max_deposit', 'min_withdrawal', 'max_withdrawal', 'welcome_bonus'];
@@ -57,6 +61,10 @@ function normalise(row) {
     }
     s.withdrawal_open_time = String(s.withdrawal_open_time || '00:00').slice(0, 5);
     s.withdrawal_close_time = String(s.withdrawal_close_time || '23:59').slice(0, 5);
+    // Older cached rows (before deposit_mode existed) only carry payment_mode.
+    if (row.deposit_mode === undefined && row.payment_mode) s.deposit_mode = row.payment_mode;
+    if (!['manual', 'gateway'].includes(s.deposit_mode)) s.deposit_mode = 'manual';
+    s.payment_mode = s.deposit_mode;
     if (!Array.isArray(s.withdrawal_days)) s.withdrawal_days = DEFAULTS.withdrawal_days;
     s.withdrawal_days = s.withdrawal_days.map(Number);
     return s;

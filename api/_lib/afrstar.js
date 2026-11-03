@@ -43,6 +43,14 @@ export function getConfig(env = process.env) {
 }
 
 /** Two-decimal string for a money value ("500" -> "500.00"). Throws on junk. */
+/** Deposit mode from a site_settings row: 'manual' | 'gateway'.
+ *  deposit_mode is the switch on admin/gateway.html; payment_mode is the
+ *  legacy column (kept in sync by a DB trigger) used only as a fallback. */
+export function depositMode(settings) {
+  const m = settings?.deposit_mode ?? settings?.payment_mode;
+  return m === 'gateway' ? 'gateway' : 'manual';
+}
+
 export function money(value) {
   const n = typeof value === 'string' ? Number(value.trim()) : Number(value);
   if (!Number.isFinite(n)) throw new Error(`Invalid amount: ${value}`);
