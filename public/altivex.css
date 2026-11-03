@@ -736,3 +736,81 @@ html body .ax-nav { border-bottom-color: var(--ax-hairline); }
 .ax-subnav .sidebar-item, .ax-tabbar .island-item { letter-spacing: 0.02em; }
 html body .rounded-\[10px\] { border-radius: 12px; }
 html body .rounded-\[14px\] { border-radius: 16px; }
+
+/* ==========================================================================
+   APP SHELL — user sidebar (rendered by src/user-shell.js)
+   md and up: persistent left sidebar · below md: slide-in drawer from the ☰
+   button with overlay. The bottom tab bar stays on mobile only.
+   ========================================================================== */
+:root { --ax-side: 260px; }
+html body #mobileDrawer.ax-side {
+    position: fixed; top: 0; bottom: 0; left: 0; right: auto; z-index: 70;
+    width: min(86vw, 312px);
+    display: flex; flex-direction: column;
+    overflow-y: auto; overscroll-behavior: contain;
+    background: linear-gradient(180deg, #10182A, #0C1322);
+    border-left: 0; border-right: 1px solid var(--ax-border);
+    transform: translateX(-100%); transition: transform .26s cubic-bezier(.32,.72,0,1);
+}
+html body #mobileDrawer.ax-side.open { transform: translateX(0); box-shadow: 24px 0 60px -30px rgba(0,0,0,.7); }
+.ax-side .ax-sheet-head { height: var(--ax-top); padding: 0 14px 0 18px; flex: none; }
+.ax-side .ax-side-account { padding: 16px 18px; align-items: flex-start; transition: background .12s ease; flex: none; }
+.ax-side .ax-side-account:hover { background: rgba(255,255,255,0.025); }
+.ax-side .ax-side-meta { display: block; margin-top: 4px; font-size: 11px; color: var(--ax-faint); }
+.ax-side .ax-side-meta:has(> span:empty) { display: none; }
+.ax-side .ax-side-bal span { color: var(--ax-text); }
+.ax-side .ax-sheet-nav { flex: 1; display: flex; flex-direction: column; padding: 6px 10px 16px; }
+.ax-side .ax-sheet-label { padding: 14px 10px 6px; }
+.ax-side .ax-sheet-nav .drawer-item { height: 42px; font-size: 14px; }
+.ax-side .ax-sheet-nav .drawer-item.drawer-active,
+.ax-side .ax-sheet-nav .drawer-item.sidebar-active { background: var(--ax-s2); color: var(--ax-text); box-shadow: inset 2px 0 0 var(--ax-accent); }
+.ax-side .ax-sheet-nav .drawer-item.drawer-active svg,
+.ax-side .ax-sheet-nav .drawer-item.sidebar-active svg { color: var(--ax-accent); }
+.ax-side .ax-side-ext { margin-top: 10px; }
+.ax-side .ax-side-ext svg { color: #AFC0DA; }
+.ax-side .ax-sheet-nav .drawer-item .ax-side-ext-icon { width: 14px; height: 14px; margin-left: auto; color: var(--ax-faint); }
+.ax-side .ax-sheet-nav > .ax-divider { margin-top: auto; }
+.ax-nav-toggle { flex: none; }
+
+@media (min-width: 768px) {
+    html body #mobileDrawer.ax-side { width: var(--ax-side); transform: none; transition: none; box-shadow: none; z-index: 46; }
+    html body.ax-has-side #drawerOverlay { display: none; }
+    .ax-side .ax-side-close, .ax-nav-toggle { display: none; }
+    html body.ax-has-side .ax-topbar { left: var(--ax-side); }
+    html body.ax-has-side .ax-topbar-inner { max-width: none; }
+    html body.ax-has-side .ax-topbar a[aria-label="Altivex home"] { display: none; }
+    html body.ax-has-side .ax-topbar .ax-crumb { font-family: var(--ax-font-display); font-size: 20px; font-weight: 600; color: var(--ax-text); }
+    html body.ax-has-side .ax-topbar .ax-crumb::before { display: none; }
+    html body.ax-has-side main.ax-main { margin-left: var(--ax-side); padding-top: calc(var(--ax-top) + 28px); padding-bottom: 56px; }
+    html body.ax-has-side #islandNav.ax-tabbar { display: none; }
+    html body.ax-has-side .ax-subnav { display: none; }
+}
+@media (min-width: 1280px) {
+    html body.ax-has-side main.ax-main { padding-left: 36px; padding-right: 36px; }
+}
+
+/* Profile photo inside .ax-avatar (shell-managed: photo, else initials) */
+.ax-avatar.ax-av-managed > :not(.ax-av-img):not(.ax-av-ini) { display: none !important; }
+.ax-avatar .ax-av-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ax-avatar .ax-av-img[hidden] { display: none; }
+.ax-avatar.ax-av-has-img { background: var(--ax-s2); }
+.ax-avatar.ax-av-has-img .ax-av-ini { display: none; }
+.ax-avatar .ax-av-ini { font-size: 12px; letter-spacing: 0.02em; line-height: 1; }
+.ax-avatar-lg .ax-av-ini { font-size: 17px; }
+.ax-avatar-btn-solo { padding: 0 3px; }
+
+/* Register: optional photo picker */
+.ax-photo-pick { display: flex; align-items: center; gap: 16px; padding: 14px; border: 1px dashed var(--ax-border-strong); border-radius: var(--ax-r); background: rgba(255,255,255,0.015); }
+.ax-photo-circle {
+    position: relative; width: 72px; height: 72px; border-radius: 50%; flex: none; overflow: hidden; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--ax-accent-soft); border: 1px solid var(--ax-accent-line); color: var(--ax-accent);
+}
+.ax-photo-circle img { width: 100%; height: 100%; object-fit: cover; }
+.ax-photo-circle svg { width: 26px; height: 26px; }
+/* Top bar on small phones: ☰ + logo mark + page title (wordmark hidden so the title fits) */
+html body.ax-has-side .ax-topbar a[aria-label="Back to dashboard"] { display: none; }
+@media (max-width: 479px) {
+    html body.ax-has-side .ax-topbar .ax-logo > span { display: none; }
+    html body.ax-has-side .ax-topbar .ax-crumb { color: var(--ax-text); }
+}

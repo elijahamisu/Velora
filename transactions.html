@@ -53,6 +53,7 @@
         }
     </style>
     <link rel="stylesheet" href="/altivex.css">
+    <script type="module" src="/src/user-shell.js"></script>
 </head>
 <body class="bg-[var(--paper)]">
 
@@ -84,53 +85,7 @@
         </div>
     </header>
 
-    <!-- ============ Desktop section nav (id kept as "sidebar" for scripts) ============ -->
-    <nav id="sidebar" class="ax-subnav no-print" aria-label="Sections">
-        <div class="ax-subnav-inner" id="sidebarNav">
-            <a href="dashboard.html" data-page="dashboard" class="sidebar-item"><i data-lucide="layout-grid"></i>Overview</a>
-            <a href="invest.html" data-page="invest" class="sidebar-item"><i data-lucide="trending-up"></i>Invest</a>
-            <a href="deposit.html" data-page="deposit" class="sidebar-item"><i data-lucide="arrow-down-left"></i>Deposit</a>
-            <a href="withdraw.html" data-page="withdraw" class="sidebar-item"><i data-lucide="arrow-up-right"></i>Withdraw</a>
-            <a href="wallet.html" data-page="wallet" class="sidebar-item"><i data-lucide="wallet"></i>Wallet</a>
-            <a href="transactions.html" data-page="transactions" class="sidebar-item"><i data-lucide="list"></i>Transactions</a>
-            <a href="referral.html" data-page="referral" class="sidebar-item"><i data-lucide="users"></i>Referrals</a>
-            <a href="gift.html" data-page="gift" class="sidebar-item"><i data-lucide="gift"></i>Gift codes</a>
-            <a href="support.html" data-page="support" class="sidebar-item"><i data-lucide="life-buoy"></i>Support</a>
-            <span class="ax-subnav-spacer"></span>
-            <button id="logoutBtn" class="sidebar-item ax-subnav-logout"><i data-lucide="log-out"></i>Log out</button>
-        </div>
-    </nav>
-
-    <!-- ============ Account sheet (opens from the avatar button) ============ -->
-    <div id="drawerOverlay" class="no-print"></div>
-    <aside id="mobileDrawer" class="no-print" aria-label="Account menu">
-        <div class="ax-sheet-head">
-            <span class="ax-logo ax-logo-sm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6 22.4 12 12 22.4 1.6 12z" fill="none" stroke="#D9C7A3" stroke-width="1.1"/><path d="M8.2 16.2 12 7.4l3.8 8.8M9.6 13.1h4.8" fill="none" stroke="#D9C7A3" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Altivex</span></span>
-            <button id="drawerClose" aria-label="Close menu" class="ax-icon-btn"><i data-lucide="x"></i></button>
-        </div>
-        <div class="ax-sheet-account">
-            <span class="ax-avatar ax-avatar-lg"><i data-lucide="user-round"></i></span>
-            <div class="min-w-0">
-                <p class="text-sm font-semibold text-white truncate">Your account</p><p class="text-[11px] text-[var(--ax-muted)] truncate">Wallet <span id="drawerBalance" class="mono text-[var(--ax-accent)] font-semibold">₦0.00</span></p>
-            </div>
-        </div>
-        <nav class="ax-sheet-nav" id="drawerNav">
-            <p class="ax-sheet-label">Money</p>
-            <a href="dashboard.html" data-page="dashboard" class="drawer-item"><i data-lucide="layout-grid"></i><span>Overview</span></a>
-            <a href="invest.html" data-page="invest" class="drawer-item"><i data-lucide="trending-up"></i><span>Invest</span></a>
-            <a href="deposit.html" data-page="deposit" class="drawer-item"><i data-lucide="arrow-down-left"></i><span>Deposit</span></a>
-            <a href="withdraw.html" data-page="withdraw" class="drawer-item"><i data-lucide="arrow-up-right"></i><span>Withdraw</span></a>
-            <a href="wallet.html" data-page="wallet" class="drawer-item"><i data-lucide="wallet"></i><span>Wallet</span></a>
-            <a href="transactions.html" data-page="transactions" class="drawer-item"><i data-lucide="list"></i><span>Transactions</span></a>
-            <p class="ax-sheet-label">Account</p>
-            <a href="referral.html" data-page="referral" class="drawer-item"><i data-lucide="users"></i><span>Referrals</span></a>
-            <a href="gift.html" data-page="gift" class="drawer-item"><i data-lucide="gift"></i><span>Gift codes</span></a>
-            <a href="profile.html" data-page="profile" class="drawer-item"><i data-lucide="user-round"></i><span>Profile & security</span></a>
-            <a href="support.html" data-page="support" class="drawer-item"><i data-lucide="life-buoy"></i><span>Support</span></a>
-            <div class="ax-divider my-2"></div>
-            <button id="drawerLogoutBtn" class="drawer-item ax-logout"><i data-lucide="log-out"></i><span>Log out</span></button>
-        </nav>
-    </aside>
+    <!-- ============ Sidebar (md+) / slide-in drawer (mobile): rendered by src/user-shell.js ============ -->
 
     <!-- ============ Mobile tab bar (id kept as "islandNav" for scripts) ============ -->
     <nav id="islandNav" class="ax-tabbar no-print" aria-label="Tabs">

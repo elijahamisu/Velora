@@ -395,6 +395,16 @@
             return `<div class="flex gap-2">${details}<button onclick="openManageModal('${u.id}')" class="flex-1 px-3 py-2.5 bg-black/5 hover:bg-black/10 rounded-lg text-[11px] font-bold uppercase transition">Quick Manage</button></div>`;
         }
 
+        function escHtml(v) {
+            return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+        // User photo (profiles.avatar_url) in a circle, initials when there is none or it fails to load
+        function userAvatar(u, size) {
+            const initial = escHtml((u.full_name || '?').trim().charAt(0).toUpperCase() || '?');
+            const url = /^https:\/\//i.test(u.avatar_url || '') ? escHtml(u.avatar_url) : '';
+            return `<div class="${size} shrink-0 rounded-full ax-fill flex items-center justify-center text-white ax-display font-semibold text-sm overflow-hidden relative">${initial}${url ? `<img src="${url}" alt="" loading="lazy" referrerpolicy="no-referrer" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">` : ''}</div>`;
+        }
+
         function renderUsers(list) {
             const cards = document.getElementById('usersCards');
             const body = document.getElementById('usersBody');
@@ -413,10 +423,10 @@
                     <div class="p-5">
                         <div class="flex items-start justify-between gap-3 mb-3">
                             <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-10 h-10 shrink-0 rounded-lg ax-fill flex items-center justify-center text-white ax-display font-semibold text-sm">${(u.full_name || '?').charAt(0).toUpperCase()}</div>
+                                ${userAvatar(u, 'w-10 h-10')}
                                 <div class="min-w-0">
-                                    <p class="text-sm font-semibold text-[var(--ink-text)] truncate">${u.full_name || 'Unnamed'}</p>
-                                    <p class="text-[10px] text-[var(--muted)] mono truncate">${u.phone || u.email || '—'}</p>
+                                    <p class="text-sm font-semibold text-[var(--ink-text)] truncate">${escHtml(u.full_name || 'Unnamed')}</p>
+                                    <p class="text-[10px] text-[var(--muted)] mono truncate">${escHtml(u.phone || u.email || '—')}</p>
                                 </div>
                             </div>
                             <div class="flex flex-col items-end gap-1">${roleBadge(u.role, isAdmin)}${statusBadge(u.status)}</div>
@@ -450,10 +460,10 @@
                     <tr class="hover:bg-black/[0.015] transition">
                         <td class="px-8 py-5">
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-lg ax-fill flex items-center justify-center text-white ax-display font-semibold text-sm">${(u.full_name || '?').charAt(0).toUpperCase()}</div>
+                                ${userAvatar(u, 'w-9 h-9')}
                                 <div>
-                                    <a href="${detailsHref(u)}" class="text-sm font-semibold text-[var(--ink-text)] hover:underline">${u.full_name || 'Unnamed'}</a>
-                                    <p class="text-[10px] text-[var(--muted)] mono">${u.phone || u.email || '—'}</p>
+                                    <a href="${detailsHref(u)}" class="text-sm font-semibold text-[var(--ink-text)] hover:underline">${escHtml(u.full_name || 'Unnamed')}</a>
+                                    <p class="text-[10px] text-[var(--muted)] mono">${escHtml(u.phone || u.email || '—')}</p>
                                 </div>
                             </div>
                         </td>

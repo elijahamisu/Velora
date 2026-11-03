@@ -118,6 +118,23 @@
                     </div>
                     </div>
 
+                    <div class="input-group">
+                        <span class="ax-label">Profile photo (Optional)</span>
+                        <div class="ax-photo-pick">
+                            <label for="avatarInput" id="avatarPreview" class="ax-photo-circle" aria-label="Choose a profile photo"><i data-lucide="camera"></i></label>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-[13px] text-white font-medium">Add a profile photo</p>
+                                <p class="text-[12px] text-[var(--ax-faint)] mt-0.5">JPG, PNG or WebP. We crop and resize it for you; you can change it later.</p>
+                                <div class="flex flex-wrap gap-2 mt-2.5">
+                                    <label for="avatarInput" class="ax-btn ax-btn-sm cursor-pointer"><i data-lucide="image-up"></i><span id="avatarPickLabel">Choose photo</span></label>
+                                    <button type="button" id="avatarClear" class="ax-btn ax-btn-sm ax-btn-ghost hidden">Remove</button>
+                                </div>
+                                <p id="avatarErr" class="hidden text-[12px] text-red-400 mt-2"></p>
+                            </div>
+                            <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp" class="hidden">
+                        </div>
+                    </div>
+
                     <button type="submit" id="submitBtn" class="ax-btn ax-btn-primary ax-btn-lg ax-btn-block mt-2">
                         <span id="btnText">Create account</span>
                         <div id="loader" class="loader hidden"></div>
@@ -135,6 +152,7 @@
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
         import * as AX from './src/site-settings.js';
+        import { prepareAvatar, uploadAvatar } from './src/avatar.js';
 
         lucide.createIcons();
 
@@ -177,6 +195,46 @@
                 lucide.createIcons();
             });
         });
+
+        // 2. Optional profile photo: validated + resized to 512px on pick, uploaded after sign-up
+        let avatarPrepared = null;
+        let avatarPreviewUrl = null;
+        const avatarInput = document.getElementById('avatarInput');
+        const avatarPreview = document.getElementById('avatarPreview');
+        const avatarErr = document.getElementById('avatarErr');
+        const avatarClear = document.getElementById('avatarClear');
+        function resetAvatar() {
+            avatarPrepared = null;
+            if (avatarPreviewUrl) URL.revokeObjectURL(avatarPreviewUrl);
+            avatarPreviewUrl = null;
+            avatarPreview.innerHTML = '<i data-lucide="camera"></i>';
+            avatarClear.classList.add('hidden');
+            document.getElementById('avatarPickLabel').textContent = 'Choose photo';
+            lucide.createIcons();
+        }
+        avatarInput.addEventListener('change', async () => {
+            const file = avatarInput.files[0];
+            avatarInput.value = '';
+            if (!file) return;
+            avatarErr.classList.add('hidden');
+            try {
+                const prepared = await prepareAvatar(file);
+                resetAvatar();
+                avatarPrepared = prepared;
+                avatarPreviewUrl = URL.createObjectURL(prepared.blob);
+                const img = document.createElement('img');
+                img.src = avatarPreviewUrl;
+                img.alt = 'Selected profile photo';
+                avatarPreview.replaceChildren(img);
+                avatarClear.classList.remove('hidden');
+                document.getElementById('avatarPickLabel').textContent = 'Change';
+            } catch (err) {
+                resetAvatar();
+                avatarErr.textContent = err.message || 'Could not use that image.';
+                avatarErr.classList.remove('hidden');
+            }
+        });
+        avatarClear.addEventListener('click', () => { resetAvatar(); avatarErr.classList.add('hidden'); });
 
         // 3. Register Logic
         form.addEventListener('submit', async (e) => {
@@ -258,11 +316,28 @@
                     }
                 }
 
+                // Step C: Optional profile photo. Never blocks sign-up: a failed
+                // upload only shows a soft note (the photo can be added later
+                // from Profile).
+                let photoNote = '';
+                if (avatarPrepared) {
+                    if (authData.session) {
+                        try {
+                            await uploadAvatar(supabase, userId, avatarPrepared);
+                        } catch (photoErr) {
+                            console.error('Profile photo upload failed:', photoErr?.message);
+                            photoNote = ' Your photo could not be uploaded; you can add it later from your profile.';
+                        }
+                    } else {
+                        photoNote = ' You can add your photo from your profile after signing in.';
+                    }
+                }
+
                 // Success!
-                showMsg('Account created! Welcome bonus credited.' + giftNote, 'success');
+                showMsg('Account created! Welcome bonus credited.' + giftNote + photoNote, photoNote ? 'warn' : 'success');
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
-                }, giftNote ? 3500 : 1000);
+                }, (giftNote || photoNote) ? 3500 : 1000);
 
             } catch (err) {
                 showMsg(err.message, 'error');
@@ -281,6 +356,8 @@
             statusMsg.classList.remove('hidden');
             if (type === 'error') {
                 statusMsg.classList.add('bg-red-50', 'text-red-600', 'border-red-100');
+            } else if (type === 'warn') {
+                statusMsg.classList.add('bg-amber-50', 'text-amber-700', 'border-amber-100');
             } else {
                 statusMsg.classList.add('bg-green-50', 'text-green-600', 'border-green-100');
             }

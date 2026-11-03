@@ -1629,3 +1629,72 @@ begin
 
   return wid;
 end; $$;
+
+-- ============================================================================
+-- Profile photos + storage hardening (Nov 2026)
+--   · avatars bucket: public read (public bucket URLs), 2 MB, jpeg/png/webp
+--   · support-screenshots bucket: public read, 5 MB, jpeg/png/webp/gif
+--   · writes only inside the caller's own "<uid>/" folder; listing/select via
+--     the API only for your own folder (or admins), so nobody can enumerate
+--     other users' files. Public object URLs keep working without a policy.
+--   · profiles.avatar_url (non-admin edits) must point into the caller's own
+--     avatars/<uid>/ folder, so it can't be set to an arbitrary external URL.
+-- ============================================================================
+insert into storage.buckets (id, name, public) values ('avatars','avatars', true) on conflict (id) do nothing;
+insert into storage.buckets (id, name, public) values ('support-screenshots','support-screenshots', true) on conflict (id) do nothing;
+update storage.buckets set public = true, file_size_limit = 2097152,
+       allowed_mime_types = array['image/jpeg','image/png','image/webp']
+ where id = 'avatars';
+update storage.buckets set public = true, file_size_limit = 5242880,
+       allowed_mime_types = array['image/jpeg','image/png','image/webp','image/gif']
+ where id = 'support-screenshots';
+
+drop policy if exists "auth upload altivex" on storage.objects;
+drop policy if exists "auth update altivex" on storage.objects;
+drop policy if exists "public read altivex" on storage.objects;
+drop policy if exists "altivex own folder select" on storage.objects;
+drop policy if exists "altivex own folder insert" on storage.objects;
+drop policy if exists "altivex avatars own update" on storage.objects;
+drop policy if exists "altivex avatars own delete" on storage.objects;
+drop policy if exists "altivex admin storage" on storage.objects;
+
+create policy "altivex own folder select" on storage.objects for select to authenticated
+  using (bucket_id in ('avatars','support-screenshots')
+         and (storage.foldername(name))[1] = auth.uid()::text);
+create policy "altivex own folder insert" on storage.objects for insert to authenticated
+  with check (bucket_id in ('avatars','support-screenshots')
+              and (storage.foldername(name))[1] = auth.uid()::text);
+create policy "altivex avatars own update" on storage.objects for update to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text)
+  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+create policy "altivex avatars own delete" on storage.objects for delete to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+create policy "altivex admin storage" on storage.objects for all to authenticated
+  using (bucket_id in ('avatars','support-screenshots') and public.is_admin())
+  with check (bucket_id in ('avatars','support-screenshots') and public.is_admin());
+
+create or replace function public.protect_role() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is not null and not public.is_admin() then
+    new.id := old.id;
+    new.role := old.role;
+    new.status := old.status;
+    new.status_reason := old.status_reason;
+    new.status_changed_at := old.status_changed_at;
+    new.email := old.email;
+    new.referral_code := old.referral_code;
+    new.referred_by := old.referred_by;
+    new.created_at := old.created_at;
+    if new.avatar_url is distinct from old.avatar_url and new.avatar_url is not null
+       and new.avatar_url !~ ('^https://bqycpupnmjkqqnzujotp\.supabase\.co/storage/v1/object/public/avatars/'
+                              || auth.uid()::text || '/[A-Za-z0-9._-]+$') then
+      raise exception 'Profile photo must be uploaded through Altivex.' using errcode = '22023';
+    end if;
+  end if;
+  if new.status is distinct from old.status then
+    new.status_changed_at := now();
+  end if;
+  new.updated_at := now();
+  return new;
+end; $$;

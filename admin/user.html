@@ -508,8 +508,15 @@
             document.getElementById('uName').textContent = name;
             document.getElementById('uEmail').textContent = [profile.email, profile.phone].filter(Boolean).join(' · ') || '—';
             const av = document.getElementById('uAvatar');
-            if (profile.avatar_url) av.innerHTML = `<img src="${esc(profile.avatar_url)}" alt="" class="w-full h-full object-cover">`;
-            else av.textContent = name.charAt(0).toUpperCase();
+            av.classList.remove('rounded-[12px]'); av.classList.add('rounded-full');
+            av.textContent = name.charAt(0).toUpperCase();
+            if (profile.avatar_url && /^https:\/\//i.test(profile.avatar_url)) {
+                const img = document.createElement('img');
+                img.src = profile.avatar_url; img.alt = ''; img.referrerPolicy = 'no-referrer';
+                img.className = 'w-full h-full object-cover';
+                img.onerror = () => { av.textContent = name.charAt(0).toUpperCase(); };
+                av.replaceChildren(img);
+            }
             const status = profile.status || 'active';
             document.getElementById('uBadges').innerHTML =
                 badge(profile.role || 'user', ['admin', 'super_admin'].includes(profile.role) ? 'gold' : 'plain') +
