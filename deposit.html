@@ -611,36 +611,14 @@
             setLoading(true);
 
             try {
-                // 1. Create Deposit Record
-                const { error: depErr } = await supabase
-                    .from('deposits')
-                    .insert([{
-                        user_id: user.id,
-                        amount: amount,
-                        account_name: accountName,
-                        bank_name: bankName,
-                        status: 'pending'
-                    }]);
-
+                // Server-side: creates the pending deposit (limits enforced),
+                // its pending transaction log and the notification together.
+                const { error: depErr } = await supabase.rpc('user_create_deposit', {
+                    p_amount: amount,
+                    p_account_name: accountName,
+                    p_bank_name: bankName
+                });
                 if (depErr) throw depErr;
-
-                // 2. Create Pending Transaction Record
-                // transactions table has no `status` column — pending/completed
-                // state lives on the `deposits` table row instead, not here.
-                const { error: depTxErr } = await supabase.from('transactions').insert([{
-                    user_id: user.id,
-                    amount: amount,
-                    type: 'deposit',
-                    description: `Deposit from ${accountName} (${bankName}) — pending`
-                }]);
-                if (depTxErr) console.error('Transaction log error:', depTxErr.message);
-
-                // 3. Create Notification
-                await supabase.from('notifications').insert([{
-                    user_id: user.id,
-                    title: 'Deposit Received',
-                    message: `Your deposit of ₦${amount.toLocaleString()} is being verified. It will reflect in your wallet once approved.`
-                }]);
 
                 showSuccessStep();
                 document.getElementById('depositAmount').value = '';

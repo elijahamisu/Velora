@@ -592,51 +592,14 @@
             setModalLoading(true);
 
             try {
-                // 1. Create Investment Record FIRST — using the real investments
-                //    table columns (plan_id, amount_invested, daily_earning_amount,
-                //    remaining_days), not "amount"/"daily_roi_pct" which don't exist.
-                //    We do this before touching the wallet so that if it fails,
-                //    no money has left the user's balance.
-                const dailyEarningAmount = amount * plan.dailyRoiPct / 100;
-
-                const { data: investData, error: investErr } = await supabase
-                    .from('investments')
-                    .insert([{
-                        user_id: user.id,
-                        plan_id: plan.id,
-                        amount_invested: amount,
-                        daily_earning_amount: dailyEarningAmount,
-                        remaining_days: plan.durationDays,
-                        status: 'active'
-                    }])
-                    .select()
-                    .single();
-
-                if (investErr) throw investErr;
-
-                // 2. Deduct Balance — column is available_balance, not balance.
-                //    If this fails, roll back the investment record we just created
-                //    so the two stay in sync (no debit without a matching investment,
-                //    and no investment without a matching debit).
-                const { error: walletErr } = await supabase
-                    .from('wallets')
-                    .update({ available_balance: currentBalance - amount })
-                    .eq('user_id', user.id);
-
-                if (walletErr) {
-                    await supabase.from('investments').delete().eq('id', investData.id);
-                    throw walletErr;
-                }
-
-                // 3. Create Transaction Record
-                // transactions table has no `status` column.
-                const { error: txErr } = await supabase.from('transactions').insert([{
-                    user_id: user.id,
-                    amount: amount,
-                    type: 'investment',
-                    description: `Committed ₦${amount} to the ${plan.name}`
-                }]);
-                if (txErr) console.error('Transaction log error:', txErr.message);
+                // One atomic server-side call: validates the plan (active, price),
+                // account status and balance, debits the wallet, creates the
+                // investment and logs the transaction.
+                const { error: rpcErr } = await supabase.rpc('user_invest', {
+                    p_plan_id: plan.id,
+                    p_amount: amount
+                });
+                if (rpcErr) throw rpcErr;
 
                 window.location.href = 'dashboard.html';
 

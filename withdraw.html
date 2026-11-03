@@ -547,55 +547,17 @@
             setLoading(true);
 
             try {
-                // 1. Create Withdrawal Record FIRST — so a failed wallet update
-                //    can never leave the user debited without a matching record.
-                const { data: withdrawData, error: withdrawErr } = await supabase
-                    .from('withdrawals')
-                    .insert([{
-                        user_id: user.id,
-                        amount: amount,
-                        charge: charge,
-                        bank_name: bankName,
-                        bank_code: bankCode,
-                        account_number: accNum,
-                        account_name: accName,
-                        status: 'pending'
-                    }])
-                    .select()
-                    .single();
-
-                if (withdrawErr) throw withdrawErr;
-
-                // 2. Reduce Wallet Balance — column is available_balance, not balance.
-                //    Roll back the withdrawal record if this fails.
-                const { error: walletErr } = await supabase
-                    .from('wallets')
-                    .update({ available_balance: availableBalance - amount })
-                    .eq('user_id', user.id);
-
-                if (walletErr) {
-                    await supabase.from('withdrawals').delete().eq('id', withdrawData.id);
-                    throw walletErr;
-                }
-
-                // 3. Create Transaction
-                // transactions table has no `status` column — pending/completed
-                // state lives on the `withdrawals` table row instead, not here.
-                const { error: txErr } = await supabase.from('transactions').insert([{
-                    user_id: user.id,
-                    amount: amount,
-                    type: 'withdrawal',
-                    description: `Withdrawal request to ${bankName} (${accNum}) — pending`
-                }]);
-                if (txErr) console.error('Transaction log error:', txErr.message);
-
-                // 4. Notification
-                const { error: notifErr } = await supabase.from('notifications').insert([{
-                    user_id: user.id,
-                    title: 'Withdrawal Pending',
-                    message: `Your request for ${naira(amount)} is being reviewed.`
-                }]);
-                if (notifErr) console.error('Notification error:', notifErr.message);
+                // One atomic server-side call: validates status, limits, window,
+                // active investment and balance, debits the wallet, creates the
+                // pending withdrawal, the transaction log and the notification.
+                const { error: rpcErr } = await supabase.rpc('user_request_withdrawal', {
+                    p_amount: amount,
+                    p_bank_name: bankName,
+                    p_bank_code: bankCode,
+                    p_account_number: accNum,
+                    p_account_name: accName
+                });
+                if (rpcErr) throw rpcErr;
 
                 alert('Withdrawal request submitted successfully.');
                 location.reload();

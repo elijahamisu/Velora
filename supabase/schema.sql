@@ -954,3 +954,301 @@ grant execute on function public.gateway_apply_admin(text,text,text,int,numeric,
 -- Helps the deposit result page and the admin lists.
 create index if not exists deposits_method_created_idx on public.deposits (method, created_at desc);
 create index if not exists withdrawals_method_created_idx on public.withdrawals (method, created_at desc);
+
+-- ============================================================================
+-- Security lockdown (Nov 2026): users can no longer write money tables
+-- directly. Every money-moving user action goes through a SECURITY DEFINER
+-- RPC that validates server-side with auth.uid(), locks the wallet row and
+-- writes the debit/credit, the row, and the transaction log atomically.
+-- ============================================================================
+
+-- ---------- 0. Hygiene: API roles never need TRUNCATE / TRIGGER / REFERENCES
+revoke truncate, trigger, references on all tables in schema public from anon, authenticated;
+
+-- ---------- 1. wallets: read own only; writes only via definer functions / service role
+drop policy if exists own_all on public.wallets;
+drop policy if exists active_only_upd on public.wallets;
+drop policy if exists own_select on public.wallets;
+create policy own_select on public.wallets for select using (user_id = auth.uid());
+revoke insert, update, delete on public.wallets from anon, authenticated;
+
+-- ---------- 2. investments: read own (plus referral_active); create via user_invest()
+drop policy if exists own_all on public.investments;
+drop policy if exists own_select on public.investments;
+create policy own_select on public.investments for select using (user_id = auth.uid());
+
+-- ---------- 3. transactions: no self-inserted ledger rows
+drop policy if exists own_ins on public.transactions;
+
+-- ---------- 4. withdrawals: read own; create via user_request_withdrawal()
+drop policy if exists own_all on public.withdrawals;
+drop policy if exists own_select on public.withdrawals;
+create policy own_select on public.withdrawals for select using (user_id = auth.uid());
+revoke insert, update, delete on public.withdrawals from anon, authenticated;
+
+-- ---------- 5. deposits: read own; manual requests via user_create_deposit()
+drop policy if exists own_ins on public.deposits;
+
+-- ---------- 6. gift codes: users can neither list nor edit codes
+drop policy if exists read_codes on public.gift_codes;
+drop policy if exists use_codes on public.gift_codes;
+drop policy if exists active_only_upd on public.gift_codes;
+drop policy if exists own_all on public.gift_redemptions;
+drop policy if exists own_select on public.gift_redemptions;
+create policy own_select on public.gift_redemptions for select using (user_id = auth.uid());
+
+-- ---------- 7. notifications: read own, mark read, delete own; never create
+drop policy if exists own_all on public.notifications;
+drop policy if exists own_select on public.notifications;
+drop policy if exists own_update on public.notifications;
+drop policy if exists own_delete on public.notifications;
+create policy own_select on public.notifications for select using (user_id = auth.uid());
+create policy own_update on public.notifications for update using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy own_delete on public.notifications for delete using (user_id = auth.uid());
+-- Column-level: non-admin updates can only touch is_read. Admins insert through
+-- admin_all (INSERT stays granted) and never update notifications from the UI.
+revoke update on public.notifications from anon, authenticated;
+grant update (is_read) on public.notifications to authenticated;
+
+-- ---------- 8. profiles: users may edit name/phone/avatar/terms only
+create or replace function public.protect_role()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  if auth.uid() is not null and not public.is_admin() then
+    new.id := old.id;
+    new.role := old.role;
+    new.status := old.status;
+    new.status_reason := old.status_reason;
+    new.status_changed_at := old.status_changed_at;
+    new.admin_notes := old.admin_notes;
+    new.email := old.email;
+    new.referral_code := old.referral_code;
+    new.referred_by := old.referred_by;
+    new.created_at := old.created_at;
+  end if;
+  if new.status is distinct from old.status then
+    new.status_changed_at := now();
+  end if;
+  new.updated_at := now();
+  return new;
+end; $$;
+
+-- ---------- 9. Functions anyone could call
+-- increment_balance(row_id, amt) credited ANY wallet by ANY amount for anon/authenticated.
+revoke execute on function public.increment_balance(uuid, numeric) from public, anon, authenticated;
+grant execute on function public.increment_balance(uuid, numeric) to service_role;
+-- Daily earnings run from pg_cron as postgres only.
+revoke execute on function public.process_daily_earnings() from public, anon, authenticated;
+grant execute on function public.process_daily_earnings() to service_role;
+-- Trigger functions are not callable as RPCs anyway; tidy their grants.
+revoke execute on function public.enforce_deposit_limits() from public, anon, authenticated;
+revoke execute on function public.enforce_withdrawal_rules() from public, anon, authenticated;
+revoke execute on function public.protect_withdrawals() from public, anon, authenticated;
+revoke execute on function public.protect_role() from public, anon, authenticated;
+revoke execute on function public.touch_site_settings() from public, anon, authenticated;
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+grant execute on function public.handle_new_user() to supabase_auth_admin, service_role;
+-- Admin RPCs: authenticated may call, each checks is_admin(); never anon.
+revoke execute on function public.admin_set_wallet(uuid,numeric,numeric,numeric,numeric,numeric,numeric,numeric,text) from public, anon;
+revoke execute on function public.admin_approve_deposit(uuid) from public, anon;
+revoke execute on function public.admin_reject_deposit(uuid) from public, anon;
+
+-- ---------- 10. User RPCs ---------------------------------------------------
+
+-- Withdrawal request: validates and debits available_balance atomically.
+-- The enforce_withdrawal_rules trigger still runs on the insert (min/max,
+-- days/hours, fee, sanitised gateway columns); the checks below give the
+-- same errors before anything is written. The row is 'pending' and stays
+-- compatible with admin Complete / Reject (refund) / Send to gateway.
+create or replace function public.user_request_withdrawal(
+  p_amount numeric, p_bank_name text, p_bank_code text, p_account_number text, p_account_name text
+) returns uuid
+language plpgsql security definer set search_path = public as $$
+declare
+  uid uuid := auth.uid();
+  s public.site_settings;
+  w public.wallets;
+  amt numeric := round(coalesce(p_amount, 0), 2);
+  acct text := regexp_replace(coalesce(p_account_number, ''), '\s', '', 'g');
+  bname text := nullif(trim(coalesce(p_bank_name, '')), '');
+  aname text := nullif(trim(coalesce(p_account_name, '')), '');
+  bcode text := nullif(trim(coalesce(p_bank_code, '')), '');
+  lagos timestamp := now() at time zone 'Africa/Lagos';
+  t time := (now() at time zone 'Africa/Lagos')::time;
+  wid uuid;
+begin
+  if uid is null then raise exception 'Please sign in again.'; end if;
+  if not public.is_active_user() then raise exception 'Your account is not active. Contact support.'; end if;
+  if amt <= 0 then raise exception 'Enter a valid amount.'; end if;
+  if bname is null then raise exception 'Select your bank.'; end if;
+  if acct !~ '^[0-9]{10}$' then raise exception 'Enter your 10-digit account number.'; end if;
+  if aname is null then raise exception 'Enter the account holder name.'; end if;
+  if bcode is not null and bcode !~ '^[0-9]{8}$' then bcode := null; end if;
+
+  select * into s from public.site_settings where id = 1;
+  if found then
+    if amt < s.min_withdrawal then
+      raise exception 'Minimum withdrawal is ₦%', to_char(s.min_withdrawal,'FM999,999,999,990');
+    end if;
+    if s.max_withdrawal is not null and s.max_withdrawal > 0 and amt > s.max_withdrawal then
+      raise exception 'Maximum withdrawal is ₦%', to_char(s.max_withdrawal,'FM999,999,999,990');
+    end if;
+    if not (extract(dow from lagos)::int = any(s.withdrawal_days)) or
+       (case when s.withdrawal_open_time <= s.withdrawal_close_time
+             then t < s.withdrawal_open_time or t > s.withdrawal_close_time + interval '59 seconds'
+             else t < s.withdrawal_open_time and t > s.withdrawal_close_time + interval '59 seconds' end) then
+      raise exception 'Withdrawals are closed right now';
+    end if;
+  end if;
+
+  if not exists (select 1 from public.investments where user_id = uid and status = 'active') then
+    raise exception 'You need at least one active investment before you can withdraw.';
+  end if;
+
+  select * into w from public.wallets where user_id = uid for update;
+  if not found then raise exception 'Wallet not found.'; end if;
+  if w.available_balance < amt then raise exception 'Insufficient wallet balance.'; end if;
+
+  update public.wallets set available_balance = available_balance - amt, updated_at = now() where user_id = uid;
+
+  insert into public.withdrawals (user_id, amount, charge, bank_name, bank_code, account_number, account_name, status)
+  values (uid, amt, round(amt * coalesce(s.withdrawal_fee_pct, 0) / 100, 2), bname, bcode, acct, aname, 'pending')
+  returning id into wid;   -- enforce_withdrawal_rules recomputes the same charge for non-admins
+
+  insert into public.transactions (user_id, amount, type, description)
+  values (uid, amt, 'withdrawal', 'Withdrawal request to ' || bname || ' (' || acct || ') — pending');
+
+  insert into public.notifications (user_id, title, message)
+  values (uid, 'Withdrawal Pending', 'Your request for ₦' || to_char(amt,'FM999,999,999,990.00') || ' is being reviewed.');
+
+  return wid;
+end; $$;
+
+-- Investment purchase: plan must be active, amount is the plan price.
+create or replace function public.user_invest(p_plan_id uuid, p_amount numeric default null)
+returns uuid
+language plpgsql security definer set search_path = public as $$
+declare
+  uid uuid := auth.uid();
+  p public.investment_plans;
+  w public.wallets;
+  amt numeric;
+  iid uuid;
+begin
+  if uid is null then raise exception 'Please sign in again.'; end if;
+  if not public.is_active_user() then raise exception 'Your account is not active. Contact support.'; end if;
+
+  select * into p from public.investment_plans where id = p_plan_id;
+  if not found or not coalesce(p.is_active, false) then raise exception 'This plan is not available.'; end if;
+  amt := round(coalesce(p.price, 0), 2);
+  if amt <= 0 or coalesce(p.duration_days, 0) <= 0 or coalesce(p.daily_roi_pct, 0) <= 0 then
+    raise exception 'This plan is not available.';
+  end if;
+  if p_amount is not null and round(p_amount, 2) <> amt then
+    raise exception 'This plan costs ₦%', to_char(amt,'FM999,999,999,990');
+  end if;
+  if p.category = 'professional'
+     and not exists (select 1 from public.investments where user_id = uid and status = 'active') then
+    raise exception 'You need at least one active investment before purchasing a Professional plan.';
+  end if;
+
+  select * into w from public.wallets where user_id = uid for update;
+  if not found then raise exception 'Wallet not found.'; end if;
+  if w.available_balance < amt then raise exception 'Insufficient wallet balance.'; end if;
+
+  update public.wallets set available_balance = available_balance - amt, updated_at = now() where user_id = uid;
+
+  insert into public.investments (user_id, plan_id, amount_invested, daily_earning_amount, remaining_days, status)
+  values (uid, p.id, amt, round(amt * p.daily_roi_pct / 100, 2), p.duration_days, 'active')
+  returning id into iid;
+
+  insert into public.transactions (user_id, amount, type, description)
+  values (uid, amt, 'investment', 'Committed ₦' || to_char(amt,'FM999999999990.##') || ' to the ' || coalesce(p.name, 'plan'));
+
+  return iid;
+end; $$;
+
+-- Gift code redemption (gift page and the optional code at sign-up).
+-- One redemption per user per code (unique index), usage limit and expiry
+-- enforced under a row lock. p_signup=true mirrors the old sign-up flow,
+-- which also added the amount to bonus_balance.
+create or replace function public.user_redeem_gift_code(p_code text, p_signup boolean default false)
+returns numeric
+language plpgsql security definer set search_path = public as $$
+declare
+  uid uuid := auth.uid();
+  c text := upper(trim(coalesce(p_code, '')));
+  g public.gift_codes;
+begin
+  if uid is null then raise exception 'Please sign in again.'; end if;
+  if not public.is_active_user() then raise exception 'Your account is not active. Contact support.'; end if;
+  if c = '' then raise exception 'Enter a reward code.'; end if;
+
+  select * into g from public.gift_codes where upper(code) = c for update;
+  if not found or not coalesce(g.is_active, false) then raise exception 'Invalid or inactive reward code.'; end if;
+  if g.expiry_date is not null and g.expiry_date < now() then raise exception 'This reward code has expired.'; end if;
+  if g.usage_limit is not null and coalesce(g.current_usage, 0) >= g.usage_limit then
+    raise exception 'This code has reached its maximum usage limit.';
+  end if;
+  if coalesce(g.amount, 0) <= 0 then raise exception 'Invalid or inactive reward code.'; end if;
+  if exists (select 1 from public.gift_redemptions where user_id = uid and gift_code_id = g.id) then
+    raise exception 'You have already redeemed this reward.';
+  end if;
+
+  perform 1 from public.wallets where user_id = uid for update;
+  if not found then raise exception 'Wallet not found.'; end if;
+
+  insert into public.gift_redemptions (user_id, gift_code_id) values (uid, g.id);
+  update public.gift_codes set current_usage = coalesce(current_usage, 0) + 1, used_by = uid where id = g.id;
+  update public.wallets
+     set available_balance = available_balance + g.amount,
+         bonus_balance = bonus_balance + case when p_signup then g.amount else 0 end,
+         updated_at = now()
+   where user_id = uid;
+
+  insert into public.transactions (user_id, amount, type, description)
+  values (uid, g.amount, 'gift_code',
+          case when p_signup then 'Redeemed gift code: ' else 'Redeemed Gift Reward: ' end || g.code);
+  insert into public.notifications (user_id, title, message)
+  values (uid, 'Gift Reward Credited!',
+          'Successfully redeemed code ' || g.code || '. ₦' || to_char(g.amount,'FM999,999,999,990.00') || ' added to your wallet.');
+  return g.amount;
+end; $$;
+
+-- Manual (bank transfer) deposit request: pending row + ledger + notification.
+-- No money moves until an admin approves (admin_approve_deposit). The
+-- enforce_deposit_limits trigger still applies min/max and sanitises the row.
+create or replace function public.user_create_deposit(p_amount numeric, p_account_name text, p_bank_name text)
+returns uuid
+language plpgsql security definer set search_path = public as $$
+declare
+  uid uuid := auth.uid();
+  amt numeric := round(coalesce(p_amount, 0), 2);
+  aname text := nullif(trim(coalesce(p_account_name, '')), '');
+  bname text := nullif(trim(coalesce(p_bank_name, '')), '');
+  did uuid;
+begin
+  if uid is null then raise exception 'Please sign in again.'; end if;
+  if not public.is_active_user() then raise exception 'Your account is not active. Contact support.'; end if;
+  if amt <= 0 then raise exception 'Enter a valid amount.'; end if;
+  if aname is null or bname is null then raise exception 'Please enter both the account name and bank name.'; end if;
+
+  insert into public.deposits (user_id, amount, account_name, bank_name, status)
+  values (uid, amt, aname, bname, 'pending') returning id into did;
+
+  insert into public.transactions (user_id, amount, type, description)
+  values (uid, amt, 'deposit', 'Deposit from ' || aname || ' (' || bname || ') — pending');
+  insert into public.notifications (user_id, title, message)
+  values (uid, 'Deposit Received',
+          'Your deposit of ₦' || to_char(amt,'FM999,999,999,990') || ' is being verified. It will reflect in your wallet once approved.');
+  return did;
+end; $$;
+
+revoke execute on function public.user_request_withdrawal(numeric,text,text,text,text) from public, anon;
+revoke execute on function public.user_invest(uuid,numeric) from public, anon;
+revoke execute on function public.user_redeem_gift_code(text,boolean) from public, anon;
+revoke execute on function public.user_create_deposit(numeric,text,text) from public, anon;
+grant execute on function public.user_request_withdrawal(numeric,text,text,text,text) to authenticated;
+grant execute on function public.user_invest(uuid,numeric) to authenticated;
+grant execute on function public.user_redeem_gift_code(text,boolean) to authenticated;
+grant execute on function public.user_create_deposit(numeric,text,text) to authenticated;

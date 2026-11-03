@@ -342,72 +342,12 @@
             statusArea.className = 'hidden p-4 rounded-[10px] text-xs font-bold uppercase tracking-wider border';
 
             try {
-                // 1. Verify Code exists and is active
-                const { data: gift, error: giftErr } = await supabase
-                    .from('gift_codes')
-                    .select('*')
-                    .eq('code', code)
-                    .eq('is_active', true)
-                    .single();
-
-                if (giftErr || !gift) throw new Error("Invalid or inactive reward code.");
-
-                // 2. Check Expiry
-                if (gift.expiry_date && new Date(gift.expiry_date) < new Date()) {
-                    throw new Error("This reward code has expired.");
-                }
-
-                // 3. Check Usage Limit
-                if (gift.usage_limit && gift.current_usage >= gift.usage_limit) {
-                    throw new Error("This code has reached its maximum usage limit.");
-                }
-
-                // 4. Check if User already redeemed this specific code
-                const { data: alreadyUsed } = await supabase
-                    .from('gift_redemptions')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .eq('gift_code_id', gift.id)
-                    .single();
-
-                if (alreadyUsed) throw new Error("You have already redeemed this reward.");
-
-                // --- ATOMIC REDEMPTION PROCESS ---
-                // (In production, use a Database RPC/Function for atomicity)
-
-                // A. Record redemption
-                const redemptionRes = await supabase.from('gift_redemptions').insert([{ user_id: user.id, gift_code_id: gift.id }]);
-                if (redemptionRes.error) throw new Error(`Could not record redemption: ${redemptionRes.error.message}`);
-
-                // B. Increment usage count
-                const usageRes = await supabase.from('gift_codes').update({ current_usage: gift.current_usage + 1 }).eq('id', gift.id);
-                if (usageRes.error) throw new Error(`Could not update code usage: ${usageRes.error.message}`);
-
-                // C. Credit Wallet — column is available_balance, not balance
-                const currentBalance = toNum(wallet.available_balance);
-                const creditRes = await supabase.from('wallets')
-                    .update({ available_balance: currentBalance + toNum(gift.amount) })
-                    .eq('user_id', user.id);
-                if (creditRes.error) throw new Error(`Could not credit wallet: ${creditRes.error.message}`);
-
-                // D. Log Transaction
-                // transactions table has no `status` or `reference` column —
-                // the code is folded into the description text instead.
-                const txRes = await supabase.from('transactions').insert([{
-                    user_id: user.id,
-                    amount: gift.amount,
-                    type: 'gift_code',
-                    description: `Redeemed Gift Reward: ${code}`
-                }]);
-                if (txRes.error) console.error('Transaction log error:', txRes.error.message);
-
-                // E. Create Notification
-                const notifRes = await supabase.from('notifications').insert([{
-                    user_id: user.id,
-                    title: 'Gift Reward Credited!',
-                    message: `Successfully redeemed code ${code}. ${naira(gift.amount)} added to your wallet.`
-                }]);
-                if (notifRes.error) console.error('Notification error:', notifRes.error.message);
+                // One atomic server-side call: checks the code (active, expiry,
+                // usage limit, not already redeemed by you), credits the wallet,
+                // records the redemption, transaction and notification.
+                const { data: credited, error: rpcErr } = await supabase.rpc('user_redeem_gift_code', { p_code: code });
+                if (rpcErr) throw new Error(rpcErr.message);
+                const gift = { amount: toNum(credited) };
 
                 showStatus(`Success! ${naira(gift.amount)} has been credited.`, 'success');
                 document.getElementById('giftForm').reset();

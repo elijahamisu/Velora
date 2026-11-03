@@ -246,43 +246,23 @@
                 //      a second, duplicate row for a profile/wallet the trigger
                 //      already created, causing a duplicate key error.
 
-                // Step B: Handle Gift Code (if provided)
-                // This still needs to happen from the client since it's not
-                // covered by the signup trigger.
-                if (giftCode) {
-                    const { data: giftData, error: giftSearchErr } = await supabase
-                        .from('gift_codes')
-                        .select('*')
-                        .eq('code', giftCode)
-                        .eq('is_used', false)
-                        .single();
-
-                    if (giftData && !giftSearchErr) {
-                        // Credit the gift amount onto bonus_balance (adjust the
-                        // column name here, and inside the increment_balance
-                        // function itself, if your schema uses a different one).
-                        const { error: incErr } = await supabase.rpc('increment_balance', {
-                            row_id: userId,
-                            amt: giftData.amount
-                        });
-                        if (incErr) console.error('Gift code balance increment failed:', incErr);
-
-                        await supabase.from('gift_codes').update({ is_used: true, used_by: userId }).eq('id', giftData.id);
-                        // transactions table has no `status` column.
-                        await supabase.from('transactions').insert([{
-                            user_id: userId,
-                            amount: giftData.amount,
-                            type: 'gift_code',
-                            description: `Redeemed gift code: ${giftCode}`
-                        }]);
+                // Step B: Handle Gift Code (if provided) — redeemed server-side
+                // (validated, credited and logged atomically). Needs the new
+                // session, so it only runs when sign-up signs the user in.
+                let giftNote = '';
+                if (giftCode && authData.session) {
+                    const { error: giftErr } = await supabase.rpc('user_redeem_gift_code', { p_code: giftCode, p_signup: true });
+                    if (giftErr) {
+                        console.error('Gift code redemption failed:', giftErr.message);
+                        giftNote = ` Gift code not applied: ${giftErr.message}`;
                     }
                 }
 
                 // Success!
-                showMsg('Account created! Welcome bonus credited.', 'success');
+                showMsg('Account created! Welcome bonus credited.' + giftNote, 'success');
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
-                }, 1000);
+                }, giftNote ? 3500 : 1000);
 
             } catch (err) {
                 showMsg(err.message, 'error');
