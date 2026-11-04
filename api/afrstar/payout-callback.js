@@ -5,6 +5,7 @@
 // reply so nothing is applied and the gateway retries.
 import { supabaseAdmin } from '../_lib/supabaseAdmin.js';
 import { getConfig, parseCallbackBody, replyText } from '../_lib/afrstar.js';
+import { clientForOrder, forwardCallback } from '../_lib/relay.js';
 import { handlePayoutCallback } from '../_lib/afrstar-callbacks.js';
 
 export default async function handler(req, res) {
@@ -19,6 +20,13 @@ export default async function handler(req, res) {
   }
   let body;
   try { body = parseCallbackBody(req); } catch { return replyText(res, 400, 'bad body'); }
+  // Orders of a sister site sharing this merchant (e.g. TOP) are forwarded to it.
+  const relayTo = await clientForOrder(body?.order_sn).catch(() => null);
+  if (relayTo) {
+    const out = await forwardCallback(relayTo, 'payout', body);
+    console.log('afrstar payout-callback relayed', { client: relayTo.name, order_sn: body?.order_sn, status: out.status });
+    return replyText(res, out.status, out.text);
+  }
   try {
     const out = await handlePayoutCallback({ body, db: supabaseAdmin, config });
     if (out.status !== 200) {
