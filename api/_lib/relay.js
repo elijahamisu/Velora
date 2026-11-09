@@ -8,10 +8,13 @@ import crypto from 'node:crypto';
 // { name, secret, order_prefix, callback_url } (kept out of the database so the
 // relay works even when this site's Supabase project is paused).
 export async function relayClients() {
-  try {
-    const rows = JSON.parse(process.env.AFRSTAR_RELAY_CLIENTS || '[]');
-    return Array.isArray(rows) ? rows.filter(r => r && r.name && r.secret && r.order_prefix && r.callback_url && r.active !== false) : [];
-  } catch { console.error('AFRSTAR_RELAY_CLIENTS is not valid JSON'); return []; }
+  // AFRSTAR_RELAY_CLIENTS (e.g. TOP) plus AFRSTAR_RELAY_CLIENTS_EXTRA (e.g. Amisytech), both JSON arrays.
+  const read = (key) => {
+    try { const rows = JSON.parse(process.env[key] || '[]'); return Array.isArray(rows) ? rows : []; }
+    catch { console.error(key + ' is not valid JSON'); return []; }
+  };
+  return [...read('AFRSTAR_RELAY_CLIENTS'), ...read('AFRSTAR_RELAY_CLIENTS_EXTRA')]
+    .filter(r => r && r.name && r.secret && r.order_prefix && r.callback_url && r.active !== false);
 }
 export const hmac = (secret, ts, raw) => crypto.createHmac('sha256', secret).update(`${ts}.${raw}`).digest('hex');
 export function hmacOk(secret, ts, raw, sig) {
